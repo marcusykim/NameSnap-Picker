@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import UIKit
 
 struct NameEntry: Identifiable, Codable, Hashable {
     let id: UUID
@@ -11,6 +12,14 @@ struct NameEntry: Identifiable, Codable, Hashable {
         self.name = name
         self.isIncluded = isIncluded
     }
+}
+
+enum NSTheme {
+    static let bg = Color(red: 224 / 255, green: 244 / 255, blue: 171 / 255)
+    static let skyBlue = Color(red: 107 / 255, green: 163 / 255, blue: 204 / 255)
+    static let tan = Color(red: 199 / 255, green: 171 / 255, blue: 138 / 255)
+    static let card = Color(red: 242 / 255, green: 244 / 255, blue: 250 / 255)
+    static let yellow = Color(red: 247 / 255, green: 220 / 255, blue: 96 / 255)
 }
 
 @MainActor
@@ -70,8 +79,20 @@ final class NameSnapViewModel: ObservableObject {
     }
 
     func spin() {
+        guard !isSpinning else { return }
+
+        if activeEntries.isEmpty {
+            selectedName = "Add contestants to start spinning"
+            return
+        }
+
         let pool = availableEntries
-        guard !pool.isEmpty, !isSpinning else { return }
+        if pool.isEmpty {
+            selectedName = "All Contestants Picked!"
+            UINotificationFeedbackGenerator().notificationOccurred(.warning)
+            return
+        }
+
         isSpinning = true
 
         let ticks = Int.random(in: 14...24)
@@ -100,20 +121,27 @@ final class NameSnapViewModel: ObservableObject {
 struct ContentView: View {
     @StateObject private var vm = NameSnapViewModel()
 
+    private var titleFont: Font {
+        if UIFont(name: "RubikMonoOne-Regular", size: 38) != nil {
+            return .custom("RubikMonoOne-Regular", size: 38)
+        }
+        if UIFont(name: "Rubik Mono One", size: 38) != nil {
+            return .custom("Rubik Mono One", size: 38)
+        }
+        return .system(size: 38, weight: .black, design: .rounded)
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
-                LinearGradient(
-                    colors: [Color(red: 0.95, green: 0.96, blue: 1.0), Color.white],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
+                NSTheme.bg
+                    .ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 16) {
                         Text("NameSnap")
-                            .font(.system(size: 38, weight: .black, design: .rounded))
+                            .font(titleFont)
+                            .foregroundStyle(NSTheme.skyBlue)
                             .frame(maxWidth: .infinity, alignment: .leading)
 
                         card {
@@ -126,7 +154,7 @@ struct ContentView: View {
                                         .fill(Color.white)
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 12)
-                                                .stroke(Color.indigo.opacity(0.55), lineWidth: 2)
+                                                .stroke(NSTheme.skyBlue.opacity(0.8), lineWidth: 2)
                                         )
 
                                     if vm.rawInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -167,16 +195,22 @@ struct ContentView: View {
                         } label: {
                             ZStack {
                                 Circle()
-                                    .fill(Color.yellow)
+                                    .fill(NSTheme.tan)
+                                    .frame(width: 250, height: 250)
+                                    .opacity(0.55)
+
+                                Circle()
+                                    .fill(NSTheme.yellow)
                                     .frame(width: 160, height: 160)
-                                    .shadow(color: .yellow.opacity(0.5), radius: 10, y: 4)
+                                    .shadow(color: NSTheme.yellow.opacity(0.5), radius: 10, y: 4)
+
                                 Text(vm.isSpinning ? "Spinning" : "Spin")
-                                    .font(.system(size: 34, weight: .heavy, design: .rounded))
-                                    .foregroundStyle(.blue)
+                                    .font(.system(size: 34, weight: .black, design: .rounded))
+                                    .foregroundStyle(NSTheme.skyBlue)
                             }
                         }
-                        .disabled(vm.isSpinning || vm.availableEntries.isEmpty)
-                        .opacity(vm.availableEntries.isEmpty ? 0.45 : 1)
+                        .disabled(vm.isSpinning || vm.activeEntries.isEmpty)
+                        .opacity(vm.activeEntries.isEmpty ? 0.45 : 1)
                         .padding(.vertical, 6)
 
                         if !vm.selectedName.isEmpty {
@@ -186,7 +220,7 @@ struct ContentView: View {
                                 .padding(.vertical, 14)
                                 .background(
                                     LinearGradient(
-                                        colors: [Color.yellow.opacity(0.35), Color.orange.opacity(0.22)],
+                                        colors: [NSTheme.yellow.opacity(0.4), Color.orange.opacity(0.18)],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     )
@@ -257,7 +291,7 @@ struct ContentView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
-                .background(.ultraThinMaterial)
+                .background(NSTheme.bg)
             }
             .navigationBarHidden(true)
         }
@@ -268,11 +302,11 @@ struct ContentView: View {
         content()
             .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(.ultraThinMaterial)
+            .background(NSTheme.card)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(Color.black.opacity(0.06), lineWidth: 1)
+                    .stroke(NSTheme.skyBlue.opacity(0.12), lineWidth: 1)
             )
     }
 }
