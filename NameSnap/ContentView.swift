@@ -203,11 +203,14 @@ final class NameSnapViewModel: ObservableObject {
     @discardableResult
     func commitCurrentWheelSelectionAsWinner() -> String? {
         guard let winner = currentWheelEntry() else { return nil }
+        return commitWinnerSnapshot(winner)
+    }
+
+    @discardableResult
+    func commitWinnerSnapshot(_ winner: NameEntry) -> String {
         let display = "\(winner.drawNumber). \(winner.name)"
-        selectedName = display
         history.insert(WinnerRecord(drawNumber: winner.drawNumber, name: winner.name), at: 0)
         if history.count > 20 { history.removeLast() }
-        markWinnerAsUsed(winner)
         return display
     }
 
@@ -331,6 +334,10 @@ struct ContentView: View {
     @State private var isWheelSwipeSession = false
     @State private var suppressWheelSettle = false
     @State private var isButtonWheelSpin = false
+    @State private var winnerSyncWorkItem: DispatchWorkItem?
+    @State private var winnerRemovalWorkItem: DispatchWorkItem?
+    @State private var pendingWinnerSnapshot: NameEntry?
+    @State private var pendingWinnerDisplay: String = ""
 
     private let flashColors: [Color] = [.pink, .yellow, .cyan, .green, .orange, .purple]
 
@@ -753,6 +760,10 @@ struct ContentView: View {
 
                                 Button("Reset Pool") {
                                     suppressWheelSettle = true
+                                    winnerSyncWorkItem?.cancel()
+                                    winnerRemovalWorkItem?.cancel()
+                                    pendingWinnerSnapshot = nil
+                                    pendingWinnerDisplay = ""
                                     vm.resetThisPool()
                                     withAnimation { showResetPoolConfirm = false }
                                     showBigAlert("♻️ Pool Reset")
@@ -804,6 +815,10 @@ struct ContentView: View {
 
                                 Button("Clear Pool") {
                                     suppressWheelSettle = true
+                                    winnerSyncWorkItem?.cancel()
+                                    winnerRemovalWorkItem?.cancel()
+                                    pendingWinnerSnapshot = nil
+                                    pendingWinnerDisplay = ""
                                     vm.clearThisPool()
                                     withAnimation { showClearPoolConfirm = false }
                                     showBigAlert("🧹 Pool Cleared")
@@ -883,6 +898,10 @@ struct ContentView: View {
                     didShowWinnerForCurrentSpin = false
                     isWheelSwipeSession = false
                     wheelSettleWorkItem?.cancel()
+                    winnerSyncWorkItem?.cancel()
+                    winnerRemovalWorkItem?.cancel()
+                    pendingWinnerSnapshot = nil
+                    pendingWinnerDisplay = ""
                     suppressWheelSettle = true
                 } else {
                     // let wheel settle callbacks quiet down after programmatic spin
