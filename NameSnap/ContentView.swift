@@ -52,8 +52,10 @@ final class NameSnapViewModel: ObservableObject {
     @Published var history: [WinnerRecord] = []
     @Published var visualMode: SpinVisualMode = .classic
     @Published var wheelIndex: Int = 0
+    @Published var exhaustedSpinAttempt: Int = 0
 
     private var lastAddedBatch: [UUID] = []
+    private var delayedWinnerWorkItem: DispatchWorkItem?
 
     var activeEntries: [NameEntry] { entries.filter { $0.isIncluded } }
 
@@ -115,7 +117,11 @@ final class NameSnapViewModel: ObservableObject {
         return entries.filter { $0.isIncluded && !pickedIds.contains($0.id) }
     }
 
-    var wheelRepeatCount: Int { 40 }
+    var wheelRepeatCount: Int { 120 }
+
+    var isExhausted: Bool {
+        !activeEntries.isEmpty && availableEntries.isEmpty
+    }
 
     var wheelEntries: [NameEntry] {
         let base = availableEntries
@@ -213,9 +219,23 @@ final class NameSnapViewModel: ObservableObject {
 
     private func markWinnerAsUsed(_ winner: NameEntry) {
         guard noRepeatMode else { return }
-        pickedIds.insert(winner.id)
-        if let idx = entries.firstIndex(where: { $0.id == winner.id }) {
-            entries[idx].isIncluded = false
+
+        let consume = { [weak self] in
+            guard let self else { return }
+            pickedIds.insert(winner.id)
+            if let idx = entries.firstIndex(where: { $0.id == winner.id }) {
+                entries[idx].isIncluded = false
+            }
+        }
+
+        // In wheel mode, keep winner visible until alert has displayed.
+        if visualMode == .wheel {
+            delayedWinnerWorkItem?.cancel()
+            let work = DispatchWorkItem { consume() }
+            delayedWinnerWorkItem = work
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.25, execute: work)
+        } else {
+            consume()
         }
     }
 
@@ -227,6 +247,7 @@ final class NameSnapViewModel: ObservableObject {
     }
 
     func resetThisPool() {
+        delayedWinnerWorkItem?.cancel()
         for index in entries.indices { entries[index].isIncluded = true }
         pickedIds.removeAll()
         selectedName = ""
@@ -235,6 +256,7 @@ final class NameSnapViewModel: ObservableObject {
     }
 
     func clearThisPool() {
+        delayedWinnerWorkItem?.cancel()
         entries.removeAll()
         pickedIds.removeAll()
         selectedName = ""
@@ -259,7 +281,8 @@ final class NameSnapViewModel: ObservableObject {
 
         let pool = availableEntries
         if pool.isEmpty {
-            selectedName = "All Contestants Picked!"
+            selectedName = "All winners selected!"
+            exhaustedSpinAttempt += 1
             UINotificationFeedbackGenerator().notificationOccurred(.warning)
             return
         }
@@ -280,13 +303,13 @@ final class NameSnapViewModel: ObservableObject {
             }
         case .wheel:
             normalizeWheelIndexIfNeeded(forceCenter: true)
-            let ticks = Int.random(in: 22...36)
+            let ticks = Int.random(in: 28...42)
             for i in 0..<ticks {
-                let delay = Double(i) * 0.045
+                let progress = Double(i) / Double(max(1, ticks - 1))
+                let delay = (Double(i) * 0.028) + (pow(progress, 2.0) * 0.35)
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
                     guard let self else { return }
-                    self.spinWheelForward(step: Int.random(in: 1...3))
-                    self.normalizeWheelIndexIfNeeded()
+                    self.spinWheelForward(step: 1)
                     self.selectedName = self.currentWheelEntry()?.name ?? ""
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     if i == ticks - 1 { self.finishSpin(pool: pool) }
@@ -354,14 +377,18 @@ struct ContentView: View {
         return .system(size: size, weight: .black, design: .rounded)
     }
 
-    private func showBigAlert(_ text: String) {
+    private func dismissKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+
+    private func showBigAlert(_ text: String, duration: Double = 1.2) {
         centerAlertText = text
         centerAlertScale = 0.65
         withAnimation(.spring(response: 0.32, dampingFraction: 0.62)) {
             showCenterAlert = true
             centerAlertScale = 1
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
             withAnimation(.easeInOut(duration: 0.25)) {
                 showCenterAlert = false
             }
@@ -371,7 +398,7 @@ struct ContentView: View {
 
     private func triggerWinnerEffects(name: String) {
         showBigAlert("🎉 Winner: \(name)")
-        playCelebrationSoundReliably()
+        _ = playCelebrationSoundReliably()
         showWinnerFlash = true
         flashIndex = 0
 
@@ -388,18 +415,21 @@ struct ContentView: View {
         }
     }
 
-    private func playCelebrationSoundReliably() {
-        playRandomCelebrationSound()
+    @discardableResult
+    private func playCelebrationSoundReliably() -> Bool {
+        let started = playRandomCelebrationSound()
 
         // Rare simulator/audio-session race: retry once if playback did not start.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
             if winnerAudioPlayer?.isPlaying != true {
-                playRandomCelebrationSound()
+                _ = playRandomCelebrationSound()
             }
         }
+        return started
     }
 
-    private func playRandomCelebrationSound() {
+    @discardableResult
+    private func playRandomCelebrationSound() -> Bool {
         // Preferred: bundled techno winner clips.
         let customNames = [
             "techno_upbeat_01",
@@ -438,7 +468,7 @@ struct ContentView: View {
 
         guard !availableURLs.isEmpty else {
             print("No bundled winner audio files found in app bundle.")
-            return
+            return false
         }
 
         for url in availableURLs.shuffled() {
@@ -465,13 +495,14 @@ struct ContentView: View {
                 }
                 winnerAudioStopWorkItem = stopItem
                 DispatchQueue.main.asyncAfter(deadline: .now() + 4.8, execute: stopItem)
-                return
+                return true
             } catch {
                 print("Failed to play custom SFX \(url.lastPathComponent): \(error.localizedDescription)")
             }
         }
 
         print("Winner audio failed for all bundled candidates.")
+        return false
     }
 
     var body: some View {
@@ -512,6 +543,7 @@ struct ContentView: View {
                                 }
 
                                 Button("Add These Names to Pool") {
+                                    dismissKeyboard()
                                     let added = vm.addNamesFromInput()
                                     guard added > 0 else { return }
                                     showBigAlert("✅ Names Added")
@@ -528,6 +560,7 @@ struct ContentView: View {
                                 .scaleEffect(pulseAddButton ? 0.96 : 1)
 
                                 Button("Undo Last Add") {
+                                    dismissKeyboard()
                                     let removed = vm.undoLastAdd()
                                     guard removed > 0 else { return }
                                     showBigAlert("↩️ Undid \(removed)")
@@ -537,6 +570,7 @@ struct ContentView: View {
                                 .font(titleFamilyFont(size: 13))
 
                                 Button("Clear This List") {
+                                    dismissKeyboard()
                                     vm.clearInputList()
                                     showBigAlert("🧹 List Cleared")
                                 }
@@ -574,6 +608,7 @@ struct ContentView: View {
 
                         if vm.visualMode == .classic {
                             Button {
+                                dismissKeyboard()
                                 vm.spin()
                             } label: {
                                 ZStack {
@@ -590,6 +625,12 @@ struct ContentView: View {
                                     Text(vm.isSpinning ? "Spinning" : "Spin")
                                         .font(titleFamilyFont(size: 32))
                                         .foregroundStyle(NSTheme.skyBlue)
+
+                                    if vm.isExhausted {
+                                        Image(systemName: "xmark")
+                                            .font(.system(size: 120, weight: .heavy))
+                                            .foregroundStyle(Color.red.opacity(0.75))
+                                    }
                                 }
                             }
                             .disabled(vm.isSpinning || vm.activeEntries.isEmpty)
@@ -602,13 +643,14 @@ struct ContentView: View {
                                         .font(titleFamilyFont(size: 16))
                                     Picker("Wheel", selection: $vm.wheelIndex) {
                                         ForEach(Array(vm.wheelEntries.enumerated()), id: \.offset) { index, item in
-                                            Text(item.name).tag(index)
+                                            Text("\(item.drawNumber). \(item.name)").tag(index)
                                         }
                                     }
                                     .pickerStyle(.wheel)
                                     .frame(height: 140)
 
                                     Button(vm.isSpinning ? "Spinning" : "Spin Wheel") {
+                                        dismissKeyboard()
                                         isButtonWheelSpin = true
                                         suppressWheelSettle = true
                                         vm.spin()
@@ -622,8 +664,9 @@ struct ContentView: View {
                             }
                         }
 
-                        if !vm.selectedName.isEmpty {
-                            Text(vm.selectedName)
+                        let winnerDisplayText = vm.isExhausted ? "All winners selected!" : vm.selectedName
+                        if !winnerDisplayText.isEmpty {
+                            Text(winnerDisplayText)
                                 .font(.title2.bold())
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 14)
@@ -643,7 +686,7 @@ struct ContentView: View {
                                     Text("Recent winners")
                                         .font(.headline)
                                     ForEach(vm.history) { item in
-                                        Text("• \(item.displayText)")
+                                        Text(item.displayText)
                                     }
                                 }
                             }
@@ -700,10 +743,14 @@ struct ContentView: View {
                     .padding(.bottom, 110)
                 }
             }
+            .scrollDismissesKeyboard(.interactively)
+            .scrollDisabled(vm.visualMode == .wheel)
+            .background(ScrollDecelerationConfigurator())
+            .onTapGesture { dismissKeyboard() }
             .overlay {
                 if showWinnerFlash {
                     flashColors[flashIndex % flashColors.count]
-                        .opacity(0.28)
+                        .opacity(0.14)
                         .ignoresSafeArea()
                         .transition(.opacity)
                 }
@@ -830,11 +877,17 @@ struct ContentView: View {
             }
             .overlay(alignment: .bottom) {
                 VStack(spacing: 10) {
-                    Button("Reset This Pool") { showResetPoolConfirm = true }
+                    Button("Reset This Pool") {
+                        dismissKeyboard()
+                        showResetPoolConfirm = true
+                    }
                         .buttonStyle(.borderedProminent)
                         .tint(.indigo)
                         .font(titleFamilyFont(size: 14))
-                    Button("Clear This Pool") { showClearPoolConfirm = true }
+                    Button("Clear This Pool") {
+                        dismissKeyboard()
+                        showClearPoolConfirm = true
+                    }
                         .buttonStyle(.borderedProminent)
                         .tint(.red)
                         .font(titleFamilyFont(size: 14))
@@ -847,9 +900,24 @@ struct ContentView: View {
             }
             .onChange(of: vm.wheelIndex) { _ in
                 guard vm.visualMode == .wheel else { return }
-                vm.normalizeWheelIndexIfNeeded()
-                if let current = vm.currentWheelEntry() {
-                    vm.selectedName = current.name
+
+                // Keep wheel effectively infinite by continuously drifting selection back toward middle chunks.
+                let baseCount = max(vm.availableEntries.count, 1)
+                let totalCount = vm.wheelEntries.count
+                if totalCount > 0 {
+                    let midChunk = (vm.wheelRepeatCount / 2) * baseCount
+                    let offset = ((vm.wheelIndex % baseCount) + baseCount) % baseCount
+                    let recentered = midChunk + offset
+                    let drift = abs(vm.wheelIndex - recentered)
+
+                    // Recenter when drift gets large so wheel never deterministically bottoms out.
+                    if drift > (baseCount * 6) {
+                        vm.wheelIndex = recentered
+                    }
+                }
+
+                if let current = vm.currentWheelEntry(), (vm.isSpinning || isWheelSwipeSession) {
+                    vm.selectedName = "\(current.drawNumber). \(current.name)"
                 }
                 guard !vm.isSpinning, !isButtonWheelSpin, !suppressWheelSettle else { return }
 
@@ -862,12 +930,13 @@ struct ContentView: View {
                 let settle = DispatchWorkItem {
                     isWheelSwipeSession = false
                     guard !suppressWheelSettle else { return }
-                    guard let winnerName = vm.commitCurrentWheelSelectionAsWinner() else { return }
+                    guard vm.commitCurrentWheelSelectionAsWinner() != nil else { return }
                     didShowWinnerForCurrentSpin = true
-                    triggerWinnerEffects(name: winnerName)
+                    // Source of truth: winner bar text (selectedName) at settle time.
+                    triggerWinnerEffects(name: vm.selectedName)
                 }
                 wheelSettleWorkItem = settle
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.75, execute: settle)
+                DispatchQueue.main.async(execute: settle)
             }
             .onChange(of: vm.availableEntries.map(\.id)) { _ in
                 suppressWheelSettle = true
@@ -875,6 +944,9 @@ struct ContentView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
                     suppressWheelSettle = false
                 }
+            }
+            .onChange(of: vm.exhaustedSpinAttempt) { _ in
+                showBigAlert("All Winners Selected!")
             }
             .onChange(of: vm.isSpinning) { spinning in
                 if spinning {
@@ -891,13 +963,14 @@ struct ContentView: View {
 
                     if !didShowWinnerForCurrentSpin,
                        !vm.selectedName.isEmpty,
-                       vm.selectedName != "All Contestants Picked!",
+                       vm.selectedName != "All winners selected!",
                        vm.selectedName != "Add contestants to start spinning" {
                         didShowWinnerForCurrentSpin = true
                         triggerWinnerEffects(name: vm.selectedName)
                     }
                 }
             }
+            .preferredColorScheme(.light)
             .navigationBarHidden(true)
         }
     }
@@ -1142,6 +1215,29 @@ private final class PasteAwareTextField: UITextField {
     }
 }
 
+private struct ScrollDecelerationConfigurator: UIViewRepresentable {
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView(frame: .zero)
+        DispatchQueue.main.async { configure(from: view) }
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        DispatchQueue.main.async { configure(from: uiView) }
+    }
+
+    private func configure(from view: UIView) {
+        var current: UIView? = view
+        while let c = current {
+            if let scroll = c as? UIScrollView {
+                scroll.decelerationRate = .fast
+                break
+            }
+            current = c.superview
+        }
+    }
+}
+
 private final class InlineInputRowCell: UITableViewCell {
     static let reuseId = "InlineInputRowCell"
 
@@ -1158,12 +1254,14 @@ private final class InlineInputRowCell: UITableViewCell {
         backgroundColor = .clear
         contentView.backgroundColor = .clear
 
+        selectionStyle = .none
+
         numberLabel.font = .preferredFont(forTextStyle: .body)
-        numberLabel.textColor = .secondaryLabel
+        numberLabel.textColor = .darkGray
         numberLabel.textAlignment = .right
 
         textField.font = .preferredFont(forTextStyle: .body)
-        textField.textColor = .label
+        textField.textColor = .black
         textField.borderStyle = .none
         textField.autocorrectionType = .no
         textField.returnKeyType = .default
@@ -1202,7 +1300,14 @@ private final class InlineInputRowCell: UITableViewCell {
 
     func configure(number: Int, text: String, isPlaceholderRow: Bool) {
         numberLabel.text = "\(number)."
-        textField.placeholder = isPlaceholderRow ? "Type or paste names here…" : nil
+        if isPlaceholderRow {
+            textField.attributedPlaceholder = NSAttributedString(
+                string: "Type or paste names here…",
+                attributes: [.foregroundColor: UIColor.darkGray]
+            )
+        } else {
+            textField.attributedPlaceholder = nil
+        }
         textField.text = text
         trashButton.isHidden = isPlaceholderRow
     }
