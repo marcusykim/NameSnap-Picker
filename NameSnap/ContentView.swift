@@ -115,13 +115,10 @@ final class NameSnapViewModel: ObservableObject {
         return entries.filter { $0.isIncluded && !pickedIds.contains($0.id) }
     }
 
-    var wheelRepeatCount: Int { 40 }
+    // Very large repeat depth so furious swipe sessions never visibly hit hard ends.
+    var wheelRepeatCount: Int { 1 }
 
-    var wheelEntries: [NameEntry] {
-        let base = availableEntries
-        guard !base.isEmpty else { return [] }
-        return Array(repeating: base, count: wheelRepeatCount).flatMap { $0 }
-    }
+    var wheelEntries: [NameEntry] { availableEntries }
 
     private func nextDrawNumber() -> Int {
         (entries.map(\.drawNumber).max() ?? 0) + 1
@@ -168,12 +165,12 @@ final class NameSnapViewModel: ObservableObject {
     func currentWheelEntry() -> NameEntry? {
         let base = availableEntries
         guard !base.isEmpty else { return nil }
-        let safe = ((wheelIndex % base.count) + base.count) % base.count
+        let safe = max(0, min(wheelIndex, base.count - 1))
         return base[safe]
     }
 
     func spinWheelForward(step: Int) {
-        let total = wheelEntries.count
+        let total = availableEntries.count
         guard total > 0 else { return }
         wheelIndex = (wheelIndex + max(step, 1)) % total
     }
@@ -184,20 +181,7 @@ final class NameSnapViewModel: ObservableObject {
             wheelIndex = 0
             return
         }
-
-        let total = baseCount * wheelRepeatCount
-        var normalized = wheelIndex
-        if normalized < 0 { normalized = ((normalized % total) + total) % total }
-        if normalized >= total { normalized = normalized % total }
-
-        let needsRecentering = forceCenter || normalized < baseCount || normalized > (total - baseCount - 1)
-        if needsRecentering {
-            let midChunk = (wheelRepeatCount / 2) * baseCount
-            let offsetInChunk = normalized % baseCount
-            wheelIndex = midChunk + offsetInChunk
-        } else {
-            wheelIndex = normalized
-        }
+        wheelIndex = max(0, min(wheelIndex, baseCount - 1))
     }
 
     @discardableResult
@@ -352,6 +336,10 @@ struct ContentView: View {
             return .custom("Rubik Mono One", size: size)
         }
         return .system(size: size, weight: .black, design: .rounded)
+    }
+
+    private func dismissKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 
     private func showBigAlert(_ text: String) {
@@ -512,6 +500,7 @@ struct ContentView: View {
                                 }
 
                                 Button("Add These Names to Pool") {
+                                    dismissKeyboard()
                                     let added = vm.addNamesFromInput()
                                     guard added > 0 else { return }
                                     showBigAlert("✅ Names Added")
@@ -528,6 +517,7 @@ struct ContentView: View {
                                 .scaleEffect(pulseAddButton ? 0.96 : 1)
 
                                 Button("Undo Last Add") {
+                                    dismissKeyboard()
                                     let removed = vm.undoLastAdd()
                                     guard removed > 0 else { return }
                                     showBigAlert("↩️ Undid \(removed)")
@@ -537,6 +527,7 @@ struct ContentView: View {
                                 .font(titleFamilyFont(size: 13))
 
                                 Button("Clear This List") {
+                                    dismissKeyboard()
                                     vm.clearInputList()
                                     showBigAlert("🧹 List Cleared")
                                 }
@@ -574,6 +565,7 @@ struct ContentView: View {
 
                         if vm.visualMode == .classic {
                             Button {
+                                dismissKeyboard()
                                 vm.spin()
                             } label: {
                                 ZStack {
@@ -609,6 +601,7 @@ struct ContentView: View {
                                     .frame(height: 140)
 
                                     Button(vm.isSpinning ? "Spinning" : "Spin Wheel") {
+                                        dismissKeyboard()
                                         isButtonWheelSpin = true
                                         suppressWheelSettle = true
                                         vm.spin()
@@ -703,7 +696,7 @@ struct ContentView: View {
             .overlay {
                 if showWinnerFlash {
                     flashColors[flashIndex % flashColors.count]
-                        .opacity(0.28)
+                        .opacity(0.14)
                         .ignoresSafeArea()
                         .transition(.opacity)
                 }
@@ -830,11 +823,17 @@ struct ContentView: View {
             }
             .overlay(alignment: .bottom) {
                 VStack(spacing: 10) {
-                    Button("Reset This Pool") { showResetPoolConfirm = true }
+                    Button("Reset This Pool") {
+                        dismissKeyboard()
+                        showResetPoolConfirm = true
+                    }
                         .buttonStyle(.borderedProminent)
                         .tint(.indigo)
                         .font(titleFamilyFont(size: 14))
-                    Button("Clear This Pool") { showClearPoolConfirm = true }
+                    Button("Clear This Pool") {
+                        dismissKeyboard()
+                        showClearPoolConfirm = true
+                    }
                         .buttonStyle(.borderedProminent)
                         .tint(.red)
                         .font(titleFamilyFont(size: 14))
@@ -845,29 +844,28 @@ struct ContentView: View {
                 .background(NSTheme.bg)
                 .ignoresSafeArea(edges: .bottom)
             }
+            .scrollDismissesKeyboard(.interactively)
+            .onTapGesture { dismissKeyboard() }
             .onChange(of: vm.wheelIndex) { _ in
                 guard vm.visualMode == .wheel else { return }
                 vm.normalizeWheelIndexIfNeeded()
-                if let current = vm.currentWheelEntry() {
-                    vm.selectedName = current.name
+                if let current = vm.currentWheelEntry(), (vm.isSpinning || isWheelSwipeSession) {
+                    vm.selectedName = "\(current.drawNumber). \(current.name)"
                 }
                 guard !vm.isSpinning, !isButtonWheelSpin, !suppressWheelSettle else { return }
 
-                // Manual swipe spin: commit winner when wheel settles.
-                if !isWheelSwipeSession {
-                    isWheelSwipeSession = true
-                }
+                if !isWheelSwipeSession { isWheelSwipeSession = true }
 
                 wheelSettleWorkItem?.cancel()
                 let settle = DispatchWorkItem {
                     isWheelSwipeSession = false
                     guard !suppressWheelSettle else { return }
-                    guard let winnerName = vm.commitCurrentWheelSelectionAsWinner() else { return }
+                    guard vm.commitCurrentWheelSelectionAsWinner() != nil else { return }
                     didShowWinnerForCurrentSpin = true
-                    triggerWinnerEffects(name: winnerName)
+                    triggerWinnerEffects(name: vm.selectedName)
                 }
                 wheelSettleWorkItem = settle
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.75, execute: settle)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.22, execute: settle)
             }
             .onChange(of: vm.availableEntries.map(\.id)) { _ in
                 suppressWheelSettle = true
@@ -898,6 +896,7 @@ struct ContentView: View {
                     }
                 }
             }
+            .preferredColorScheme(.light)
             .navigationBarHidden(true)
         }
     }
@@ -916,6 +915,38 @@ struct ContentView: View {
     }
 }
 
+
+
+
+
+private final class WheelRowCell: UITableViewCell {
+    static let reuseId = "WheelRowCell"
+    private let label = UILabel()
+
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        selectionStyle = .none
+        backgroundColor = .clear
+        contentView.backgroundColor = .clear
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textAlignment = .center
+        label.font = .preferredFont(forTextStyle: .body)
+        label.textColor = .label
+        contentView.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            label.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            label.topAnchor.constraint(equalTo: contentView.topAnchor),
+            label.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+        ])
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    func configure(text: String) {
+        label.text = text
+    }
+}
 
 private struct InlineTrashTextView: UIViewRepresentable {
     @Binding var text: String
@@ -1155,15 +1186,16 @@ private final class InlineInputRowCell: UITableViewCell {
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        selectionStyle = .none
         backgroundColor = .clear
         contentView.backgroundColor = .clear
 
         numberLabel.font = .preferredFont(forTextStyle: .body)
-        numberLabel.textColor = .secondaryLabel
+        numberLabel.textColor = .darkGray
         numberLabel.textAlignment = .right
 
         textField.font = .preferredFont(forTextStyle: .body)
-        textField.textColor = .label
+        textField.textColor = .black
         textField.borderStyle = .none
         textField.autocorrectionType = .no
         textField.returnKeyType = .default
@@ -1202,7 +1234,14 @@ private final class InlineInputRowCell: UITableViewCell {
 
     func configure(number: Int, text: String, isPlaceholderRow: Bool) {
         numberLabel.text = "\(number)."
-        textField.placeholder = isPlaceholderRow ? "Type or paste names here…" : nil
+        if isPlaceholderRow {
+            textField.attributedPlaceholder = NSAttributedString(
+                string: "Type or paste names here…",
+                attributes: [.foregroundColor: UIColor.darkGray]
+            )
+        } else {
+            textField.attributedPlaceholder = nil
+        }
         textField.text = text
         trashButton.isHidden = isPlaceholderRow
     }
@@ -1211,6 +1250,100 @@ private final class InlineInputRowCell: UITableViewCell {
     @objc private func textChanged() { onTextChanged?(textField.text ?? "") }
 }
 
+
+
+private struct InfiniteWheelPicker: UIViewRepresentable {
+    let entries: [NameEntry]
+    @Binding var selectedLogicalIndex: Int
+    var onSettle: (Int) -> Void
+
+    private let virtualRows = 100_000
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    func makeUIView(context: Context) -> UIPickerView {
+        let picker = UIPickerView()
+        picker.delegate = context.coordinator
+        picker.dataSource = context.coordinator
+        context.coordinator.pickerView = picker
+        context.coordinator.syncSelection(animated: false)
+        return picker
+    }
+
+    func updateUIView(_ uiView: UIPickerView, context: Context) {
+        let previousCount = context.coordinator.parent.entries.count
+        let previousIndex = context.coordinator.parent.selectedLogicalIndex
+
+        context.coordinator.parent = self
+
+        if previousCount != entries.count {
+            uiView.reloadAllComponents()
+            context.coordinator.syncSelection(animated: false)
+            return
+        }
+
+        if previousIndex != selectedLogicalIndex {
+            context.coordinator.syncSelection(animated: false)
+        }
+    }
+
+    final class Coordinator: NSObject, UIPickerViewDelegate, UIPickerViewDataSource {
+        var parent: InfiniteWheelPicker
+        weak var pickerView: UIPickerView?
+
+        init(_ parent: InfiniteWheelPicker) { self.parent = parent }
+
+        func numberOfComponents(in pickerView: UIPickerView) -> Int { 1 }
+
+        func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+            max(parent.virtualRows, max(parent.entries.count, 1))
+        }
+
+        func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat { 34 }
+
+        func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
+            let label = (view as? UILabel) ?? UILabel()
+            label.textAlignment = .center
+            label.font = UIFont.preferredFont(forTextStyle: .body)
+            label.textColor = .label
+            if parent.entries.isEmpty {
+                label.text = ""
+            } else {
+                let logical = ((row % parent.entries.count) + parent.entries.count) % parent.entries.count
+                let item = parent.entries[logical]
+                label.text = "\(item.drawNumber). \(item.name)"
+            }
+            return label
+        }
+
+        func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+            guard !parent.entries.isEmpty else { return }
+            let logical = ((row % parent.entries.count) + parent.entries.count) % parent.entries.count
+            if parent.selectedLogicalIndex != logical {
+                parent.selectedLogicalIndex = logical
+            }
+            parent.onSettle(logical)
+
+            // Silent recenter to keep infinite feel smooth.
+            let mid = parent.virtualRows / 2
+            let target = mid - (mid % parent.entries.count) + logical
+            if abs(row - target) > parent.entries.count * 4 {
+                pickerView.selectRow(target, inComponent: 0, animated: false)
+            }
+        }
+
+        func syncSelection(animated: Bool) {
+            guard let picker = pickerView else { return }
+            guard !parent.entries.isEmpty else { return }
+            let safe = max(0, min(parent.selectedLogicalIndex, parent.entries.count - 1))
+            let mid = parent.virtualRows / 2
+            let target = mid - (mid % parent.entries.count) + safe
+            if picker.selectedRow(inComponent: 0) != target {
+                picker.selectRow(target, inComponent: 0, animated: animated)
+            }
+        }
+    }
+}
 
 #Preview {
     ContentView()
