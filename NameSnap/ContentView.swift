@@ -336,6 +336,7 @@ struct ContentView: View {
     @State private var isButtonWheelSpin = false
     @State private var winnerSyncWorkItem: DispatchWorkItem?
     @State private var winnerRemovalWorkItem: DispatchWorkItem?
+    @State private var winnerRemovalSequence: Int = 0
     @State private var pendingWinnerSnapshot: NameEntry?
     @State private var pendingWinnerDisplay: String = ""
 
@@ -899,7 +900,6 @@ struct ContentView: View {
                     isWheelSwipeSession = false
                     wheelSettleWorkItem?.cancel()
                     winnerSyncWorkItem?.cancel()
-                    winnerRemovalWorkItem?.cancel()
                     pendingWinnerSnapshot = nil
                     pendingWinnerDisplay = ""
                     suppressWheelSettle = true
