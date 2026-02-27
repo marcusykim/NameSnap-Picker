@@ -211,6 +211,7 @@ final class NameSnapViewModel: ObservableObject {
         let display = "\(winner.drawNumber). \(winner.name)"
         history.insert(WinnerRecord(drawNumber: winner.drawNumber, name: winner.name), at: 0)
         if history.count > 20 { history.removeLast() }
+        markWinnerAsUsed(winner)
         return display
     }
 
@@ -306,11 +307,8 @@ final class NameSnapViewModel: ObservableObject {
             winner = pool.randomElement()
         }
         guard let winner else { isSpinning = false; return }
-        selectedName = "\(winner.drawNumber). \(winner.name)"
+        selectedName = commitWinnerSnapshot(winner)
         normalizeWheelIndexIfNeeded(forceCenter: true)
-        history.insert(WinnerRecord(drawNumber: winner.drawNumber, name: winner.name), at: 0)
-        if history.count > 20 { history.removeLast() }
-        markWinnerAsUsed(winner)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         isSpinning = false
     }
