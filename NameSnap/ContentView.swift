@@ -721,13 +721,6 @@ struct ContentView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .center)
 
-                        if !purchases.isUnlimitedUnlocked {
-                            Text("Free: up to 10 contestants • Unlimited: $0.99")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(.secondary)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                        }
-
                         Picker("Spin Mode", selection: $vm.visualMode) {
                             ForEach(SpinVisualMode.allCases) { mode in
                                 Text(mode.rawValue).tag(mode)
