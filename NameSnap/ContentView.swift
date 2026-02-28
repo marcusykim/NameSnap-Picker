@@ -609,7 +609,7 @@ struct ContentView: View {
                                         .font(titleFamilyFont(size: 16))
                                     Picker("Wheel", selection: $vm.wheelIndex) {
                                         ForEach(Array(vm.wheelEntries.enumerated()), id: \.offset) { index, item in
-                                            Text(item.name).tag(index)
+                                            Text("\(item.drawNumber). \(item.name)").tag(index)
                                         }
                                     }
                                     .pickerStyle(.wheel)
