@@ -200,6 +200,17 @@ final class NameSnapViewModel: ObservableObject {
         }
     }
 
+    func clampWheelIndexToWheelEntries() {
+        let total = wheelEntries.count
+        guard total > 0 else {
+            wheelIndex = 0
+            return
+        }
+        if wheelIndex < 0 || wheelIndex >= total {
+            wheelIndex = ((wheelIndex % total) + total) % total
+        }
+    }
+
     @discardableResult
     func commitCurrentWheelSelectionAsWinner() -> String? {
         guard let winner = currentWheelEntry() else { return nil }
@@ -1016,9 +1027,13 @@ struct ContentView: View {
             .onChange(of: vm.availableEntries.map(\.id)) { _ in
                 suppressWheelSettle = true
                 vm.normalizeWheelIndexIfNeeded(forceCenter: true)
+                vm.clampWheelIndexToWheelEntries()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
                     suppressWheelSettle = false
                 }
+            }
+            .onChange(of: vm.wheelEntries.count) { _ in
+                vm.clampWheelIndexToWheelEntries()
             }
             .onAppear {
                 noRepeatToggleUIValue = vm.noRepeatMode
