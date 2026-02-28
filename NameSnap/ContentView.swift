@@ -223,6 +223,13 @@ final class NameSnapViewModel: ObservableObject {
         }
     }
 
+    func commitSelectedNameAsWinnerIfNeeded() {
+        let parts = selectedName.split(separator: ".", maxSplits: 1).map { String($0).trimmingCharacters(in: .whitespaces) }
+        guard parts.count == 2, let draw = Int(parts[0]) else { return }
+        guard let winner = entries.first(where: { $0.drawNumber == draw && $0.name == parts[1] }) else { return }
+        _ = commitWinnerSnapshot(winner)
+    }
+
     func clearInputList() { rawInput = "" }
 
     func toggle(_ entry: NameEntry) {
@@ -307,7 +314,7 @@ final class NameSnapViewModel: ObservableObject {
             winner = pool.randomElement()
         }
         guard let winner else { isSpinning = false; return }
-        selectedName = commitWinnerSnapshot(winner)
+        selectedName = "\(winner.drawNumber). \(winner.name)"
         normalizeWheelIndexIfNeeded(forceCenter: true)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         isSpinning = false
@@ -924,6 +931,8 @@ struct ContentView: View {
                        !vm.selectedName.isEmpty,
                        vm.selectedName != "All Contestants Picked!",
                        vm.selectedName != "Add contestants to start spinning" {
+                        // Commit/removal happens first; alert/bar/animation/music remain driven by selectedName.
+                        vm.commitSelectedNameAsWinnerIfNeeded()
                         didShowWinnerForCurrentSpin = true
                         triggerWinnerEffects(name: vm.selectedName)
                     }
