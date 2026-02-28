@@ -905,26 +905,31 @@ struct ContentView: View {
 
                                 Button("Confirm") {
                                     let next = pendingNoRepeatValue
-                                    suppressNoRepeatToggleConfirm = true
-                                    vm.noRepeatMode = next
-                                    previousNoRepeatValue = next
 
-                                    winnerSyncWorkItem?.cancel()
-                                    wheelSettleWorkItem?.cancel()
-                                    pendingWinnerSnapshot = nil
-                                    pendingWinnerDisplay = ""
-                                    suppressNextWheelSettleCommit = true
-                                    suppressWheelSettle = true
-                                    vm.resetThisPool()
-                                    pendingNoRepeatValue = previousNoRepeatValue
+                                    // Dismiss first, then apply toggle + reset sequence.
                                     withAnimation { showNoRepeatToggleConfirm = false }
-                                    showBigAlert("♻️ Pool Reset")
 
-                                    // Release guards after UI settles so no auto wheel winner sequence fires.
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                                        suppressNoRepeatToggleConfirm = false
-                                        suppressWheelSettle = false
-                                        suppressNextWheelSettleCommit = false
+                                    DispatchQueue.main.async {
+                                        suppressNoRepeatToggleConfirm = true
+                                        vm.noRepeatMode = next
+                                        previousNoRepeatValue = next
+
+                                        winnerSyncWorkItem?.cancel()
+                                        wheelSettleWorkItem?.cancel()
+                                        pendingWinnerSnapshot = nil
+                                        pendingWinnerDisplay = ""
+                                        suppressNextWheelSettleCommit = true
+                                        suppressWheelSettle = true
+                                        vm.resetThisPool()
+                                        pendingNoRepeatValue = previousNoRepeatValue
+                                        showBigAlert("♻️ Pool Reset")
+
+                                        // Release guards after UI settles so no auto wheel winner sequence fires.
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                            suppressNoRepeatToggleConfirm = false
+                                            suppressWheelSettle = false
+                                            suppressNextWheelSettleCommit = false
+                                        }
                                     }
                                 }
                                 .buttonStyle(.borderedProminent)
