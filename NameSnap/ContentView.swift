@@ -479,13 +479,19 @@ struct ContentView: View {
             try session.setCategory(.ambient, mode: .default, options: [.mixWithOthers])
             try session.setActive(true)
 
+            #if targetEnvironment(simulator)
+            // Simulator reports this hint unreliably; avoid false positives.
+            return
+            #else
             // Evaluate after a short delay so the audio session has time to settle on fresh launch.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                 let settledSession = AVAudioSession.sharedInstance()
-                if settledSession.secondaryAudioShouldBeSilencedHint {
+                let shouldShowSilentHint = settledSession.secondaryAudioShouldBeSilencedHint && !settledSession.isOtherAudioPlaying
+                if shouldShowSilentHint {
                     withAnimation { showSoundOnHint = true }
                 }
             }
+            #endif
         } catch {
             print("Launch audio session check failed: \(error.localizedDescription)")
         }
