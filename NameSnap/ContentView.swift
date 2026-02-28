@@ -902,6 +902,7 @@ struct ContentView: View {
                     isWheelSwipeSession = false
                     guard !suppressWheelSettle else { return }
                     guard let winnerName = vm.commitCurrentWheelSelectionAsWinner() else { return }
+                    vm.selectedName = winnerName
                     didShowWinnerForCurrentSpin = true
                     triggerWinnerEffects(name: winnerName)
                 }
