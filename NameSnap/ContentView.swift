@@ -761,6 +761,10 @@ struct ContentView: View {
 
                         if vm.visualMode == .classic {
                             Button {
+                                dismissKeyboard()
+                                if vm.availableEntries.isEmpty && !vm.activeEntries.isEmpty {
+                                    showBigAlert("⚠️ All winners have been selected")
+                                }
                                 vm.spin()
                             } label: {
                                 ZStack {
@@ -806,6 +810,9 @@ struct ContentView: View {
 
                                     Button(vm.isSpinning ? "Spinning" : "Spin Wheel") {
                                         dismissKeyboard()
+                                        if vm.availableEntries.isEmpty && !vm.activeEntries.isEmpty {
+                                            showBigAlert("⚠️ All winners have been selected")
+                                        }
                                         isButtonWheelSpin = true
                                         suppressWheelSettle = true
                                         vm.spin()
@@ -1266,6 +1273,12 @@ struct ContentView: View {
                 let settle = DispatchWorkItem {
                     isWheelSwipeSession = false
                     guard !suppressWheelSettle else { return }
+
+                    if vm.availableEntries.isEmpty && !vm.activeEntries.isEmpty {
+                        showBigAlert("⚠️ All winners have been selected")
+                        return
+                    }
+
                     guard let winnerName = vm.commitCurrentWheelSelectionAsWinner() else { return }
                     vm.selectedName = winnerName
                     didShowWinnerForCurrentSpin = true
