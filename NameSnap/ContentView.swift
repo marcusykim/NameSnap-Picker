@@ -396,6 +396,10 @@ struct ContentView: View {
         return .system(size: size, weight: .black, design: .rounded)
     }
 
+    private func dismissKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+
     private func showBigAlert(_ text: String) {
         centerAlertText = text
         centerAlertScale = 0.65
@@ -775,6 +779,11 @@ struct ContentView: View {
                     .padding()
                     .padding(.bottom, 110)
                 }
+                .simultaneousGesture(
+                    TapGesture().onEnded {
+                        dismissKeyboard()
+                    }
+                )
             }
             .overlay {
                 if showWinnerFlash {
