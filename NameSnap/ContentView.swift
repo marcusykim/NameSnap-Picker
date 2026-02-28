@@ -338,6 +338,9 @@ struct ContentView: View {
     @State private var inputDraftName = ""
     @State private var showClearPoolConfirm = false
     @State private var showResetPoolConfirm = false
+    @State private var showNoRepeatToggleConfirm = false
+    @State private var pendingNoRepeatValue: Bool?
+    @State private var suppressNoRepeatToggleConfirm = false
     @State private var didShowWinnerForCurrentSpin = false
     @State private var flashIndex = 0
     @State private var showWinnerFlash = false
@@ -584,12 +587,16 @@ struct ContentView: View {
                             Toggle("", isOn: $vm.noRepeatMode)
                                 .labelsHidden()
                                 .tint(.indigo)
-                                .onChange(of: vm.noRepeatMode) { _ in
-                                    winnerSyncWorkItem?.cancel()
-                                    wheelSettleWorkItem?.cancel()
-                                    pendingWinnerSnapshot = nil
-                                    pendingWinnerDisplay = ""
-                                    vm.resetThisPool()
+                                .onChange(of: vm.noRepeatMode) { newValue in
+                                    guard !suppressNoRepeatToggleConfirm else { return }
+                                    pendingNoRepeatValue = newValue
+
+                                    // Revert until user confirms.
+                                    suppressNoRepeatToggleConfirm = true
+                                    vm.noRepeatMode.toggle()
+                                    suppressNoRepeatToggleConfirm = false
+
+                                    withAnimation { showNoRepeatToggleConfirm = true }
                                 }
                         }
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -850,6 +857,65 @@ struct ContentView: View {
                                 }
                                 .buttonStyle(.borderedProminent)
                                 .tint(.red)
+                                .font(titleFamilyFont(size: 13))
+                            }
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 20)
+                        .background(.ultraThinMaterial)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(.white.opacity(0.65), lineWidth: 2)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .shadow(radius: 12)
+                        .padding(.horizontal, 22)
+                    }
+                    .transition(.opacity)
+                }
+            }
+            .overlay {
+                if showNoRepeatToggleConfirm {
+                    ZStack {
+                        Color.black.opacity(0.25)
+                            .ignoresSafeArea()
+
+                        VStack(spacing: 12) {
+                            Text("🔁 Change no-repeat setting?")
+                                .font(titleFamilyFont(size: 22))
+                                .multilineTextAlignment(.center)
+
+                            Text("This will reset the current pool and no-repeat history. Continue?")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+
+                            HStack(spacing: 10) {
+                                Button("Cancel") {
+                                    pendingNoRepeatValue = nil
+                                    withAnimation { showNoRepeatToggleConfirm = false }
+                                }
+                                .buttonStyle(.bordered)
+                                .font(titleFamilyFont(size: 13))
+
+                                Button("Confirm") {
+                                    if let next = pendingNoRepeatValue {
+                                        suppressNoRepeatToggleConfirm = true
+                                        vm.noRepeatMode = next
+                                        suppressNoRepeatToggleConfirm = false
+                                    }
+
+                                    winnerSyncWorkItem?.cancel()
+                                    wheelSettleWorkItem?.cancel()
+                                    pendingWinnerSnapshot = nil
+                                    pendingWinnerDisplay = ""
+                                    vm.resetThisPool()
+                                    pendingNoRepeatValue = nil
+                                    withAnimation { showNoRepeatToggleConfirm = false }
+                                    showBigAlert("♻️ Pool Reset")
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(.indigo)
                                 .font(titleFamilyFont(size: 13))
                             }
                         }
