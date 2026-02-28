@@ -939,13 +939,18 @@ struct ContentView: View {
                        !vm.selectedName.isEmpty,
                        vm.selectedName != "All Contestants Picked!",
                        vm.selectedName != "Add contestants to start spinning" {
-                        // Keep wheel highlight synced to the selected winner before commit/removal side effects.
-                        vm.alignWheelHighlightToSelectedWinner()
-
-                        // Commit/removal happens first; alert/bar/animation/music remain driven by selectedName.
-                        vm.commitSelectedNameAsWinnerIfNeeded()
-                        didShowWinnerForCurrentSpin = true
-                        triggerWinnerEffects(name: vm.selectedName)
+                        if vm.visualMode == .wheel, let wheelWinner = vm.currentWheelEntry() {
+                            // Wheel is source-of-truth: commit + effects use the highlighted wheel entry.
+                            let winnerText = vm.commitWinnerSnapshot(wheelWinner)
+                            vm.selectedName = winnerText
+                            didShowWinnerForCurrentSpin = true
+                            triggerWinnerEffects(name: winnerText)
+                        } else {
+                            // Classic keeps selectedName-driven commit path.
+                            vm.commitSelectedNameAsWinnerIfNeeded()
+                            didShowWinnerForCurrentSpin = true
+                            triggerWinnerEffects(name: vm.selectedName)
+                        }
                     }
                 }
             }
