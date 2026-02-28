@@ -339,8 +339,8 @@ struct ContentView: View {
     @State private var showClearPoolConfirm = false
     @State private var showResetPoolConfirm = false
     @State private var showNoRepeatToggleConfirm = false
+    @State private var noRepeatToggleUIValue: Bool = true
     @State private var pendingNoRepeatValue: Bool = true
-    @State private var previousNoRepeatValue: Bool = true
     @State private var suppressNoRepeatToggleConfirm = false
     @State private var suppressNextWheelSettleCommit = false
     @State private var didShowWinnerForCurrentSpin = false
@@ -586,18 +586,12 @@ struct ContentView: View {
                         HStack(spacing: 12) {
                             Text("No repeats until reset")
                                 .font(.body.weight(.medium))
-                            Toggle("", isOn: $vm.noRepeatMode)
+                            Toggle("", isOn: $noRepeatToggleUIValue)
                                 .labelsHidden()
                                 .tint(.indigo)
-                                .onChange(of: vm.noRepeatMode) { newValue in
+                                .onChange(of: noRepeatToggleUIValue) { newValue in
                                     guard !suppressNoRepeatToggleConfirm else { return }
                                     pendingNoRepeatValue = newValue
-
-                                    // Revert to last committed value until user confirms.
-                                    suppressNoRepeatToggleConfirm = true
-                                    vm.noRepeatMode = previousNoRepeatValue
-                                    suppressNoRepeatToggleConfirm = false
-
                                     withAnimation { showNoRepeatToggleConfirm = true }
                                 }
                         }
@@ -895,9 +889,9 @@ struct ContentView: View {
                             HStack(spacing: 10) {
                                 Button("Cancel") {
                                     suppressNoRepeatToggleConfirm = true
-                                    vm.noRepeatMode = previousNoRepeatValue
+                                    noRepeatToggleUIValue = vm.noRepeatMode
+                                    pendingNoRepeatValue = vm.noRepeatMode
                                     suppressNoRepeatToggleConfirm = false
-                                    pendingNoRepeatValue = previousNoRepeatValue
                                     withAnimation { showNoRepeatToggleConfirm = false }
                                 }
                                 .buttonStyle(.bordered)
@@ -912,7 +906,7 @@ struct ContentView: View {
                                     DispatchQueue.main.async {
                                         suppressNoRepeatToggleConfirm = true
                                         vm.noRepeatMode = next
-                                        previousNoRepeatValue = next
+                                        noRepeatToggleUIValue = next
 
                                         winnerSyncWorkItem?.cancel()
                                         wheelSettleWorkItem?.cancel()
@@ -921,7 +915,7 @@ struct ContentView: View {
                                         suppressNextWheelSettleCommit = true
                                         suppressWheelSettle = true
                                         vm.resetThisPool()
-                                        pendingNoRepeatValue = previousNoRepeatValue
+                                        pendingNoRepeatValue = next
                                         showBigAlert("♻️ Pool Reset")
 
                                         // Release guards after UI settles so no auto wheel winner sequence fires.
@@ -1009,8 +1003,14 @@ struct ContentView: View {
                 }
             }
             .onAppear {
-                previousNoRepeatValue = vm.noRepeatMode
+                noRepeatToggleUIValue = vm.noRepeatMode
                 pendingNoRepeatValue = vm.noRepeatMode
+            }
+            .onChange(of: vm.noRepeatMode) { newValue in
+                if !showNoRepeatToggleConfirm {
+                    noRepeatToggleUIValue = newValue
+                    pendingNoRepeatValue = newValue
+                }
             }
             .onChange(of: vm.isSpinning) { spinning in
                 if spinning {
