@@ -902,7 +902,6 @@ struct ContentView: View {
                                     if let next = pendingNoRepeatValue {
                                         suppressNoRepeatToggleConfirm = true
                                         vm.noRepeatMode = next
-                                        suppressNoRepeatToggleConfirm = false
                                     }
 
                                     winnerSyncWorkItem?.cancel()
@@ -913,6 +912,11 @@ struct ContentView: View {
                                     pendingNoRepeatValue = nil
                                     withAnimation { showNoRepeatToggleConfirm = false }
                                     showBigAlert("♻️ Pool Reset")
+
+                                    // Release guard on next runloop so toggle writeback can't immediately reopen this modal.
+                                    DispatchQueue.main.async {
+                                        suppressNoRepeatToggleConfirm = false
+                                    }
                                 }
                                 .buttonStyle(.borderedProminent)
                                 .tint(.indigo)
