@@ -332,6 +332,7 @@ struct ContentView: View {
     @State private var isWheelSwipeSession = false
     @State private var suppressWheelSettle = false
     @State private var isButtonWheelSpin = false
+    @State private var spinWinnerLockUntil: Date = .distantPast
     @State private var winnerSyncWorkItem: DispatchWorkItem?
     @State private var winnerRemovalWorkItem: DispatchWorkItem?
     @State private var winnerRemovalSequence: Int = 0
@@ -864,6 +865,10 @@ struct ContentView: View {
             .onChange(of: vm.wheelIndex) { _ in
                 guard vm.visualMode == .wheel else { return }
                 vm.normalizeWheelIndexIfNeeded()
+
+                // During post-spin lock, keep winner frozen so manual-settle path can't re-commit a new name.
+                guard Date() >= spinWinnerLockUntil else { return }
+
                 if let current = vm.currentWheelEntry() {
                     vm.selectedName = current.name
                 }
@@ -902,6 +907,9 @@ struct ContentView: View {
                     pendingWinnerDisplay = ""
                     suppressWheelSettle = true
                 } else {
+                    // Freeze winner briefly after programmatic spin so wheel recentering can't commit the wrong follow-up name.
+                    spinWinnerLockUntil = Date().addingTimeInterval(1.2)
+
                     // let wheel settle callbacks quiet down after programmatic spin
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                         suppressWheelSettle = false
