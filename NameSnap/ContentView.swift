@@ -689,6 +689,7 @@ struct ContentView: View {
                                 }
 
                                 Button("Add These Names to Pool") {
+                                    dismissKeyboard()
                                     let incoming = vm.parsedInputNames.count
                                     guard incoming > 0 else { return }
 
@@ -707,6 +708,7 @@ struct ContentView: View {
                                 .scaleEffect(pulseAddButton ? 0.96 : 1)
 
                                 Button("Undo Last Add") {
+                                    dismissKeyboard()
                                     let removed = vm.undoLastAdd()
                                     guard removed > 0 else { return }
                                     showBigAlert("↩️ Undid \(removed)")
@@ -716,6 +718,7 @@ struct ContentView: View {
                                 .font(titleFamilyFont(size: 13))
 
                                 Button("Clear This List") {
+                                    dismissKeyboard()
                                     vm.clearInputList()
                                     showBigAlert("🧹 List Cleared")
                                 }
@@ -802,6 +805,7 @@ struct ContentView: View {
                                     }
 
                                     Button(vm.isSpinning ? "Spinning" : "Spin Wheel") {
+                                        dismissKeyboard()
                                         isButtonWheelSpin = true
                                         suppressWheelSettle = true
                                         vm.spin()
@@ -942,12 +946,14 @@ struct ContentView: View {
 
                             HStack(spacing: 10) {
                                 Button("Cancel") {
+                                    dismissKeyboard()
                                     withAnimation { showResetPoolConfirm = false }
                                 }
                                 .buttonStyle(.bordered)
                                 .font(titleFamilyFont(size: 13))
 
                                 Button("Reset Pool") {
+                                    dismissKeyboard()
                                     suppressWheelSettle = true
                                     winnerSyncWorkItem?.cancel()
                                     winnerRemovalWorkItem?.cancel()
@@ -997,12 +1003,14 @@ struct ContentView: View {
 
                             HStack(spacing: 10) {
                                 Button("Cancel") {
+                                    dismissKeyboard()
                                     withAnimation { showClearPoolConfirm = false }
                                 }
                                 .buttonStyle(.bordered)
                                 .font(titleFamilyFont(size: 13))
 
                                 Button("Clear Pool") {
+                                    dismissKeyboard()
                                     suppressWheelSettle = true
                                     winnerSyncWorkItem?.cancel()
                                     winnerRemovalWorkItem?.cancel()
@@ -1046,6 +1054,7 @@ struct ContentView: View {
                                 .multilineTextAlignment(.center)
 
                             Button("Gotcha") {
+                                dismissKeyboard()
                                 withAnimation { showSoundOnHint = false }
                             }
                             .buttonStyle(.borderedProminent)
@@ -1084,12 +1093,14 @@ struct ContentView: View {
 
                             HStack(spacing: 10) {
                                 Button("Not Now") {
+                                    dismissKeyboard()
                                     withAnimation { showUpgradeConfirm = false }
                                 }
                                 .buttonStyle(.bordered)
                                 .font(titleFamilyFont(size: 13))
 
                                 Button(isPurchasingUpgrade ? "Purchasing…" : "Unlock $0.99") {
+                                    dismissKeyboard()
                                     guard !isPurchasingUpgrade else { return }
                                     isPurchasingUpgrade = true
                                     Task {
@@ -1109,6 +1120,7 @@ struct ContentView: View {
                             }
 
                             Button("Restore Purchases") {
+                                dismissKeyboard()
                                 Task {
                                     await purchases.restorePurchases()
                                     if purchases.isUnlimitedUnlocked {
@@ -1153,6 +1165,7 @@ struct ContentView: View {
 
                             HStack(spacing: 10) {
                                 Button("Cancel") {
+                                    dismissKeyboard()
                                     suppressNoRepeatToggleConfirm = true
                                     noRepeatToggleUIValue = vm.noRepeatMode
                                     pendingNoRepeatValue = vm.noRepeatMode
@@ -1163,6 +1176,7 @@ struct ContentView: View {
                                 .font(titleFamilyFont(size: 13))
 
                                 Button("Confirm") {
+                                    dismissKeyboard()
                                     let next = pendingNoRepeatValue
 
                                     // Dismiss first, then apply toggle + reset sequence.
