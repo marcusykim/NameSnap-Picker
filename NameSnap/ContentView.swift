@@ -340,7 +340,9 @@ struct ContentView: View {
     @State private var showResetPoolConfirm = false
     @State private var showNoRepeatToggleConfirm = false
     @State private var pendingNoRepeatValue: Bool?
+    @State private var previousNoRepeatValue: Bool = true
     @State private var suppressNoRepeatToggleConfirm = false
+    @State private var suppressNextWheelSettleCommit = false
     @State private var didShowWinnerForCurrentSpin = false
     @State private var flashIndex = 0
     @State private var showWinnerFlash = false
@@ -591,9 +593,9 @@ struct ContentView: View {
                                     guard !suppressNoRepeatToggleConfirm else { return }
                                     pendingNoRepeatValue = newValue
 
-                                    // Revert until user confirms.
+                                    // Revert to last committed value until user confirms.
                                     suppressNoRepeatToggleConfirm = true
-                                    vm.noRepeatMode.toggle()
+                                    vm.noRepeatMode = previousNoRepeatValue
                                     suppressNoRepeatToggleConfirm = false
 
                                     withAnimation { showNoRepeatToggleConfirm = true }
@@ -892,6 +894,9 @@ struct ContentView: View {
 
                             HStack(spacing: 10) {
                                 Button("Cancel") {
+                                    suppressNoRepeatToggleConfirm = true
+                                    vm.noRepeatMode = previousNoRepeatValue
+                                    suppressNoRepeatToggleConfirm = false
                                     pendingNoRepeatValue = nil
                                     withAnimation { showNoRepeatToggleConfirm = false }
                                 }
@@ -902,20 +907,25 @@ struct ContentView: View {
                                     if let next = pendingNoRepeatValue {
                                         suppressNoRepeatToggleConfirm = true
                                         vm.noRepeatMode = next
+                                        previousNoRepeatValue = next
                                     }
 
                                     winnerSyncWorkItem?.cancel()
                                     wheelSettleWorkItem?.cancel()
                                     pendingWinnerSnapshot = nil
                                     pendingWinnerDisplay = ""
+                                    suppressNextWheelSettleCommit = true
+                                    suppressWheelSettle = true
                                     vm.resetThisPool()
                                     pendingNoRepeatValue = nil
                                     withAnimation { showNoRepeatToggleConfirm = false }
                                     showBigAlert("♻️ Pool Reset")
 
-                                    // Release guard on next runloop so toggle writeback can't immediately reopen this modal.
-                                    DispatchQueue.main.async {
+                                    // Release guards after UI settles so no auto wheel winner sequence fires.
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                                         suppressNoRepeatToggleConfirm = false
+                                        suppressWheelSettle = false
+                                        suppressNextWheelSettleCommit = false
                                     }
                                 }
                                 .buttonStyle(.borderedProminent)
@@ -963,6 +973,7 @@ struct ContentView: View {
 
                 // Critical: never overwrite selected winner while programmatic spin is still finalizing.
                 guard !vm.isSpinning else { return }
+                guard !suppressNextWheelSettleCommit else { return }
 
                 if !didShowWinnerForCurrentSpin, let current = vm.currentWheelEntry() {
                     vm.selectedName = "\(current.drawNumber). \(current.name)"
