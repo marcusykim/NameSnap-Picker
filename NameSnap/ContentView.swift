@@ -624,6 +624,10 @@ struct ContentView: View {
             ZStack {
                 NSTheme.bg
                     .ignoresSafeArea()
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        dismissKeyboard()
+                    }
 
                 ScrollView {
                     VStack(spacing: 16) {
@@ -869,11 +873,6 @@ struct ContentView: View {
                     .padding()
                     .padding(.bottom, 110)
                 }
-                .simultaneousGesture(
-                    TapGesture().onEnded {
-                        dismissKeyboard()
-                    }
-                )
             }
             .overlay {
                 if showWinnerFlash {
