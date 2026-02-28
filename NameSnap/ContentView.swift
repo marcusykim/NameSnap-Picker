@@ -427,6 +427,7 @@ struct ContentView: View {
     @State private var showUpgradeConfirm = false
     @State private var isPurchasingUpgrade = false
     @State private var showSoundOnHint = false
+    @State private var didRunLaunchSilentCheck = false
     @State private var didShowWinnerForCurrentSpin = false
     @State private var flashIndex = 0
     @State private var showWinnerFlash = false
@@ -467,6 +468,23 @@ struct ContentView: View {
 
     private func dismissKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+
+    private func runLaunchSilentModeCheckIfNeeded() {
+        guard !didRunLaunchSilentCheck else { return }
+        didRunLaunchSilentCheck = true
+
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.ambient, mode: .default, options: [.mixWithOthers])
+            try session.setActive(true)
+
+            if session.secondaryAudioShouldBeSilencedHint {
+                withAnimation { showSoundOnHint = true }
+            }
+        } catch {
+            print("Launch audio session check failed: \(error.localizedDescription)")
+        }
     }
 
     private func addNamesToPoolNow() {
@@ -569,11 +587,6 @@ struct ContentView: View {
             let session = AVAudioSession.sharedInstance()
             try session.setCategory(.ambient, mode: .default, options: [.mixWithOthers])
             try session.setActive(true)
-
-            if session.secondaryAudioShouldBeSilencedHint {
-                withAnimation { showSoundOnHint = true }
-                return
-            }
         } catch {
             print("Audio session setup failed: \(error.localizedDescription)")
         }
@@ -1249,6 +1262,7 @@ struct ContentView: View {
             .onAppear {
                 noRepeatToggleUIValue = vm.noRepeatMode
                 pendingNoRepeatValue = vm.noRepeatMode
+                runLaunchSilentModeCheckIfNeeded()
             }
             .onChange(of: vm.noRepeatMode) { newValue in
                 if !showNoRepeatToggleConfirm {
