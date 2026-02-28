@@ -232,6 +232,10 @@ final class NameSnapViewModel: ObservableObject {
         if let idx = entries.firstIndex(where: { $0.id == winner.id }) {
             entries[idx].isIncluded = false
         }
+
+        // Winner removal changes wheel pool size immediately; keep selection index valid synchronously.
+        normalizeWheelIndexIfNeeded(forceCenter: true)
+        clampWheelIndexToWheelEntries()
     }
 
     func commitSelectedNameAsWinnerIfNeeded() {
