@@ -426,6 +426,7 @@ struct ContentView: View {
     @State private var suppressNextWheelSettleCommit = false
     @State private var showUpgradeConfirm = false
     @State private var isPurchasingUpgrade = false
+    @State private var showSoundOnHint = false
     @State private var didShowWinnerForCurrentSpin = false
     @State private var flashIndex = 0
     @State private var showWinnerFlash = false
@@ -566,8 +567,13 @@ struct ContentView: View {
 
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try session.setCategory(.ambient, mode: .default, options: [.mixWithOthers])
             try session.setActive(true)
+
+            if session.secondaryAudioShouldBeSilencedHint {
+                withAnimation { showSoundOnHint = true }
+                return
+            }
         } catch {
             print("Audio session setup failed: \(error.localizedDescription)")
         }
@@ -988,6 +994,38 @@ struct ContentView: View {
                                 .tint(.red)
                                 .font(titleFamilyFont(size: 13))
                             }
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 20)
+                        .background(.ultraThinMaterial)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(.white.opacity(0.65), lineWidth: 2)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .shadow(radius: 12)
+                        .padding(.horizontal, 22)
+                    }
+                    .transition(.opacity)
+                }
+            }
+            .overlay {
+                if showSoundOnHint {
+                    ZStack {
+                        Color.black.opacity(0.25)
+                            .ignoresSafeArea()
+
+                        VStack(spacing: 12) {
+                            Text("🔈 Better with sound on!")
+                                .font(titleFamilyFont(size: 22))
+                                .multilineTextAlignment(.center)
+
+                            Button("Gotcha") {
+                                withAnimation { showSoundOnHint = false }
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.indigo)
+                            .font(titleFamilyFont(size: 13))
                         }
                         .padding(.horizontal, 18)
                         .padding(.vertical, 20)
