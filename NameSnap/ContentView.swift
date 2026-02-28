@@ -665,13 +665,22 @@ struct ContentView: View {
                                 VStack(alignment: .leading, spacing: 10) {
                                     Text("Wheel")
                                         .font(titleFamilyFont(size: 16))
-                                    Picker("Wheel", selection: $vm.wheelIndex) {
-                                        ForEach(Array(vm.wheelEntries.enumerated()), id: \.offset) { index, item in
-                                            Text("\(item.drawNumber). \(item.name)").tag(index)
+                                    if vm.wheelEntries.isEmpty {
+                                        Text("No available contestants")
+                                            .font(.subheadline.weight(.semibold))
+                                            .foregroundStyle(.secondary)
+                                            .frame(maxWidth: .infinity, minHeight: 140)
+                                            .background(.ultraThinMaterial)
+                                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                    } else {
+                                        Picker("Wheel", selection: $vm.wheelIndex) {
+                                            ForEach(Array(vm.wheelEntries.enumerated()), id: \.offset) { index, item in
+                                                Text("\(item.drawNumber). \(item.name)").tag(index)
+                                            }
                                         }
+                                        .pickerStyle(.wheel)
+                                        .frame(height: 140)
                                     }
-                                    .pickerStyle(.wheel)
-                                    .frame(height: 140)
 
                                     Button(vm.isSpinning ? "Spinning" : "Spin Wheel") {
                                         isButtonWheelSpin = true
