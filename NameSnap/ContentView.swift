@@ -230,6 +230,14 @@ final class NameSnapViewModel: ObservableObject {
         _ = commitWinnerSnapshot(winner)
     }
 
+    func alignWheelHighlightToSelectedWinner() {
+        let parts = selectedName.split(separator: ".", maxSplits: 1).map { String($0).trimmingCharacters(in: .whitespaces) }
+        guard parts.count == 2, let draw = Int(parts[0]) else { return }
+        guard let idx = wheelEntries.firstIndex(where: { $0.drawNumber == draw && $0.name == parts[1] }) else { return }
+        wheelIndex = idx
+        normalizeWheelIndexIfNeeded(forceCenter: true)
+    }
+
     func clearInputList() { rawInput = "" }
 
     func toggle(_ entry: NameEntry) {
@@ -879,7 +887,7 @@ struct ContentView: View {
                 // Critical: never overwrite selected winner while programmatic spin is still finalizing.
                 guard !vm.isSpinning else { return }
 
-                if let current = vm.currentWheelEntry() {
+                if !didShowWinnerForCurrentSpin, let current = vm.currentWheelEntry() {
                     vm.selectedName = "\(current.drawNumber). \(current.name)"
                 }
                 guard !isButtonWheelSpin, !suppressWheelSettle else { return }
@@ -931,6 +939,9 @@ struct ContentView: View {
                        !vm.selectedName.isEmpty,
                        vm.selectedName != "All Contestants Picked!",
                        vm.selectedName != "Add contestants to start spinning" {
+                        // Keep wheel highlight synced to the selected winner before commit/removal side effects.
+                        vm.alignWheelHighlightToSelectedWinner()
+
                         // Commit/removal happens first; alert/bar/animation/music remain driven by selectedName.
                         vm.commitSelectedNameAsWinnerIfNeeded()
                         didShowWinnerForCurrentSpin = true
