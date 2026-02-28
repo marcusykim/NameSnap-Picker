@@ -482,8 +482,7 @@ struct ContentView: View {
             // Evaluate after a short delay so the audio session has time to settle on fresh launch.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                 let settledSession = AVAudioSession.sharedInstance()
-                let shouldShowSilentHint = settledSession.secondaryAudioShouldBeSilencedHint
-                    || settledSession.outputVolume <= 0.01
+                let shouldShowSilentHint = settledSession.outputVolume <= 0.01
                 if shouldShowSilentHint {
                     withAnimation { showSoundOnHint = true }
                 }
