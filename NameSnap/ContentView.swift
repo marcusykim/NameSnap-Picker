@@ -479,7 +479,8 @@ struct ContentView: View {
             try session.setCategory(.ambient, mode: .default, options: [.mixWithOthers])
             try session.setActive(true)
 
-            if session.secondaryAudioShouldBeSilencedHint {
+            let shouldShowSilentHint = session.secondaryAudioShouldBeSilencedHint && session.outputVolume <= 0.01
+            if shouldShowSilentHint {
                 withAnimation { showSoundOnHint = true }
             }
         } catch {
