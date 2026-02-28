@@ -339,7 +339,7 @@ struct ContentView: View {
     @State private var showClearPoolConfirm = false
     @State private var showResetPoolConfirm = false
     @State private var showNoRepeatToggleConfirm = false
-    @State private var pendingNoRepeatValue: Bool?
+    @State private var pendingNoRepeatValue: Bool = true
     @State private var previousNoRepeatValue: Bool = true
     @State private var suppressNoRepeatToggleConfirm = false
     @State private var suppressNextWheelSettleCommit = false
@@ -897,18 +897,17 @@ struct ContentView: View {
                                     suppressNoRepeatToggleConfirm = true
                                     vm.noRepeatMode = previousNoRepeatValue
                                     suppressNoRepeatToggleConfirm = false
-                                    pendingNoRepeatValue = nil
+                                    pendingNoRepeatValue = previousNoRepeatValue
                                     withAnimation { showNoRepeatToggleConfirm = false }
                                 }
                                 .buttonStyle(.bordered)
                                 .font(titleFamilyFont(size: 13))
 
                                 Button("Confirm") {
-                                    if let next = pendingNoRepeatValue {
-                                        suppressNoRepeatToggleConfirm = true
-                                        vm.noRepeatMode = next
-                                        previousNoRepeatValue = next
-                                    }
+                                    let next = pendingNoRepeatValue
+                                    suppressNoRepeatToggleConfirm = true
+                                    vm.noRepeatMode = next
+                                    previousNoRepeatValue = next
 
                                     winnerSyncWorkItem?.cancel()
                                     wheelSettleWorkItem?.cancel()
@@ -917,7 +916,7 @@ struct ContentView: View {
                                     suppressNextWheelSettleCommit = true
                                     suppressWheelSettle = true
                                     vm.resetThisPool()
-                                    pendingNoRepeatValue = nil
+                                    pendingNoRepeatValue = previousNoRepeatValue
                                     withAnimation { showNoRepeatToggleConfirm = false }
                                     showBigAlert("♻️ Pool Reset")
 
@@ -1003,6 +1002,10 @@ struct ContentView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
                     suppressWheelSettle = false
                 }
+            }
+            .onAppear {
+                previousNoRepeatValue = vm.noRepeatMode
+                pendingNoRepeatValue = vm.noRepeatMode
             }
             .onChange(of: vm.isSpinning) { spinning in
                 if spinning {
