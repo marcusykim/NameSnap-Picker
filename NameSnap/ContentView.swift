@@ -1279,10 +1279,23 @@ struct ContentView: View {
                         return
                     }
 
-                    guard let winnerName = vm.commitCurrentWheelSelectionAsWinner() else { return }
+                    // Prevent post-settle index churn from chaining through the entire pool.
+                    suppressWheelSettle = true
+                    spinWinnerLockUntil = Date().addingTimeInterval(0.9)
+
+                    guard let winnerName = vm.commitCurrentWheelSelectionAsWinner() else {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+                            suppressWheelSettle = false
+                        }
+                        return
+                    }
                     vm.selectedName = winnerName
                     didShowWinnerForCurrentSpin = true
                     triggerWinnerEffects(name: winnerName)
+
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+                        suppressWheelSettle = false
+                    }
                 }
                 wheelSettleWorkItem = settle
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.75, execute: settle)
