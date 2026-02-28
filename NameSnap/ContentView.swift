@@ -482,7 +482,11 @@ struct ContentView: View {
             // Evaluate after a short delay so the audio session has time to settle on fresh launch.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                 let settledSession = AVAudioSession.sharedInstance()
+                #if targetEnvironment(simulator)
                 let shouldShowSilentHint = settledSession.outputVolume <= 0.01
+                #else
+                let shouldShowSilentHint = settledSession.secondaryAudioShouldBeSilencedHint
+                #endif
                 if shouldShowSilentHint {
                     withAnimation { showSoundOnHint = true }
                 }
@@ -889,6 +893,9 @@ struct ContentView: View {
                     }
                     .padding()
                     .padding(.bottom, 110)
+                }
+                .onTapGesture {
+                    dismissKeyboard()
                 }
             }
             .overlay {
