@@ -869,10 +869,13 @@ struct ContentView: View {
                 // During post-spin lock, keep winner frozen so manual-settle path can't re-commit a new name.
                 guard Date() >= spinWinnerLockUntil else { return }
 
+                // Critical: never overwrite selected winner while programmatic spin is still finalizing.
+                guard !vm.isSpinning else { return }
+
                 if let current = vm.currentWheelEntry() {
-                    vm.selectedName = current.name
+                    vm.selectedName = "\(current.drawNumber). \(current.name)"
                 }
-                guard !vm.isSpinning, !isButtonWheelSpin, !suppressWheelSettle else { return }
+                guard !isButtonWheelSpin, !suppressWheelSettle else { return }
 
                 // Manual swipe spin: commit winner when wheel settles.
                 if !isWheelSwipeSession {
