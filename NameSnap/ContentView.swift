@@ -539,14 +539,32 @@ struct ContentView: View {
                                 }
 
                                 Button("Add These Names to Pool") {
+                                    if vm.visualMode == .wheel {
+                                        suppressNextWheelSettleCommit = true
+                                        suppressWheelSettle = true
+                                    }
+
                                     let added = vm.addNamesFromInput()
-                                    guard added > 0 else { return }
+                                    guard added > 0 else {
+                                        if vm.visualMode == .wheel {
+                                            suppressWheelSettle = false
+                                            suppressNextWheelSettleCommit = false
+                                        }
+                                        return
+                                    }
                                     showBigAlert("✅ Names Added")
                                     withAnimation(.spring(response: 0.24, dampingFraction: 0.65)) {
                                         pulseAddButton = true
                                     }
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
                                         pulseAddButton = false
+                                    }
+
+                                    if vm.visualMode == .wheel {
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                            suppressWheelSettle = false
+                                            suppressNextWheelSettleCommit = false
+                                        }
                                     }
                                 }
                                 .buttonStyle(.borderedProminent)
