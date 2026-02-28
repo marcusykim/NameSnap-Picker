@@ -907,11 +907,12 @@ struct ContentView: View {
                     pendingWinnerDisplay = ""
                     suppressWheelSettle = true
                 } else {
-                    // Freeze winner briefly after programmatic spin so wheel recentering can't commit the wrong follow-up name.
-                    spinWinnerLockUntil = Date().addingTimeInterval(1.2)
+                    // Freeze winner and suppress settle commits long enough for post-spin recenter churn to finish.
+                    spinWinnerLockUntil = Date().addingTimeInterval(1.6)
+                    wheelSettleWorkItem?.cancel()
 
                     // let wheel settle callbacks quiet down after programmatic spin
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                         suppressWheelSettle = false
                         isButtonWheelSpin = false
                     }
