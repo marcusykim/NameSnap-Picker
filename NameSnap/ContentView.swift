@@ -584,6 +584,13 @@ struct ContentView: View {
                             Toggle("", isOn: $vm.noRepeatMode)
                                 .labelsHidden()
                                 .tint(.indigo)
+                                .onChange(of: vm.noRepeatMode) { _ in
+                                    winnerSyncWorkItem?.cancel()
+                                    wheelSettleWorkItem?.cancel()
+                                    pendingWinnerSnapshot = nil
+                                    pendingWinnerDisplay = ""
+                                    vm.resetThisPool()
+                                }
                         }
                         .frame(maxWidth: .infinity, alignment: .center)
 
