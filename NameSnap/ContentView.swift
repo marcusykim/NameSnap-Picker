@@ -3,6 +3,7 @@ import Combine
 import UIKit
 import AudioToolbox
 import AVFoundation
+import StoreKit
 
 struct NameEntry: Identifiable, Codable, Hashable {
     let id: UUID
@@ -344,8 +345,73 @@ final class NameSnapViewModel: ObservableObject {
     }
 }
 
+@MainActor
+final class NameSnapPurchaseManager: ObservableObject {
+    @Published var isUnlimitedUnlocked = false
+    @Published var unlimitedProduct: Product?
+
+    private let unlimitedProductId = "namesnap.unlimited_contestants_099"
+
+    init() {
+        Task {
+            await refreshEntitlements()
+            await loadProducts()
+        }
+    }
+
+    func loadProducts() async {
+        do {
+            let products = try await Product.products(for: [unlimitedProductId])
+            unlimitedProduct = products.first
+        } catch {
+            print("Product load failed: \(error.localizedDescription)")
+        }
+    }
+
+    func refreshEntitlements() async {
+        for await result in Transaction.currentEntitlements {
+            guard case .verified(let transaction) = result else { continue }
+            if transaction.productID == unlimitedProductId {
+                isUnlimitedUnlocked = true
+                return
+            }
+        }
+        isUnlimitedUnlocked = false
+    }
+
+    func purchaseUnlimited() async -> Bool {
+        if unlimitedProduct == nil {
+            await loadProducts()
+        }
+        guard let product = unlimitedProduct else { return false }
+
+        do {
+            let result = try await product.purchase()
+            switch result {
+            case .success(let verification):
+                guard case .verified(let transaction) = verification else { return false }
+                guard transaction.productID == unlimitedProductId else { return false }
+                isUnlimitedUnlocked = true
+                await transaction.finish()
+                return true
+            default:
+                return false
+            }
+        } catch {
+            print("Purchase failed: \(error.localizedDescription)")
+            return false
+        }
+    }
+
+    func restorePurchases() async {
+        try? await AppStore.sync()
+        await refreshEntitlements()
+    }
+}
+
 struct ContentView: View {
     @StateObject private var vm = NameSnapViewModel()
+    @StateObject private var purchases = NameSnapPurchaseManager()
     @State private var showCenterAlert = false
     @State private var centerAlertText = ""
     @State private var centerAlertScale: CGFloat = 0.7
@@ -358,6 +424,8 @@ struct ContentView: View {
     @State private var pendingNoRepeatValue: Bool = true
     @State private var suppressNoRepeatToggleConfirm = false
     @State private var suppressNextWheelSettleCommit = false
+    @State private var showUpgradeConfirm = false
+    @State private var isPurchasingUpgrade = false
     @State private var didShowWinnerForCurrentSpin = false
     @State private var flashIndex = 0
     @State private var showWinnerFlash = false
@@ -398,6 +466,37 @@ struct ContentView: View {
 
     private func dismissKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+
+    private func addNamesToPoolNow() {
+        if vm.visualMode == .wheel {
+            suppressNextWheelSettleCommit = true
+            suppressWheelSettle = true
+        }
+
+        let added = vm.addNamesFromInput()
+        guard added > 0 else {
+            if vm.visualMode == .wheel {
+                suppressWheelSettle = false
+                suppressNextWheelSettleCommit = false
+            }
+            return
+        }
+
+        showBigAlert("✅ Names Added")
+        withAnimation(.spring(response: 0.24, dampingFraction: 0.65)) {
+            pulseAddButton = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
+            pulseAddButton = false
+        }
+
+        if vm.visualMode == .wheel {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                suppressWheelSettle = false
+                suppressNextWheelSettleCommit = false
+            }
+        }
     }
 
     private func showBigAlert(_ text: String) {
@@ -558,33 +657,17 @@ struct ContentView: View {
                                 }
 
                                 Button("Add These Names to Pool") {
-                                    if vm.visualMode == .wheel {
-                                        suppressNextWheelSettleCommit = true
-                                        suppressWheelSettle = true
-                                    }
+                                    let incoming = vm.parsedInputNames.count
+                                    guard incoming > 0 else { return }
 
-                                    let added = vm.addNamesFromInput()
-                                    guard added > 0 else {
-                                        if vm.visualMode == .wheel {
-                                            suppressWheelSettle = false
-                                            suppressNextWheelSettleCommit = false
-                                        }
+                                    let proposedTotal = vm.entries.count + incoming
+                                    if !purchases.isUnlimitedUnlocked && proposedTotal > 10 {
+                                        dismissKeyboard()
+                                        withAnimation { showUpgradeConfirm = true }
                                         return
                                     }
-                                    showBigAlert("✅ Names Added")
-                                    withAnimation(.spring(response: 0.24, dampingFraction: 0.65)) {
-                                        pulseAddButton = true
-                                    }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
-                                        pulseAddButton = false
-                                    }
 
-                                    if vm.visualMode == .wheel {
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                                            suppressWheelSettle = false
-                                            suppressNextWheelSettleCommit = false
-                                        }
-                                    }
+                                    addNamesToPoolNow()
                                 }
                                 .buttonStyle(.borderedProminent)
                                 .tint(.indigo)
@@ -633,6 +716,13 @@ struct ContentView: View {
                                 }
                         }
                         .frame(maxWidth: .infinity, alignment: .center)
+
+                        if !purchases.isUnlimitedUnlocked {
+                            Text("Free: up to 10 contestants • Unlimited: $0.99")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                        }
 
                         Picker("Spin Mode", selection: $vm.visualMode) {
                             ForEach(SpinVisualMode.allCases) { mode in
@@ -906,6 +996,75 @@ struct ContentView: View {
                                 .tint(.red)
                                 .font(titleFamilyFont(size: 13))
                             }
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 20)
+                        .background(.ultraThinMaterial)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(.white.opacity(0.65), lineWidth: 2)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .shadow(radius: 12)
+                        .padding(.horizontal, 22)
+                    }
+                    .transition(.opacity)
+                }
+            }
+            .overlay {
+                if showUpgradeConfirm {
+                    ZStack {
+                        Color.black.opacity(0.25)
+                            .ignoresSafeArea()
+
+                        VStack(spacing: 12) {
+                            Text("✨ Upgrade to Unlimited?")
+                                .font(titleFamilyFont(size: 22))
+                                .multilineTextAlignment(.center)
+
+                            Text("Free supports up to 10 contestants. Unlock unlimited for $0.99.")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+
+                            HStack(spacing: 10) {
+                                Button("Not Now") {
+                                    withAnimation { showUpgradeConfirm = false }
+                                }
+                                .buttonStyle(.bordered)
+                                .font(titleFamilyFont(size: 13))
+
+                                Button(isPurchasingUpgrade ? "Purchasing…" : "Unlock $0.99") {
+                                    guard !isPurchasingUpgrade else { return }
+                                    isPurchasingUpgrade = true
+                                    Task {
+                                        let success = await purchases.purchaseUnlimited()
+                                        isPurchasingUpgrade = false
+                                        if success {
+                                            withAnimation { showUpgradeConfirm = false }
+                                            showBigAlert("✅ Unlimited Unlocked")
+                                            addNamesToPoolNow()
+                                        }
+                                    }
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(.indigo)
+                                .font(titleFamilyFont(size: 13))
+                                .disabled(isPurchasingUpgrade)
+                            }
+
+                            Button("Restore Purchases") {
+                                Task {
+                                    await purchases.restorePurchases()
+                                    if purchases.isUnlimitedUnlocked {
+                                        withAnimation { showUpgradeConfirm = false }
+                                        showBigAlert("✅ Unlimited Restored")
+                                    }
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.secondary)
                         }
                         .padding(.horizontal, 18)
                         .padding(.vertical, 20)
