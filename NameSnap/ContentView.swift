@@ -347,10 +347,27 @@ final class NameSnapViewModel: ObservableObject {
 
 @MainActor
 final class NameSnapPurchaseManager: ObservableObject {
-    @Published var isUnlimitedUnlocked = false
-    @Published var unlimitedProduct: Product?
+    enum Plan {
+        case lifetime
+        case monthly
+    }
 
-    private let unlimitedProductId = "namesnap.unlimited_contestants_099"
+    @Published var isUnlimitedUnlocked = false
+    @Published var lifetimeProduct: Product?
+    @Published var monthlyProduct: Product?
+
+    // Keep legacy ID for compatibility with existing App Store Connect setup.
+    private let lifetimeProductIds = [
+        "namesnap.unlimited_contestants_699",
+        "namesnap.unlimited_contestants_099"
+    ]
+    private let monthlyProductIds = [
+        "namesnap.unlimited_contestants_monthly_099"
+    ]
+
+    private var allProductIds: [String] {
+        lifetimeProductIds + monthlyProductIds
+    }
 
     init() {
         Task {
@@ -361,36 +378,44 @@ final class NameSnapPurchaseManager: ObservableObject {
 
     func loadProducts() async {
         do {
-            let products = try await Product.products(for: [unlimitedProductId])
-            unlimitedProduct = products.first
+            let products = try await Product.products(for: allProductIds)
+            lifetimeProduct = products.first(where: { lifetimeProductIds.contains($0.id) })
+            monthlyProduct = products.first(where: { monthlyProductIds.contains($0.id) })
         } catch {
             print("Product load failed: \(error.localizedDescription)")
         }
     }
 
     func refreshEntitlements() async {
+        isUnlimitedUnlocked = false
         for await result in Transaction.currentEntitlements {
             guard case .verified(let transaction) = result else { continue }
-            if transaction.productID == unlimitedProductId {
+            if lifetimeProductIds.contains(transaction.productID) || monthlyProductIds.contains(transaction.productID) {
                 isUnlimitedUnlocked = true
                 return
             }
         }
-        isUnlimitedUnlocked = false
     }
 
-    func purchaseUnlimited() async -> Bool {
-        if unlimitedProduct == nil {
+    func purchase(plan: Plan) async -> Bool {
+        if lifetimeProduct == nil && monthlyProduct == nil {
             await loadProducts()
         }
-        guard let product = unlimitedProduct else { return false }
+
+        let product: Product?
+        switch plan {
+        case .lifetime:
+            product = lifetimeProduct
+        case .monthly:
+            product = monthlyProduct
+        }
+        guard let product else { return false }
 
         do {
             let result = try await product.purchase()
             switch result {
             case .success(let verification):
                 guard case .verified(let transaction) = verification else { return false }
-                guard transaction.productID == unlimitedProductId else { return false }
                 isUnlimitedUnlocked = true
                 await transaction.finish()
                 return true
@@ -426,6 +451,7 @@ struct ContentView: View {
     @State private var suppressNextWheelSettleCommit = false
     @State private var showUpgradeConfirm = false
     @State private var isPurchasingUpgrade = false
+    @State private var upgradeErrorText: String?
     @State private var showSoundOnHint = false
     @State private var didRunLaunchSilentCheck = false
     @State private var didShowWinnerForCurrentSpin = false
@@ -494,6 +520,12 @@ struct ContentView: View {
         } catch {
             print("Launch audio session check failed: \(error.localizedDescription)")
         }
+    }
+
+    private func canAddContestants(currentCount: Int, incomingCount: Int) -> Bool {
+        guard incomingCount > 0 else { return true }
+        if purchases.isUnlimitedUnlocked { return true }
+        return (currentCount + incomingCount) <= 10
     }
 
     private func addNamesToPoolNow() {
@@ -1093,10 +1125,18 @@ struct ContentView: View {
                                 .font(titleFamilyFont(size: 22))
                                 .multilineTextAlignment(.center)
 
-                            Text("Free supports up to 10 contestants. Unlock unlimited for $0.99.")
+                            Text("Free supports up to 10 contestants.")
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(.secondary)
                                 .multilineTextAlignment(.center)
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("• Unlimited contestants")
+                                Text("• No account needed")
+                                Text("• Restore purchases anytime")
+                            }
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.secondary)
 
                             HStack(spacing: 10) {
                                 Button("Not Now") {
@@ -1106,17 +1146,20 @@ struct ContentView: View {
                                 .buttonStyle(.bordered)
                                 .font(titleFamilyFont(size: 13))
 
-                                Button(isPurchasingUpgrade ? "Purchasing…" : "Unlock $0.99") {
+                                Button(isPurchasingUpgrade ? "Purchasing…" : "Unlock Lifetime $6.99") {
                                     dismissKeyboard()
                                     guard !isPurchasingUpgrade else { return }
                                     isPurchasingUpgrade = true
+                                    upgradeErrorText = nil
                                     Task {
-                                        let success = await purchases.purchaseUnlimited()
+                                        let success = await purchases.purchase(plan: .lifetime)
                                         isPurchasingUpgrade = false
                                         if success {
                                             withAnimation { showUpgradeConfirm = false }
                                             showBigAlert("✅ Unlimited Unlocked")
                                             addNamesToPoolNow()
+                                        } else {
+                                            upgradeErrorText = "Couldn’t complete purchase. Check connection and try again."
                                         }
                                     }
                                 }
@@ -1126,6 +1169,27 @@ struct ContentView: View {
                                 .disabled(isPurchasingUpgrade)
                             }
 
+                            Button(isPurchasingUpgrade ? "Purchasing…" : "Or Monthly $0.99") {
+                                dismissKeyboard()
+                                guard !isPurchasingUpgrade else { return }
+                                isPurchasingUpgrade = true
+                                upgradeErrorText = nil
+                                Task {
+                                    let success = await purchases.purchase(plan: .monthly)
+                                    isPurchasingUpgrade = false
+                                    if success {
+                                        withAnimation { showUpgradeConfirm = false }
+                                        showBigAlert("✅ Unlimited Unlocked")
+                                        addNamesToPoolNow()
+                                    } else {
+                                        upgradeErrorText = "Monthly plan unavailable or purchase cancelled."
+                                    }
+                                }
+                            }
+                            .buttonStyle(.bordered)
+                            .font(titleFamilyFont(size: 12))
+                            .disabled(isPurchasingUpgrade)
+
                             Button("Restore Purchases") {
                                 dismissKeyboard()
                                 Task {
@@ -1133,12 +1197,21 @@ struct ContentView: View {
                                     if purchases.isUnlimitedUnlocked {
                                         withAnimation { showUpgradeConfirm = false }
                                         showBigAlert("✅ Unlimited Restored")
+                                    } else {
+                                        upgradeErrorText = "No previous purchases found on this Apple ID."
                                     }
                                 }
                             }
                             .buttonStyle(.plain)
                             .font(.footnote.weight(.semibold))
                             .foregroundStyle(.secondary)
+
+                            if let upgradeErrorText {
+                                Text(upgradeErrorText)
+                                    .font(.footnote.weight(.semibold))
+                                    .foregroundStyle(.red)
+                                    .multilineTextAlignment(.center)
+                            }
                         }
                         .padding(.horizontal, 18)
                         .padding(.vertical, 20)
