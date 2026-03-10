@@ -1402,7 +1402,7 @@ struct ContentView: View {
                     suppressWheelSettle = true
                     spinWinnerLockUntil = Date().addingTimeInterval(0.9)
 
-                    guard let winnerName = vm.commitCurrentWheelSelectionAsWinner(consumeWinner: false) else {
+                    guard let winnerName = vm.commitCurrentWheelSelectionAsWinner(consumeWinner: vm.noRepeatMode) else {
                         vm.normalizeWheelIndexIfNeeded(forceCenter: true)
                         vm.clampWheelIndexToWheelEntries()
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
@@ -1472,7 +1472,7 @@ struct ContentView: View {
                        vm.selectedName != "Add contestants to start spinning" {
                         if vm.visualMode == .wheel, let wheelWinner = vm.currentWheelEntry() {
                             // Wheel is source-of-truth: commit + effects use the highlighted wheel entry.
-                            let winnerText = vm.commitWinnerSnapshot(wheelWinner, consumeWinner: false)
+                            let winnerText = vm.commitWinnerSnapshot(wheelWinner, consumeWinner: vm.noRepeatMode)
                             vm.selectedName = winnerText
                             didShowWinnerForCurrentSpin = true
                             triggerWinnerEffects(name: winnerText)
