@@ -57,6 +57,7 @@ final class NameSnapViewModel: ObservableObject {
     private var lastAddedBatch: [UUID] = []
 
     var activeEntries: [NameEntry] { entries.filter { $0.isIncluded } }
+    var wheelBaseEntries: [NameEntry] { activeEntries }
 
     var availableEntries: [NameEntry] {
         if !noRepeatMode { return activeEntries }
@@ -116,12 +117,41 @@ final class NameSnapViewModel: ObservableObject {
         return entries.filter { $0.isIncluded && !pickedIds.contains($0.id) }
     }
 
-    var wheelRepeatCount: Int { 40 }
+    private var wheelMinimumRows: Int { 50_000 }
+    private var wheelMaximumRows: Int { 200_000 }
+    private var wheelRowsPerEntry: Int { 2_500 }
 
-    var wheelEntries: [NameEntry] {
-        let base = availableEntries
-        guard !base.isEmpty else { return [] }
-        return Array(repeating: base, count: wheelRepeatCount).flatMap { $0 }
+    var wheelVirtualRowCount: Int {
+        let baseCount = wheelBaseEntries.count
+        guard baseCount > 0 else { return 0 }
+        return min(wheelMaximumRows, max(wheelMinimumRows, baseCount * wheelRowsPerEntry))
+    }
+
+    private func wrappedModulo(_ value: Int, modulus: Int) -> Int {
+        guard modulus > 0 else { return 0 }
+        let remainder = value % modulus
+        return remainder >= 0 ? remainder : remainder + modulus
+    }
+
+    private func centeredWheelIndex(forBaseOffset baseOffset: Int) -> Int {
+        let baseCount = wheelBaseEntries.count
+        let total = wheelVirtualRowCount
+        guard baseCount > 0, total > 0 else { return 0 }
+
+        let safeOffset = wrappedModulo(baseOffset, modulus: baseCount)
+        var center = total / 2
+        center -= center % baseCount
+        if center + safeOffset >= total {
+            center = max(0, center - baseCount)
+        }
+        return center + safeOffset
+    }
+
+    func wheelEntry(at row: Int) -> NameEntry? {
+        let base = wheelBaseEntries
+        guard !base.isEmpty else { return nil }
+        let offset = wrappedModulo(row, modulus: base.count)
+        return base[offset]
     }
 
     private func nextDrawNumber() -> Int {
@@ -167,63 +197,63 @@ final class NameSnapViewModel: ObservableObject {
     }
 
     func currentWheelEntry() -> NameEntry? {
-        let base = availableEntries
-        guard !base.isEmpty else { return nil }
-        let safe = ((wheelIndex % base.count) + base.count) % base.count
-        return base[safe]
+        wheelEntry(at: wheelIndex)
     }
 
     func spinWheelForward(step: Int) {
-        let total = wheelEntries.count
+        let total = wheelVirtualRowCount
         guard total > 0 else { return }
-        wheelIndex = (wheelIndex + max(step, 1)) % total
+        wheelIndex = wrappedModulo(wheelIndex + max(step, 1), modulus: total)
     }
 
     func normalizeWheelIndexIfNeeded(forceCenter: Bool = false) {
-        let baseCount = availableEntries.count
+        let baseCount = wheelBaseEntries.count
         guard baseCount > 0 else {
             wheelIndex = 0
             return
         }
 
-        let total = baseCount * wheelRepeatCount
-        var normalized = wheelIndex
-        if normalized < 0 { normalized = ((normalized % total) + total) % total }
-        if normalized >= total { normalized = normalized % total }
+        let total = wheelVirtualRowCount
+        guard total > 0 else {
+            wheelIndex = 0
+            return
+        }
 
-        let needsRecentering = forceCenter || normalized < baseCount || normalized > (total - baseCount - 1)
+        let normalized = wrappedModulo(wheelIndex, modulus: total)
+        let offset = wrappedModulo(normalized, modulus: baseCount)
+        let edgeBuffer = max(baseCount * 3, 24)
+
+        let needsRecentering = forceCenter || normalized < edgeBuffer || normalized >= (total - edgeBuffer)
         if needsRecentering {
-            let midChunk = (wheelRepeatCount / 2) * baseCount
-            let offsetInChunk = normalized % baseCount
-            wheelIndex = midChunk + offsetInChunk
+            wheelIndex = centeredWheelIndex(forBaseOffset: offset)
         } else {
             wheelIndex = normalized
         }
     }
 
     func clampWheelIndexToWheelEntries() {
-        let total = wheelEntries.count
+        let total = wheelVirtualRowCount
         guard total > 0 else {
             wheelIndex = 0
             return
         }
-        if wheelIndex < 0 || wheelIndex >= total {
-            wheelIndex = ((wheelIndex % total) + total) % total
-        }
+        wheelIndex = wrappedModulo(wheelIndex, modulus: total)
     }
 
     @discardableResult
-    func commitCurrentWheelSelectionAsWinner() -> String? {
+    func commitCurrentWheelSelectionAsWinner(consumeWinner: Bool = true) -> String? {
         guard let winner = currentWheelEntry() else { return nil }
-        return commitWinnerSnapshot(winner)
+        return commitWinnerSnapshot(winner, consumeWinner: consumeWinner)
     }
 
     @discardableResult
-    func commitWinnerSnapshot(_ winner: NameEntry) -> String {
+    func commitWinnerSnapshot(_ winner: NameEntry, consumeWinner: Bool = true) -> String {
         let display = "\(winner.drawNumber). \(winner.name)"
         history.insert(WinnerRecord(drawNumber: winner.drawNumber, name: winner.name), at: 0)
         if history.count > 20 { history.removeLast() }
-        markWinnerAsUsed(winner)
+        if consumeWinner {
+            markWinnerAsUsed(winner)
+        }
         return display
     }
 
@@ -249,8 +279,8 @@ final class NameSnapViewModel: ObservableObject {
     func alignWheelHighlightToSelectedWinner() {
         let parts = selectedName.split(separator: ".", maxSplits: 1).map { String($0).trimmingCharacters(in: .whitespaces) }
         guard parts.count == 2, let draw = Int(parts[0]) else { return }
-        guard let idx = wheelEntries.firstIndex(where: { $0.drawNumber == draw && $0.name == parts[1] }) else { return }
-        wheelIndex = idx
+        guard let baseIndex = wheelBaseEntries.firstIndex(where: { $0.drawNumber == draw && $0.name == parts[1] }) else { return }
+        wheelIndex = centeredWheelIndex(forBaseOffset: baseIndex)
         normalizeWheelIndexIfNeeded(forceCenter: true)
     }
 
@@ -292,11 +322,18 @@ final class NameSnapViewModel: ObservableObject {
             return
         }
 
-        let pool = availableEntries
-        if pool.isEmpty {
-            selectedName = "All Contestants Picked!"
-            UINotificationFeedbackGenerator().notificationOccurred(.warning)
-            return
+        let pool: [NameEntry]
+        switch visualMode {
+        case .classic:
+            pool = availableEntries
+            if pool.isEmpty {
+                selectedName = "All Contestants Picked!"
+                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                return
+            }
+        case .wheel:
+            // Wheel mode intentionally ignores no-repeat consumption so spins remain infinite.
+            pool = wheelBaseEntries
         }
 
         isSpinning = true
@@ -315,14 +352,30 @@ final class NameSnapViewModel: ObservableObject {
             }
         case .wheel:
             normalizeWheelIndexIfNeeded(forceCenter: true)
-            let ticks = Int.random(in: 22...36)
+            let baseCount = max(pool.count, 1)
+            let currentOffset = wrappedModulo(wheelIndex, modulus: baseCount)
+            let targetOffset = Int.random(in: 0..<baseCount)
+            let fullTurns = Int.random(in: 12...24)
+            let travelToTarget = wrappedModulo(targetOffset - currentOffset, modulus: baseCount)
+            let totalTravel = (fullTurns * baseCount) + travelToTarget
+
+            let ticks = Int.random(in: 34...54)
+            var moved = 0
             for i in 0..<ticks {
-                let delay = Double(i) * 0.045
+                let progress = Double(i + 1) / Double(ticks)
+                let eased = 1.0 - pow(1.0 - progress, 2.2)
+                let targetMoved = Int((Double(totalTravel) * eased).rounded())
+                let step = max(1, targetMoved - moved)
+                moved = targetMoved
+
+                let delay = (Double(i) * 0.034) + (Double(i * i) * 0.00062)
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
                     guard let self else { return }
-                    self.spinWheelForward(step: Int.random(in: 1...3))
+                    self.spinWheelForward(step: step)
                     self.normalizeWheelIndexIfNeeded()
-                    self.selectedName = self.currentWheelEntry()?.name ?? ""
+                    if i % 2 == 0 || i == ticks - 1 {
+                        self.selectedName = self.currentWheelEntry()?.name ?? ""
+                    }
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     if i == ticks - 1 { self.finishSpin(pool: pool) }
                 }
@@ -791,7 +844,7 @@ struct ContentView: View {
                                 VStack(alignment: .leading, spacing: 10) {
                                     Text("Wheel")
                                         .font(titleFamilyFont(size: 16))
-                                    if vm.wheelEntries.isEmpty {
+                                    if vm.wheelVirtualRowCount == 0 {
                                         Text("No available contestants")
                                             .font(.subheadline.weight(.semibold))
                                             .foregroundStyle(.secondary)
@@ -799,20 +852,17 @@ struct ContentView: View {
                                             .background(.ultraThinMaterial)
                                             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                                     } else {
-                                        Picker("Wheel", selection: $vm.wheelIndex) {
-                                            ForEach(Array(vm.wheelEntries.enumerated()), id: \.offset) { index, item in
-                                                Text("\(item.drawNumber). \(item.name)").tag(index)
-                                            }
-                                        }
-                                        .pickerStyle(.wheel)
+                                        InfiniteWheelPicker(
+                                            entries: vm.wheelBaseEntries,
+                                            selection: $vm.wheelIndex,
+                                            rowCount: vm.wheelVirtualRowCount,
+                                            animateProgrammaticChanges: vm.isSpinning
+                                        )
                                         .frame(height: 140)
                                     }
 
                                     Button(vm.isSpinning ? "Spinning" : "Spin Wheel") {
                                         dismissKeyboard()
-                                        if vm.availableEntries.isEmpty && !vm.activeEntries.isEmpty {
-                                            showBigAlert("⚠️ All winners have been selected")
-                                        }
                                         isButtonWheelSpin = true
                                         suppressWheelSettle = true
                                         vm.spin()
@@ -1273,17 +1323,15 @@ struct ContentView: View {
                 let settle = DispatchWorkItem {
                     isWheelSwipeSession = false
                     guard !suppressWheelSettle else { return }
-
-                    if vm.availableEntries.isEmpty && !vm.activeEntries.isEmpty {
-                        showBigAlert("⚠️ All winners have been selected")
-                        return
-                    }
+                    guard !vm.activeEntries.isEmpty else { return }
 
                     // Prevent post-settle index churn from chaining through the entire pool.
                     suppressWheelSettle = true
                     spinWinnerLockUntil = Date().addingTimeInterval(0.9)
 
-                    guard let winnerName = vm.commitCurrentWheelSelectionAsWinner() else {
+                    guard let winnerName = vm.commitCurrentWheelSelectionAsWinner(consumeWinner: false) else {
+                        vm.normalizeWheelIndexIfNeeded(forceCenter: true)
+                        vm.clampWheelIndexToWheelEntries()
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
                             suppressWheelSettle = false
                         }
@@ -1292,6 +1340,9 @@ struct ContentView: View {
                     vm.selectedName = winnerName
                     didShowWinnerForCurrentSpin = true
                     triggerWinnerEffects(name: winnerName)
+                    // Keep wheel swipes infinite by recentering after each manual settle commit.
+                    vm.normalizeWheelIndexIfNeeded(forceCenter: true)
+                    vm.clampWheelIndexToWheelEntries()
 
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
                         suppressWheelSettle = false
@@ -1300,7 +1351,7 @@ struct ContentView: View {
                 wheelSettleWorkItem = settle
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.75, execute: settle)
             }
-            .onChange(of: vm.availableEntries.map(\.id)) { _ in
+            .onChange(of: vm.activeEntries.map(\.id)) { _ in
                 suppressWheelSettle = true
                 vm.normalizeWheelIndexIfNeeded(forceCenter: true)
                 vm.clampWheelIndexToWheelEntries()
@@ -1308,7 +1359,7 @@ struct ContentView: View {
                     suppressWheelSettle = false
                 }
             }
-            .onChange(of: vm.wheelEntries.count) { _ in
+            .onChange(of: vm.wheelVirtualRowCount) { _ in
                 vm.clampWheelIndexToWheelEntries()
             }
             .onAppear {
@@ -1348,7 +1399,7 @@ struct ContentView: View {
                        vm.selectedName != "Add contestants to start spinning" {
                         if vm.visualMode == .wheel, let wheelWinner = vm.currentWheelEntry() {
                             // Wheel is source-of-truth: commit + effects use the highlighted wheel entry.
-                            let winnerText = vm.commitWinnerSnapshot(wheelWinner)
+                            let winnerText = vm.commitWinnerSnapshot(wheelWinner, consumeWinner: false)
                             vm.selectedName = winnerText
                             didShowWinnerForCurrentSpin = true
                             triggerWinnerEffects(name: winnerText)
@@ -1377,6 +1428,138 @@ struct ContentView: View {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .stroke(NSTheme.skyBlue.opacity(0.12), lineWidth: 1)
             )
+    }
+}
+
+
+private struct InfiniteWheelPicker: UIViewRepresentable {
+    let entries: [NameEntry]
+    @Binding var selection: Int
+    let rowCount: Int
+    let animateProgrammaticChanges: Bool
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    func makeUIView(context: Context) -> UIPickerView {
+        let picker = UIPickerView()
+        picker.dataSource = context.coordinator
+        picker.delegate = context.coordinator
+        context.coordinator.lastEntriesSignature = entriesSignature
+        context.coordinator.lastRowCount = max(rowCount, 0)
+        context.coordinator.synchronizeSelection(in: picker, animated: false)
+        return picker
+    }
+
+    func updateUIView(_ uiView: UIPickerView, context: Context) {
+        context.coordinator.parent = self
+
+        let newSignature = entriesSignature
+        let newRowCount = max(rowCount, 0)
+        let shouldReload = context.coordinator.lastEntriesSignature != newSignature || context.coordinator.lastRowCount != newRowCount
+
+        if shouldReload {
+            context.coordinator.lastEntriesSignature = newSignature
+            context.coordinator.lastRowCount = newRowCount
+            uiView.reloadAllComponents()
+        }
+
+        context.coordinator.synchronizeSelection(in: uiView, animated: animateProgrammaticChanges)
+    }
+
+    private var entriesSignature: String {
+        let first = entries.first?.id.uuidString ?? "-"
+        let last = entries.last?.id.uuidString ?? "-"
+        return "\(entries.count)#\(first)#\(last)"
+    }
+
+    final class Coordinator: NSObject, UIPickerViewDataSource, UIPickerViewDelegate {
+        var parent: InfiniteWheelPicker
+        var lastEntriesSignature = ""
+        var lastRowCount = 0
+        private var suppressSelectionCallback = false
+
+        init(_ parent: InfiniteWheelPicker) {
+            self.parent = parent
+        }
+
+        private var baseCount: Int { parent.entries.count }
+        private var totalRows: Int { max(parent.rowCount, 0) }
+
+        private func wrappedModulo(_ value: Int, modulus: Int) -> Int {
+            guard modulus > 0 else { return 0 }
+            let remainder = value % modulus
+            return remainder >= 0 ? remainder : remainder + modulus
+        }
+
+        private func centeredRow(for row: Int) -> Int {
+            let total = totalRows
+            let base = baseCount
+            guard total > 0, base > 0 else { return 0 }
+            let offset = wrappedModulo(row, modulus: base)
+            var center = total / 2
+            center -= center % base
+            if center + offset >= total {
+                center = max(0, center - base)
+            }
+            return center + offset
+        }
+
+        private func rowNearEdge(_ row: Int) -> Bool {
+            let total = totalRows
+            let base = baseCount
+            guard total > 0, base > 0 else { return false }
+            let edge = max(base * 3, 24)
+            return row < edge || row >= (total - edge)
+        }
+
+        func synchronizeSelection(in picker: UIPickerView, animated: Bool) {
+            let total = totalRows
+            guard total > 0 else { return }
+            let normalized = wrappedModulo(parent.selection, modulus: total)
+            let current = picker.selectedRow(inComponent: 0)
+            guard current != normalized else { return }
+
+            suppressSelectionCallback = true
+            picker.selectRow(normalized, inComponent: 0, animated: animated)
+            suppressSelectionCallback = false
+        }
+
+        func numberOfComponents(in pickerView: UIPickerView) -> Int { 1 }
+
+        func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+            totalRows
+        }
+
+        func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
+            34
+        }
+
+        func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+            guard baseCount > 0 else { return nil }
+            let entry = parent.entries[wrappedModulo(row, modulus: baseCount)]
+            return "\(entry.drawNumber). \(entry.name)"
+        }
+
+        func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+            guard !suppressSelectionCallback else { return }
+            let total = totalRows
+            guard total > 0 else { return }
+
+            var normalized = wrappedModulo(row, modulus: total)
+            if rowNearEdge(normalized) {
+                let recentered = centeredRow(for: normalized)
+                if recentered != normalized {
+                    suppressSelectionCallback = true
+                    pickerView.selectRow(recentered, inComponent: component, animated: false)
+                    suppressSelectionCallback = false
+                    normalized = recentered
+                }
+            }
+
+            if parent.selection != normalized {
+                parent.selection = normalized
+            }
+        }
     }
 }
 
