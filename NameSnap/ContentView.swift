@@ -409,13 +409,11 @@ final class NameSnapPurchaseManager: ObservableObject {
     @Published var lifetimeProduct: Product?
     @Published var monthlyProduct: Product?
 
-    // Keep legacy ID for compatibility with existing App Store Connect setup.
     private let lifetimeProductIds = [
-        "namesnap.unlimited_contestants_699",
-        "namesnap.unlimited_contestants_099"
+        "namesnap.unlimited_lifetime_699"
     ]
     private let monthlyProductIds = [
-        "namesnap.unlimited_contestants_monthly_099"
+        "namesnap.unlimited_monthly_099"
     ]
 
     private var allProductIds: [String] {

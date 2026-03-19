@@ -19,7 +19,7 @@ This doc is a single place to track App Store submission tasks and provides past
 - Pricing and availability
 - Current plan in repo: Paid app, `Tier 1 ($0.99 US)`.
 - Double-check against monetization in build.
-- The app includes StoreKit purchase logic for `namesnap.unlimited_contestants_099` (“Unlimited contestants” unlock).
+- The app includes StoreKit purchase logic for the new monetization model defined below.
 - Decide monetization:
 - Option A: Paid app, no IAP (remove IAP feature + product from App Store Connect).
 - Option B: Free app with IAP unlock (common pattern; update app price to Free).
@@ -27,7 +27,7 @@ This doc is a single place to track App Store submission tasks and provides past
 
 - In-App Purchase setup (only if keeping IAP)
 - IAP type: Non-Consumable (recommended for permanent unlock)
-- Product ID: `namesnap.unlimited_contestants_099`
+- Product IDs: see the locked monthly/lifetime product IDs below.
 - Reference name: `Unlimited Contestants`
 - Display name: `Unlimited Contestants`
 - IAP description: `Remove the contestant limit and run bigger raffles, classes, and games.`
@@ -58,6 +58,7 @@ This doc is a single place to track App Store submission tasks and provides past
 
 - Review notes (for the binary submission)
 - Provide a short explanation: app is a random name picker; local-only; no account.
+- Reviewer note language to use: `The app is free to download. The free tier allows up to 10 contestants in one session. Unlimited contestants are available through Unlimited Monthly ($0.99/month) or Unlimited Lifetime ($6.99 one time). Restore Purchases is supported.`
 - If IAP exists, mention where the paywall/upgrade UI appears and how to restore.
 
 ## 2) Paste-Ready App Store Connect Copy
@@ -93,7 +94,7 @@ What you can do:
 - Track recent winners
 
 Built to be simple:
-No account required. No analytics tracking. No clutter.
+Free to start. No account required. No analytics tracking. No clutter.
 Just open, paste, and pick.
 
 NameSnap is designed for moments where you need a quick, fair decision and want it to feel exciting.
@@ -197,4 +198,7 @@ How to use:
 
 Privacy: No account required, no analytics tracking, and no third-party ad tracking. Participant names, winner history, preferences, and purchase/unlock state remain on device for app functionality. Purchases and entitlement status are handled through Apple’s App Store / StoreKit.
 
-IAP (if included): “Unlimited Contestants” unlock is available from the upgrade/settings area. “Restore Purchases” is supported.
+IAP: The app includes a free tier with up to 10 contestants for one session. Upgrade options are `Unlimited Monthly` ($0.99/month) and `Unlimited Lifetime` ($6.99 one-time). Restore Purchases is supported.
+me` ($6.99 one-time). Restore Purchases is supported.
+ed Contestants” unlock is available from the upgrade/settings area. “Restore Purchases” is supported.
+ed Contestants” unlock is available from the upgrade/settings area. “Restore Purchases” is supported.

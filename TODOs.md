@@ -24,21 +24,26 @@ Next actions:
 
 ---
 
-### 2. Lock final monetization model
-Status: decision required
+### 2. Final monetization model
+Status: decided
 
-Current state:
-- Code supports lifetime unlock and monthly unlock via StoreKit.
-- App Store prep doc still correctly treats pricing as an open decision.
+Locked model:
+- Base app is **Free**
+- Free tier allows up to **10 contestants for one session**
+- Monthly subscription is **$0.99/month** for unlimited contestants
+- Lifetime unlock is **$6.99 one-time** for unlimited contestants
 
-Decision to make:
-- Paid app with no IAP
-- Free app with IAP unlock
-- Paid app with IAP
+Locked product IDs:
+- Monthly: `namesnap.unlimited_monthly_099`
+- Lifetime: `namesnap.unlimited_lifetime_699`
+
+Important implementation note:
+- Remove any other pricing schemes from code/docs/App Store Connect.
+- Because App Store Connect products cannot simply be renamed in place, create the new IDs above and retire the old contestant-based IDs.
 
 Why this matters:
-- App Store Connect listing, reviewer notes, and customer-facing copy all depend on this.
-- The Notion support/privacy/marketing page should not be finalized until this is decided.
+- App Store Connect listing, reviewer notes, paywall copy, and customer-facing messaging should now all align to this exact model.
+- The Notion support/privacy/marketing page should still be finalized near the end, but the underlying monetization decision is now settled.
 
 ---
 
@@ -94,6 +99,15 @@ Next actions:
 
 ---
 
+## Next Session Checklist
+
+1. Create the two final App Store Connect products:
+   - `namesnap.unlimited_monthly_099`
+   - `namesnap.unlimited_lifetime_699`
+2. Archive NameSnap and verify archive/upload readiness.
+3. Review `NameSnap/NameSnap/Sounds/SOUND_SOURCES_AND_LICENSES.md` and verify all sound licenses for release.
+4. Finalize App Store Connect submission details and only then paste the final Notion support/privacy/marketing page copy.
+
 ## Immediate Next Step
 
-Fix signing/provisioning first. Everything else is downstream of that.
+Create the final App Store Connect products, then move straight into archive validation.
