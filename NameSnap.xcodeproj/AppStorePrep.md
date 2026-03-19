@@ -36,11 +36,11 @@ This doc is a single place to track App Store submission tasks and provides past
 - Reviewer account: not needed (no login).
 
 - App privacy (Nutrition Label)
-- Data collected: `None` (ensure this matches the actual build; no analytics/ads SDKs).
+- Data collected: `None` (based on current code scan, no analytics/ad SDK references were found; re-verify before final submission).
 - Tracking: `No`
 - Data linked to you: `None`
 - Data used to track you: `None`
-- Notes: app stores participant names and winner history locally on device.
+- Notes: app stores participant names, winner history, preferences, and purchase/unlock state locally on device; purchases and entitlement checks are handled through Apple StoreKit/App Store.
 
 - Export compliance
 - If you do not use custom encryption beyond Apple’s OS-provided HTTPS/TLS, typically you can answer “No” to using non-exempt encryption.
@@ -93,7 +93,7 @@ What you can do:
 - Track recent winners
 
 Built to be simple:
-No accounts. No tracking. No clutter.
+No account required. No analytics tracking. No clutter.
 Just open, paste, and pick.
 
 NameSnap is designed for moments where you need a quick, fair decision and want it to feel exciting.
@@ -119,9 +119,22 @@ Recommended devices: iPhone 17 Pro Max (or latest 6.9" class) + one smaller phon
 Caption alternatives:
 - `Fair picks for class, games, and giveaways`
 - `Clean, fast, and distraction-free`
-- `No account. No tracking. Local-only`
+- `No account required. Privacy-first.`
 
-## 4) URLs + Contact (from repo values)
+## 4) Notion Page Timing Note
+
+Do **not** treat the marketing/support/privacy Notion page as final too early.
+It should be one of the **last** things updated before submission so the customer-facing wording reflects the most accurate final state of:
+- monetization,
+- purchase model,
+- privacy wording,
+- support flow,
+- and overall app positioning.
+
+Recommended source file for the latest paste-ready page copy:
+- `/volumes/mracuth/NameSnap/AppStoreMetadata/NOTION_SUPPORT_MARKETING_PAGE_COPY.md`
+
+## 5) URLs + Contact (from repo values)
 
 - Support URL: `https://halved-fan-e5f.notion.site/NameSnap-Support-Privacy-311af69cbc3a80d5b757de3d27b04c6c`
 - Marketing URL: `https://halved-fan-e5f.notion.site/NameSnap-Support-Privacy-311af69cbc3a80d5b757de3d27b04c6c`
@@ -143,19 +156,23 @@ Email: Mracuth@gmail.com
 NameSnap is designed to be privacy-first.
 
 - No account required
+- No sign-in required
 - No analytics tracking
+- No ad tracking
 - No third-party ads
 - No data sold or shared
-- All app data stays local on your device
+- Participant names, winner history, preferences, and purchase/unlock state stay on your device for app functionality
+- Purchases and entitlement status are handled through Apple’s App Store / StoreKit
 
-Data we collect: none.
+Data we collect: none for analytics, advertising, or account creation.
 
 Data stored on device (for functionality):
 - Entered participant names
 - Winner history
 - App preferences (such as no-repeat mode)
+- Purchase or unlock state needed for app functionality
 
-This data is never transmitted to external servers by the app.
+This information is used to make the app work properly on your device.
 
 Children’s privacy:
 NameSnap does not knowingly collect personal information from anyone, including children.
@@ -167,7 +184,7 @@ Privacy contact:
 Marcus Kim
 Email: Mracuth@gmail.com
 
-## 6) Reviewer Notes Template (binary submission)
+## 7) Reviewer Notes Template (binary submission)
 
 Paste and edit:
 
@@ -178,6 +195,6 @@ How to use:
 2) Tap Spin to select a random winner.
 3) Optional: enable No-Repeat mode and use Reset when needed.
 
-Privacy: No account, no tracking, and no data leaves the device.
+Privacy: No account required, no analytics tracking, and no third-party ad tracking. Participant names, winner history, preferences, and purchase/unlock state remain on device for app functionality. Purchases and entitlement status are handled through Apple’s App Store / StoreKit.
 
 IAP (if included): “Unlimited Contestants” unlock is available from the upgrade/settings area. “Restore Purchases” is supported.
