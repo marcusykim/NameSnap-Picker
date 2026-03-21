@@ -1220,6 +1220,7 @@ struct ContentView: View {
                                 .tint(.indigo)
                                 .font(titleFamilyFont(size: 13))
                                 .disabled(purchasingPlan != nil)
+                                .opacity(1)
                             }
 
                             Button(purchasingPlan == .monthly ? "Purchasing…" : "Or Monthly $0.99") {
@@ -1242,6 +1243,7 @@ struct ContentView: View {
                             .buttonStyle(.bordered)
                             .font(titleFamilyFont(size: 12))
                             .disabled(purchasingPlan != nil)
+                            .opacity(1)
 
                             Button("Restore Purchases") {
                                 dismissKeyboard()
