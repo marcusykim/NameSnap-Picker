@@ -845,10 +845,11 @@ struct ContentView: View {
                         if vm.visualMode == .classic {
                             Button {
                                 dismissKeyboard()
-                                if vm.availableEntries.isEmpty && !vm.activeEntries.isEmpty {
+                                if vm.activeEntries.isEmpty && !vm.entries.isEmpty {
                                     showBigAlert("⚠️ All winners have been selected")
+                                } else {
+                                    vm.spin()
                                 }
-                                vm.spin()
                             } label: {
                                 ZStack {
                                     Circle()
@@ -866,8 +867,8 @@ struct ContentView: View {
                                         .foregroundStyle(NSTheme.skyBlue)
                                 }
                             }
-                            .disabled(vm.isSpinning || vm.activeEntries.isEmpty)
-                            .opacity(vm.activeEntries.isEmpty ? 0.45 : 1)
+                            .disabled(vm.isSpinning || vm.entries.isEmpty)
+                            .opacity(vm.entries.isEmpty ? 0.45 : 1)
                             .padding(.vertical, 6)
                         } else {
                             card {
@@ -893,18 +894,19 @@ struct ContentView: View {
 
                                     Button(vm.isSpinning ? "Spinning" : "Spin Wheel") {
                                         dismissKeyboard()
-                                        if vm.availableEntries.isEmpty && !vm.activeEntries.isEmpty {
+                                        if vm.activeEntries.isEmpty && !vm.entries.isEmpty {
                                             showBigAlert("⚠️ All winners have been selected")
+                                        } else {
+                                            isButtonWheelSpin = true
+                                            suppressWheelSettle = true
+                                            vm.spin()
                                         }
-                                        isButtonWheelSpin = true
-                                        suppressWheelSettle = true
-                                        vm.spin()
                                     }
                                     .buttonStyle(.borderedProminent)
                                     .tint(.indigo)
                                     .font(titleFamilyFont(size: 15))
-                                    .disabled(vm.isSpinning || vm.activeEntries.isEmpty)
-                                    .opacity(vm.activeEntries.isEmpty ? 0.45 : 1)
+                                    .disabled(vm.isSpinning || vm.entries.isEmpty)
+                                    .opacity(vm.entries.isEmpty ? 0.45 : 1)
                                 }
                             }
                         }
