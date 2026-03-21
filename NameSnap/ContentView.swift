@@ -893,6 +893,9 @@ struct ContentView: View {
 
                                     Button(vm.isSpinning ? "Spinning" : "Spin Wheel") {
                                         dismissKeyboard()
+                                        if vm.availableEntries.isEmpty && !vm.activeEntries.isEmpty {
+                                            showBigAlert("⚠️ All winners have been selected")
+                                        }
                                         isButtonWheelSpin = true
                                         suppressWheelSettle = true
                                         vm.spin()
