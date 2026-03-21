@@ -501,7 +501,7 @@ struct ContentView: View {
     @State private var suppressNoRepeatToggleConfirm = false
     @State private var suppressNextWheelSettleCommit = false
     @State private var showUpgradeConfirm = false
-    @State private var isPurchasingUpgrade = false
+    @State private var purchasingPlan: NameSnapPurchaseManager.Plan? = nil
     @State private var upgradeErrorText: String?
     @State private var showSoundOnHint = false
     @State private var didRunLaunchSilentCheck = false
@@ -1194,14 +1194,14 @@ struct ContentView: View {
                                 .buttonStyle(.bordered)
                                 .font(titleFamilyFont(size: 13))
 
-                                Button(isPurchasingUpgrade ? "Purchasing…" : "Unlock Lifetime $6.99") {
+                                Button(purchasingPlan == .lifetime ? "Purchasing…" : "Unlock Lifetime $6.99") {
                                     dismissKeyboard()
-                                    guard !isPurchasingUpgrade else { return }
-                                    isPurchasingUpgrade = true
+                                    guard purchasingPlan == nil else { return }
+                                    purchasingPlan = .lifetime
                                     upgradeErrorText = nil
                                     Task {
                                         let success = await purchases.purchase(plan: .lifetime)
-                                        isPurchasingUpgrade = false
+                                        purchasingPlan = nil
                                         if success {
                                             withAnimation { showUpgradeConfirm = false }
                                             showBigAlert("✅ Unlimited Unlocked")
@@ -1214,17 +1214,17 @@ struct ContentView: View {
                                 .buttonStyle(.borderedProminent)
                                 .tint(.indigo)
                                 .font(titleFamilyFont(size: 13))
-                                .disabled(isPurchasingUpgrade)
+                                .disabled(purchasingPlan != nil)
                             }
 
-                            Button(isPurchasingUpgrade ? "Purchasing…" : "Or Monthly $0.99") {
+                            Button(purchasingPlan == .monthly ? "Purchasing…" : "Or Monthly $0.99") {
                                 dismissKeyboard()
-                                guard !isPurchasingUpgrade else { return }
-                                isPurchasingUpgrade = true
+                                guard purchasingPlan == nil else { return }
+                                purchasingPlan = .monthly
                                 upgradeErrorText = nil
                                 Task {
                                     let success = await purchases.purchase(plan: .monthly)
-                                    isPurchasingUpgrade = false
+                                    purchasingPlan = nil
                                     if success {
                                         withAnimation { showUpgradeConfirm = false }
                                         showBigAlert("✅ Unlimited Unlocked")
@@ -1236,7 +1236,7 @@ struct ContentView: View {
                             }
                             .buttonStyle(.bordered)
                             .font(titleFamilyFont(size: 12))
-                            .disabled(isPurchasingUpgrade)
+                            .disabled(purchasingPlan != nil)
 
                             Button("Restore Purchases") {
                                 dismissKeyboard()
