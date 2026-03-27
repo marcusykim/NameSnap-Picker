@@ -1678,7 +1678,7 @@ private struct InlineTrashTextView: UIViewRepresentable {
             self.lines = Self.parse(parent.text)
         }
 
-        private func focusRow(_ row: Int) {
+        private func focusRow(_ row: Int, placeCursorAtEnd: Bool = false) {
             guard let tv = tableView else { return }
             let target = max(0, min(row, max(0, tv.numberOfRows(inSection: 0) - 1)))
             let indexPath = IndexPath(row: target, section: 0)
@@ -1686,6 +1686,10 @@ private struct InlineTrashTextView: UIViewRepresentable {
             DispatchQueue.main.async {
                 if let cell = tv.cellForRow(at: indexPath) as? InlineInputRowCell {
                     cell.textField.becomeFirstResponder()
+                    if placeCursorAtEnd {
+                        let end = cell.textField.endOfDocument
+                        cell.textField.selectedTextRange = cell.textField.textRange(from: end, to: end)
+                    }
                 }
             }
         }
@@ -1767,6 +1771,18 @@ private struct InlineTrashTextView: UIViewRepresentable {
                 applyPastedText(next, at: textField.tag)
                 return false
             }
+
+            // If the user presses backspace at the beginning of an empty row,
+            // move focus to the previous row and place the cursor at the end.
+            if string.isEmpty,
+               range.location == 0,
+               range.length == 0,
+               current.isEmpty,
+               textField.tag > 0 {
+                focusRow(textField.tag - 1, placeCursorAtEnd: true)
+                return false
+            }
+
             return true
         }
 
