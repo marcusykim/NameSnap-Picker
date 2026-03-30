@@ -94,7 +94,7 @@ Email: **Mracuth@gmail.com**
 NameSnap makes random picks feel fun, fair, and fast.
 Perfect for teachers, creators, hosts, giveaways, games, and live moments where you need a winner right now.
 
-No account. No clutter. Just open, paste, and pick.
+Free to start. No account. No clutter. Just open, paste, and pick.
 
 ---
 
