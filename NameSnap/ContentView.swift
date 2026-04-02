@@ -1672,16 +1672,20 @@ private struct InlineTrashTextView: UIViewRepresentable {
         var parent: InlineTrashTextView
         weak var tableView: UITableView?
         private var lines: [String] = []
+        private var preserveKeyboardFocus = false
 
         init(_ parent: InlineTrashTextView) {
             self.parent = parent
             self.lines = Self.parse(parent.text)
         }
 
-        private func focusRow(_ row: Int, placeCursorAtEnd: Bool = false) {
+        private func focusRow(_ row: Int, placeCursorAtEnd: Bool = false, preserveKeyboard: Bool = false) {
             guard let tv = tableView else { return }
             let target = max(0, min(row, max(0, tv.numberOfRows(inSection: 0) - 1)))
             let indexPath = IndexPath(row: target, section: 0)
+            if preserveKeyboard {
+                preserveKeyboardFocus = true
+            }
             tv.scrollToRow(at: indexPath, at: .middle, animated: false)
             DispatchQueue.main.async {
                 if let cell = tv.cellForRow(at: indexPath) as? InlineInputRowCell {
@@ -1689,6 +1693,11 @@ private struct InlineTrashTextView: UIViewRepresentable {
                     if placeCursorAtEnd {
                         let end = cell.textField.endOfDocument
                         cell.textField.selectedTextRange = cell.textField.textRange(from: end, to: end)
+                    }
+                }
+                if preserveKeyboard {
+                    DispatchQueue.main.async {
+                        self.preserveKeyboardFocus = false
                     }
                 }
             }
@@ -1753,6 +1762,11 @@ private struct InlineTrashTextView: UIViewRepresentable {
             cell.onPaste = { [weak self] pasted in
                 self?.applyPastedText(pasted, at: indexPath.row)
             }
+            cell.textField.onEmptyBackspace = { [weak self, weak textField = cell.textField] in
+                guard let self, let textField else { return }
+                guard textField.tag > 0 else { return }
+                self.focusRow(textField.tag - 1, placeCursorAtEnd: true)
+            }
             return cell
         }
 
@@ -1783,6 +1797,20 @@ private struct InlineTrashTextView: UIViewRepresentable {
                 return false
             }
 
+            // If deleting the final character of a filled row, treat it as the same
+            // destructive jump path as an already-empty row backspace.
+            if string.isEmpty,
+               next.isEmpty,
+               !current.isEmpty,
+               textField.tag > 0,
+               lines.indices.contains(textField.tag) {
+                preserveKeyboardFocus = true
+                lines.remove(at: textField.tag)
+                writeBack()
+                tableView?.reloadData()
+                focusRow(textField.tag - 1, placeCursorAtEnd: true, preserveKeyboard: true)
+                return false
+            }
             return true
         }
 
@@ -1790,6 +1818,10 @@ private struct InlineTrashTextView: UIViewRepresentable {
             let nextRow = textField.tag + 1
             focusRow(nextRow)
             return false
+        }
+
+        func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
+            !preserveKeyboardFocus
         }
 
         private func applyPastedText(_ text: String, at index: Int) {
@@ -1870,6 +1902,7 @@ private struct InlineTrashTextView: UIViewRepresentable {
 
 private final class PasteAwareTextField: UITextField {
     var onPasteText: ((String) -> Void)?
+    var onEmptyBackspace: (() -> Void)?
 
     override func paste(_ sender: Any?) {
         if let pasted = UIPasteboard.general.string,
@@ -1879,6 +1912,21 @@ private final class PasteAwareTextField: UITextField {
         }
         super.paste(sender)
     }
+
+    override func deleteBackward() {
+        let cursorAtStart: Bool = {
+            guard let selectedTextRange = selectedTextRange else { return false }
+            return offset(from: beginningOfDocument, to: selectedTextRange.start) == 0
+        }()
+
+        if (text ?? "").isEmpty && cursorAtStart {
+            onEmptyBackspace?()
+            return
+        }
+
+        super.deleteBackward()
+    }
+
 }
 
 private final class InlineInputRowCell: UITableViewCell {
