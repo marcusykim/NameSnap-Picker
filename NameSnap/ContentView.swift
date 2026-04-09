@@ -1885,6 +1885,9 @@ private struct InlineTrashTextView: UIViewRepresentable {
         }
 
         private func writeBack() {
+            lines = lines
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
             let formatted = lines.enumerated().map { "\($0.offset + 1). \($0.element)" }.joined(separator: "\n")
             parent.text = formatted
         }
