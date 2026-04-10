@@ -1836,17 +1836,9 @@ private struct InlineTrashTextView: UIViewRepresentable {
             guard let row = pendingCollapsedRow else { return }
             pendingCollapsedRow = nil
             guard lines.indices.contains(row) else { return }
-
-            let focusTarget = max(0, row - 1)
             lines.remove(at: row)
             writeBack()
             tableView?.reloadData()
-
-            if row > 0 {
-                DispatchQueue.main.async {
-                    self.focusRow(focusTarget, placeCursorAtEnd: true, preserveKeyboard: true)
-                }
-            }
         }
 
         private func applyPastedText(_ text: String, at index: Int) {
