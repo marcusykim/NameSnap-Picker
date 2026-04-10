@@ -1673,7 +1673,6 @@ private struct InlineTrashTextView: UIViewRepresentable {
         weak var tableView: UITableView?
         private var lines: [String] = []
         private var preserveKeyboardFocus = false
-        private var pendingCollapsedRow: Int?
 
         init(_ parent: InlineTrashTextView) {
             self.parent = parent
@@ -1696,7 +1695,6 @@ private struct InlineTrashTextView: UIViewRepresentable {
                         cell.textField.selectedTextRange = cell.textField.textRange(from: end, to: end)
                     }
                 }
-                self.flushPendingCollapsedRowIfNeeded()
                 if preserveKeyboard {
                     DispatchQueue.main.async {
                         self.preserveKeyboardFocus = false
@@ -1769,7 +1767,9 @@ private struct InlineTrashTextView: UIViewRepresentable {
                 guard textField.tag > 0 else { return }
 
                 if self.lines.indices.contains(textField.tag) {
-                    self.pendingCollapsedRow = textField.tag
+                    self.lines.remove(at: textField.tag)
+                    self.writeBack()
+                    self.tableView?.reloadData()
                     self.focusRow(textField.tag - 1, placeCursorAtEnd: true, preserveKeyboard: true)
                 } else {
                     self.focusRow(textField.tag - 1, placeCursorAtEnd: true)
@@ -1812,11 +1812,11 @@ private struct InlineTrashTextView: UIViewRepresentable {
                !current.isEmpty,
                textField.tag > 0,
                lines.indices.contains(textField.tag) {
-                pendingCollapsedRow = textField.tag
                 preserveKeyboardFocus = true
-                DispatchQueue.main.async {
-                    self.focusRow(textField.tag - 1, placeCursorAtEnd: true, preserveKeyboard: true)
-                }
+                lines.remove(at: textField.tag)
+                writeBack()
+                tableView?.reloadData()
+                focusRow(textField.tag - 1, placeCursorAtEnd: true, preserveKeyboard: true)
                 return false
             }
             return true
@@ -1830,15 +1830,6 @@ private struct InlineTrashTextView: UIViewRepresentable {
 
         func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
             !preserveKeyboardFocus
-        }
-
-        private func flushPendingCollapsedRowIfNeeded() {
-            guard let row = pendingCollapsedRow else { return }
-            pendingCollapsedRow = nil
-            guard lines.indices.contains(row) else { return }
-            lines.remove(at: row)
-            writeBack()
-            tableView?.reloadData()
         }
 
         private func applyPastedText(_ text: String, at index: Int) {
