@@ -1765,7 +1765,15 @@ private struct InlineTrashTextView: UIViewRepresentable {
             cell.textField.onEmptyBackspace = { [weak self, weak textField = cell.textField] in
                 guard let self, let textField else { return }
                 guard textField.tag > 0 else { return }
-                self.focusRow(textField.tag - 1, placeCursorAtEnd: true)
+
+                if self.lines.indices.contains(textField.tag) {
+                    self.lines.remove(at: textField.tag)
+                    self.writeBack()
+                    self.tableView?.reloadData()
+                    self.focusRow(textField.tag - 1, placeCursorAtEnd: true, preserveKeyboard: true)
+                } else {
+                    self.focusRow(textField.tag - 1, placeCursorAtEnd: true)
+                }
             }
             return cell
         }
