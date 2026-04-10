@@ -1767,10 +1767,7 @@ private struct InlineTrashTextView: UIViewRepresentable {
                 guard textField.tag > 0 else { return }
 
                 if self.lines.indices.contains(textField.tag) {
-                    self.lines.remove(at: textField.tag)
-                    self.writeBack()
-                    self.tableView?.reloadData()
-                    self.focusRow(textField.tag - 1, placeCursorAtEnd: true, preserveKeyboard: true)
+                    self.deleteRow(at: textField.tag, focusTargetRow: textField.tag - 1)
                 } else {
                     self.focusRow(textField.tag - 1, placeCursorAtEnd: true)
                 }
@@ -1812,11 +1809,7 @@ private struct InlineTrashTextView: UIViewRepresentable {
                !current.isEmpty,
                textField.tag > 0,
                lines.indices.contains(textField.tag) {
-                preserveKeyboardFocus = true
-                lines.remove(at: textField.tag)
-                writeBack()
-                tableView?.reloadData()
-                focusRow(textField.tag - 1, placeCursorAtEnd: true, preserveKeyboard: true)
+                deleteRow(at: textField.tag, focusTargetRow: textField.tag - 1)
                 return false
             }
             return true
@@ -1830,6 +1823,21 @@ private struct InlineTrashTextView: UIViewRepresentable {
 
         func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
             !preserveKeyboardFocus
+        }
+
+        private func deleteRow(at row: Int, focusTargetRow: Int) {
+            guard let tv = tableView, lines.indices.contains(row) else { return }
+
+            preserveKeyboardFocus = true
+            lines.remove(at: row)
+            writeBack()
+
+            let deletionPath = IndexPath(row: row, section: 0)
+            tv.performBatchUpdates {
+                tv.deleteRows(at: [deletionPath], with: .none)
+            } completion: { _ in
+                self.focusRow(focusTargetRow, placeCursorAtEnd: true, preserveKeyboard: true)
+            }
         }
 
         private func applyPastedText(_ text: String, at index: Int) {
