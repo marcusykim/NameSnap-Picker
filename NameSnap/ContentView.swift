@@ -1673,6 +1673,7 @@ private struct InlineTrashTextView: UIViewRepresentable {
         weak var tableView: UITableView?
         private var lines: [String] = []
         private var preserveKeyboardFocus = false
+        private weak var pendingDeleteTextField: UITextField?
 
         init(_ parent: InlineTrashTextView) {
             self.parent = parent
@@ -1767,10 +1768,7 @@ private struct InlineTrashTextView: UIViewRepresentable {
                 guard textField.tag > 0 else { return }
 
                 if self.lines.indices.contains(textField.tag) {
-                    self.lines.remove(at: textField.tag)
-                    self.writeBack()
-                    self.tableView?.reloadData()
-                    self.focusRow(textField.tag - 1, placeCursorAtEnd: true, preserveKeyboard: true)
+                    self.scheduleDeleteRow(textField.tag, focusTargetRow: textField.tag - 1, deletingTextField: textField)
                 } else {
                     self.focusRow(textField.tag - 1, placeCursorAtEnd: true)
                 }
@@ -1812,11 +1810,7 @@ private struct InlineTrashTextView: UIViewRepresentable {
                !current.isEmpty,
                textField.tag > 0,
                lines.indices.contains(textField.tag) {
-                preserveKeyboardFocus = true
-                lines.remove(at: textField.tag)
-                writeBack()
-                tableView?.reloadData()
-                focusRow(textField.tag - 1, placeCursorAtEnd: true, preserveKeyboard: true)
+                scheduleDeleteRow(textField.tag, focusTargetRow: textField.tag - 1, deletingTextField: textField)
                 return false
             }
             return true
@@ -1829,7 +1823,38 @@ private struct InlineTrashTextView: UIViewRepresentable {
         }
 
         func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
-            !preserveKeyboardFocus
+            if pendingDeleteTextField === textField {
+                return true
+            }
+            return !preserveKeyboardFocus
+        }
+
+        private func scheduleDeleteRow(_ row: Int, focusTargetRow: Int, deletingTextField: UITextField) {
+            guard let tv = tableView, lines.indices.contains(row) else { return }
+
+            preserveKeyboardFocus = true
+            pendingDeleteTextField = deletingTextField
+            deletingTextField.resignFirstResponder()
+
+            DispatchQueue.main.async {
+                guard self.lines.indices.contains(row) else {
+                    self.pendingDeleteTextField = nil
+                    self.preserveKeyboardFocus = false
+                    return
+                }
+
+                self.lines.remove(at: row)
+                self.writeBack()
+                let deletionPath = IndexPath(row: row, section: 0)
+                tv.performBatchUpdates {
+                    tv.deleteRows(at: [deletionPath], with: .none)
+                } completion: { _ in
+                    self.pendingDeleteTextField = nil
+                    DispatchQueue.main.async {
+                        self.focusRow(focusTargetRow, placeCursorAtEnd: true, preserveKeyboard: true)
+                    }
+                }
+            }
         }
 
         private func applyPastedText(_ text: String, at index: Int) {
