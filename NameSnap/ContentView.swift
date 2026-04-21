@@ -1672,7 +1672,6 @@ private struct InlineTrashTextView: UIViewRepresentable {
         var parent: InlineTrashTextView
         weak var tableView: UITableView?
         private var lines: [String] = []
-        private var preserveKeyboardFocus = false
         private weak var pendingDeleteTextField: UITextField?
 
         init(_ parent: InlineTrashTextView) {
@@ -1680,13 +1679,10 @@ private struct InlineTrashTextView: UIViewRepresentable {
             self.lines = Self.parse(parent.text)
         }
 
-        private func focusRow(_ row: Int, placeCursorAtEnd: Bool = false, preserveKeyboard: Bool = false) {
+        private func focusRow(_ row: Int, placeCursorAtEnd: Bool = false) {
             guard let tv = tableView else { return }
             let target = max(0, min(row, max(0, tv.numberOfRows(inSection: 0) - 1)))
             let indexPath = IndexPath(row: target, section: 0)
-            if preserveKeyboard {
-                preserveKeyboardFocus = true
-            }
             tv.scrollToRow(at: indexPath, at: .middle, animated: false)
             DispatchQueue.main.async {
                 if let cell = tv.cellForRow(at: indexPath) as? InlineInputRowCell {
@@ -1694,11 +1690,6 @@ private struct InlineTrashTextView: UIViewRepresentable {
                     if placeCursorAtEnd {
                         let end = cell.textField.endOfDocument
                         cell.textField.selectedTextRange = cell.textField.textRange(from: end, to: end)
-                    }
-                }
-                if preserveKeyboard {
-                    DispatchQueue.main.async {
-                        self.preserveKeyboardFocus = false
                     }
                 }
             }
@@ -1823,43 +1814,57 @@ private struct InlineTrashTextView: UIViewRepresentable {
         }
 
         func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
-            if pendingDeleteTextField === textField {
-                return true
-            }
-            return !preserveKeyboardFocus
+            true
         }
 
         private func scheduleDeleteRow(_ row: Int, focusTargetRow: Int, deletingTextField: UITextField) {
             guard let tv = tableView, lines.indices.contains(row) else { return }
 
-            preserveKeyboardFocus = true
             pendingDeleteTextField = deletingTextField
-            deletingTextField.resignFirstResponder()
+
+            let targetRow = max(0, min(focusTargetRow, self.lines.count - 1))
+            let targetIndexPath = IndexPath(row: targetRow, section: 0)
+            tv.scrollToRow(at: targetIndexPath, at: .middle, animated: false)
 
             DispatchQueue.main.async {
                 guard self.lines.indices.contains(row) else {
                     self.pendingDeleteTextField = nil
-                    self.preserveKeyboardFocus = false
                     return
                 }
 
-                self.lines.remove(at: row)
-                self.writeBack()
-                let deletionPath = IndexPath(row: row, section: 0)
-                tv.performBatchUpdates {
-                    tv.deleteRows(at: [deletionPath], with: .none)
-                } completion: { _ in
-                    let rowCount = tv.numberOfRows(inSection: 0)
-                    if rowCount > 0 {
-                        let rowsNeedingRefresh = (row..<rowCount).map { IndexPath(row: $0, section: 0) }
-                        if !rowsNeedingRefresh.isEmpty {
-                            tv.reloadRows(at: rowsNeedingRefresh, with: .none)
-                        }
+                // Critical: hand first responder directly to the surviving row
+                // before collapsing the deleted row, so the keyboard never sees
+                // a moment with no active text field.
+                if let targetCell = tv.cellForRow(at: targetIndexPath) as? InlineInputRowCell {
+                    targetCell.textField.becomeFirstResponder()
+                    let end = targetCell.textField.endOfDocument
+                    targetCell.textField.selectedTextRange = targetCell.textField.textRange(from: end, to: end)
+                }
+
+                DispatchQueue.main.async {
+                    guard self.lines.indices.contains(row) else {
+                        self.pendingDeleteTextField = nil
+                        return
                     }
 
-                    self.pendingDeleteTextField = nil
-                    DispatchQueue.main.async {
-                        self.focusRow(focusTargetRow, placeCursorAtEnd: true, preserveKeyboard: true)
+                    self.lines.remove(at: row)
+                    self.writeBack()
+
+                    UIView.performWithoutAnimation {
+                        tv.performBatchUpdates {
+                            tv.deleteRows(at: [IndexPath(row: row, section: 0)], with: .none)
+                        } completion: { _ in
+                            let rowCount = tv.numberOfRows(inSection: 0)
+                            if rowCount > 0 {
+                                let rowsNeedingRefresh = (row..<rowCount).map { IndexPath(row: $0, section: 0) }
+                                if !rowsNeedingRefresh.isEmpty {
+                                    tv.reloadRows(at: rowsNeedingRefresh, with: .none)
+                                }
+                            }
+
+                            self.pendingDeleteTextField = nil
+                            self.focusRow(focusTargetRow, placeCursorAtEnd: true)
+                        }
                     }
                 }
             }
