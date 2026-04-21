@@ -109,7 +109,14 @@ Next actions:
 
 ## Immediate Next Step
 
-Create the final App Store Connect products, then move straight into archive validation.
+Finish the local StoreKit loop first:
+- open `NameSnap/SupportingFiles/NameSnap.storekit`
+- add `namesnap.unlimited_monthly_099`
+- add `namesnap.unlimited_lifetime_699`
+- attach it in `Product -> Scheme -> Edit Scheme... -> Run -> Options -> StoreKit Configuration`
+- verify locked >10 names shows the paywall, monthly unlock works, clearing transactions relocks, and restore works
+
+After that, create the final App Store Connect products and move straight into archive validation.
 
 ---
 
