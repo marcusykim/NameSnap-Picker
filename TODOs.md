@@ -99,6 +99,7 @@ Next actions:
 
 ## Next Session Checklist
 
+0. Set up the local StoreKit test loop using `STOREKIT_LOCAL_TESTING.md`, attach `NameSnap.storekit` to the `NameSnap` run scheme, and verify paywall/restore/relock behavior locally before leaning on Sandbox again.
 1. Create the two final App Store Connect products:
    - `namesnap.unlimited_monthly_099`
    - `namesnap.unlimited_lifetime_699`
