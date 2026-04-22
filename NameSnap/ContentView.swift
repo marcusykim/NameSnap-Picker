@@ -1849,6 +1849,14 @@ private struct InlineTrashTextView: UIViewRepresentable {
                 tv.performBatchUpdates {
                     tv.deleteRows(at: [deletionPath], with: .none)
                 } completion: { _ in
+                    let rowCount = tv.numberOfRows(inSection: 0)
+                    if rowCount > 0 {
+                        let rowsNeedingRefresh = (row..<rowCount).map { IndexPath(row: $0, section: 0) }
+                        if !rowsNeedingRefresh.isEmpty {
+                            tv.reloadRows(at: rowsNeedingRefresh, with: .none)
+                        }
+                    }
+
                     self.pendingDeleteTextField = nil
                     DispatchQueue.main.async {
                         self.focusRow(focusTargetRow, placeCursorAtEnd: true, preserveKeyboard: true)
