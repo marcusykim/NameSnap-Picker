@@ -1,0 +1,12 @@
+# macOS metadata
+.DS_Store
+._*
+
+# Xcode user state
+xcuserdata/
+*.xcuserstate
+
+# Local automation/runtime state
+.ios-sim-state.json
+artifacts/
+jarvis-avatar.jpg
