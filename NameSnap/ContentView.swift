@@ -556,19 +556,24 @@ struct ContentView: View {
 
     @ViewBuilder
     private func centerAlertLabel(_ text: String) -> some View {
+        symbolTitleLabel(text, textSize: 24, symbolSize: 28)
+    }
+
+    @ViewBuilder
+    private func symbolTitleLabel(_ text: String, textSize: CGFloat, symbolSize: CGFloat) -> some View {
         let parts = alertParts(from: text)
         HStack(spacing: 10) {
             if let symbol = parts.symbol {
-                centerAlertSymbol(symbol)
+                centerAlertSymbol(symbol, size: symbolSize)
             }
             Text(parts.message)
-                .font(titleFamilyFont(size: 24))
+                .font(titleFamilyFont(size: textSize))
         }
         .multilineTextAlignment(.center)
     }
 
     @ViewBuilder
-    private func centerAlertSymbol(_ symbol: String) -> some View {
+    private func centerAlertSymbol(_ symbol: String, size: CGFloat = 28) -> some View {
         if symbol.contains("✅") || symbol.contains("✔") {
             ZStack {
                 RoundedRectangle(cornerRadius: 7, style: .continuous)
@@ -585,7 +590,7 @@ struct ContentView: View {
             .accessibilityLabel("Success")
         } else {
             Text(symbol)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .font(.system(size: size, weight: .bold, design: .rounded))
         }
     }
 
@@ -1071,9 +1076,7 @@ struct ContentView: View {
                             .ignoresSafeArea()
 
                         VStack(spacing: 12) {
-                            Text("♻️ Reset this pool?")
-                                .font(titleFamilyFont(size: 22))
-                                .multilineTextAlignment(.center)
+                            symbolTitleLabel("♻️ Reset this pool?", textSize: 22, symbolSize: 24)
 
                             Text("This keeps names, but resets inclusion and no-repeat history.")
                                 .font(.subheadline.weight(.semibold))
@@ -1128,9 +1131,7 @@ struct ContentView: View {
                             .ignoresSafeArea()
 
                         VStack(spacing: 12) {
-                            Text("⚠️ Clear this pool?")
-                                .font(titleFamilyFont(size: 22))
-                                .multilineTextAlignment(.center)
+                            symbolTitleLabel("⚠️ Clear this pool?", textSize: 22, symbolSize: 24)
 
                             Text("This removes all names from the current pool.")
                                 .font(.subheadline.weight(.semibold))
@@ -1185,9 +1186,7 @@ struct ContentView: View {
                             .ignoresSafeArea()
 
                         VStack(spacing: 12) {
-                            Text("🔈 Better with sound on!")
-                                .font(titleFamilyFont(size: 22))
-                                .multilineTextAlignment(.center)
+                            symbolTitleLabel("🔈 Better with sound on!", textSize: 22, symbolSize: 24)
 
                             Button("Gotcha") {
                                 dismissKeyboard()
@@ -1218,9 +1217,7 @@ struct ContentView: View {
                             .ignoresSafeArea()
 
                         VStack(spacing: 12) {
-                            Text("✨ Upgrade to Unlimited?")
-                                .font(titleFamilyFont(size: 22))
-                                .multilineTextAlignment(.center)
+                            symbolTitleLabel("✨ Upgrade to Unlimited?", textSize: 22, symbolSize: 24)
 
                             Text("Free supports up to 10 contestants.")
                                 .font(.subheadline.weight(.semibold))
@@ -1331,9 +1328,7 @@ struct ContentView: View {
                             .ignoresSafeArea()
 
                         VStack(spacing: 12) {
-                            Text("🔁 Change no-repeat setting?")
-                                .font(titleFamilyFont(size: 22))
-                                .multilineTextAlignment(.center)
+                            symbolTitleLabel("🔁 Change no-repeat setting?", textSize: 22, symbolSize: 24)
 
                             Text("This will reset the current pool and no-repeat history. Continue?")
                                 .font(.subheadline.weight(.semibold))
