@@ -10,3 +10,6 @@ xcuserdata/
 .ios-sim-state.json
 artifacts/
 jarvis-avatar.jpg
+
+# Local Xcode build products
+.derivedData/
