@@ -588,6 +588,26 @@ struct ContentView: View {
                 .frame(width: 30, height: 30)
             }
             .accessibilityLabel("Success")
+        } else if symbol.contains("✨") {
+            ZStack {
+                Circle()
+                    .fill(Color.yellow.opacity(0.95))
+                    .frame(width: 30, height: 30)
+                Path { path in
+                    path.move(to: CGPoint(x: 15, y: 4))
+                    path.addLine(to: CGPoint(x: 18, y: 12))
+                    path.addLine(to: CGPoint(x: 26, y: 15))
+                    path.addLine(to: CGPoint(x: 18, y: 18))
+                    path.addLine(to: CGPoint(x: 15, y: 26))
+                    path.addLine(to: CGPoint(x: 12, y: 18))
+                    path.addLine(to: CGPoint(x: 4, y: 15))
+                    path.addLine(to: CGPoint(x: 12, y: 12))
+                    path.closeSubpath()
+                }
+                .fill(Color.white)
+                .frame(width: 30, height: 30)
+            }
+            .accessibilityLabel("Upgrade")
         } else {
             Text(symbol)
                 .font(.system(size: size, weight: .bold, design: .rounded))
