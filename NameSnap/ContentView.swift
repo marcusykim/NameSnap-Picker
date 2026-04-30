@@ -543,6 +543,52 @@ struct ContentView: View {
         return .system(size: size, weight: .black, design: .rounded)
     }
 
+    private func alertParts(from text: String) -> (symbol: String?, message: String) {
+        guard let first = text.first else { return (nil, text) }
+        let firstScalars = String(first).unicodeScalars
+        let isPlainLetterOrNumber = firstScalars.allSatisfy { CharacterSet.alphanumerics.contains($0) }
+        guard !isPlainLetterOrNumber else { return (nil, text) }
+
+        let message = text.dropFirst().trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !message.isEmpty else { return (nil, text) }
+        return (String(first), message)
+    }
+
+    @ViewBuilder
+    private func centerAlertLabel(_ text: String) -> some View {
+        let parts = alertParts(from: text)
+        HStack(spacing: 10) {
+            if let symbol = parts.symbol {
+                centerAlertSymbol(symbol)
+            }
+            Text(parts.message)
+                .font(titleFamilyFont(size: 24))
+        }
+        .multilineTextAlignment(.center)
+    }
+
+    @ViewBuilder
+    private func centerAlertSymbol(_ symbol: String) -> some View {
+        if symbol.contains("✅") || symbol.contains("✔") {
+            ZStack {
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .fill(Color.green)
+                    .frame(width: 30, height: 30)
+                Path { path in
+                    path.move(to: CGPoint(x: 8, y: 15.5))
+                    path.addLine(to: CGPoint(x: 13, y: 20.5))
+                    path.addLine(to: CGPoint(x: 23, y: 9.5))
+                }
+                .stroke(.white, style: StrokeStyle(lineWidth: 3.4, lineCap: .round, lineJoin: .round))
+                .frame(width: 30, height: 30)
+            }
+            .accessibilityLabel("Success")
+        } else {
+            Text(symbol)
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+        }
+    }
+
     private func dismissKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
@@ -1004,9 +1050,7 @@ struct ContentView: View {
             }
             .overlay {
                 if showCenterAlert {
-                    Text(centerAlertText)
-                        .font(titleFamilyFont(size: 24))
-                        .multilineTextAlignment(.center)
+                    centerAlertLabel(centerAlertText)
                         .padding(.horizontal, 18)
                         .padding(.vertical, 20)
                         .background(.ultraThinMaterial)
