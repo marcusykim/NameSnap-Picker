@@ -43,7 +43,7 @@ Local StoreKit testing is faster, deterministic, and much easier to manage.
 
 ## Fast local test loop
 1. Run the app with the StoreKit config attached.
-2. Add more than 10 names.
+2. Add more than 20 names.
 3. Confirm the paywall appears.
 4. Buy Monthly, confirm unlimited unlocks.
 5. Use Xcode menu:

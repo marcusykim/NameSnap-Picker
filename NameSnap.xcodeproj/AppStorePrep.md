@@ -58,7 +58,7 @@ This doc is a single place to track App Store submission tasks and provides past
 
 - Review notes (for the binary submission)
 - Provide a short explanation: app is a random name picker; local-only; no account.
-- Reviewer note language to use: `The app is free to download. The free tier allows up to 10 contestants in one session. Unlimited contestants are available through Unlimited Monthly ($0.99/month) or Unlimited Lifetime ($6.99 one time). Restore Purchases is supported.`
+- Reviewer note language to use: `The app is free to download. The free tier allows up to 16 contestants in one session. Unlimited contestants are available through Unlimited Monthly ($0.99/month) or Unlimited Lifetime ($6.99 one time). Restore Purchases is supported.`
 - If IAP exists, mention where the paywall/upgrade UI appears and how to restore.
 
 ## 2) Paste-Ready App Store Connect Copy
@@ -122,25 +122,24 @@ Caption alternatives:
 - `Clean, fast, and distraction-free`
 - `No account required. Privacy-first.`
 
-## 4) Notion Page Timing Note
+## 4) Firebase Site Timing Note
 
-Do **not** treat the marketing/support/privacy Notion page as final too early.
-It should be one of the **last** things updated before submission so the customer-facing wording reflects the most accurate final state of:
+Keep the Firebase marketing, support, and privacy pages aligned with the release so the customer-facing wording reflects the most accurate final state of:
 - monetization,
 - purchase model,
 - privacy wording,
 - support flow,
 - and overall app positioning.
 
-Recommended source file for the latest paste-ready page copy:
-- `/volumes/mracuth/NameSnap/AppStoreMetadata/NOTION_SUPPORT_MARKETING_PAGE_COPY.md`
+Canonical source copy:
+- `AppStoreMetadata/SUPPORT_MARKETING_PAGE_COPY.md`
 
 ## 5) URLs + Contact (from repo values)
 
-- Support URL: `https://halved-fan-e5f.notion.site/NameSnap-Support-Privacy-311af69cbc3a80d5b757de3d27b04c6c`
-- Marketing URL: `https://halved-fan-e5f.notion.site/NameSnap-Support-Privacy-311af69cbc3a80d5b757de3d27b04c6c`
-- Privacy Policy URL: `https://halved-fan-e5f.notion.site/NameSnap-Support-Privacy-311af69cbc3a80d5b757de3d27b04c6c`
-- Support Email: `Mracuth@gmail.com`
+- Support URL: `https://getnamesnap.web.app/support`
+- Marketing URL: `https://getnamesnap.web.app`
+- Privacy Policy URL: `https://getnamesnap.web.app/privacy`
+- Support Email: `sidequestsoftware@proton.me`
 - Contact name: `Marcus Kim`
 
 ## 5) Support + Privacy Policy (paste-ready text)
@@ -151,7 +150,7 @@ _Last updated: 2026-02-23_
 If you need help, found a bug, or want to suggest a feature, contact:
 
 Marcus Kim
-Email: Mracuth@gmail.com
+Email: sidequestsoftware@proton.me
 
 ### Privacy Policy
 NameSnap is designed to be privacy-first.
@@ -183,7 +182,7 @@ If this policy changes in future releases, the updated version will be posted wi
 
 Privacy contact:
 Marcus Kim
-Email: Mracuth@gmail.com
+Email: sidequestsoftware@proton.me
 
 ## 7) Reviewer Notes Template (binary submission)
 
@@ -198,7 +197,4 @@ How to use:
 
 Privacy: No account required, no analytics tracking, and no third-party ad tracking. Participant names, winner history, preferences, and purchase/unlock state remain on device for app functionality. Purchases and entitlement status are handled through Apple’s App Store / StoreKit.
 
-IAP: The app includes a free tier with up to 10 contestants for one session. Upgrade options are `Unlimited Monthly` ($0.99/month) and `Unlimited Lifetime` ($6.99 one-time). Restore Purchases is supported.
-me` ($6.99 one-time). Restore Purchases is supported.
-ed Contestants” unlock is available from the upgrade/settings area. “Restore Purchases” is supported.
-ed Contestants” unlock is available from the upgrade/settings area. “Restore Purchases” is supported.
+IAP: The app includes a free tier with up to 16 contestants for one session. Upgrade options are `Unlimited Monthly` ($0.99/month) and `Unlimited Lifetime` ($6.99 one-time). Restore Purchases is supported.

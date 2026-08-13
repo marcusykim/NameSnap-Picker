@@ -13,3 +13,13 @@ jarvis-avatar.jpg
 
 # Local Xcode build products
 .derivedData/
+DerivedData/
+build/
+*.xcarchive
+*.ipa
+*.dSYM.zip
+
+# Generated Fastlane reports and screenshots
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/

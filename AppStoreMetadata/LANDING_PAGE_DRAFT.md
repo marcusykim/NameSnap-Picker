@@ -1,7 +1,7 @@
 # NameSnap Landing Page Draft
 
-_Last updated: 2026-03-29_
-_Status: working draft only — finalize near release after monetization, support, privacy, and App Store Connect variables are confirmed._
+_Last updated: 2026-08-11_
+_Status: published at https://getnamesnap.web.app._
 
 ## Hero
 **NameSnap**
@@ -33,7 +33,7 @@ NameSnap is built to make random picks feel simple, exciting, and trustworthy.
 
 ## Monetization placeholder
 Current planned model:
-- Free tier supports up to 10 contestants per session
+- Free tier supports up to 16 contestants per session
 - Unlimited Monthly: $0.99/month
 - Unlimited Lifetime: $6.99 one-time
 
@@ -52,7 +52,7 @@ NameSnap is privacy-first.
 ## Support draft
 For support, bug reports, or feature requests:
 - Marcus Kim
-- Mracuth@gmail.com
+- sidequestsoftware@proton.me
 
 ## Short marketing copy options
 ### Option A
@@ -64,11 +64,7 @@ Fast, fair random picks for class, games, and giveaways.
 ### Option C
 A playful random name picker built for real moments.
 
-## Finalization rule
-Do not treat this page as final until these are confirmed:
-- monetization wording
-- support wording
-- privacy wording
-- App Store review notes
-- IAP/subscription product setup
-- launch positioning
+## Production URLs
+- Marketing: https://getnamesnap.web.app
+- Support: https://getnamesnap.web.app/support
+- Privacy: https://getnamesnap.web.app/privacy

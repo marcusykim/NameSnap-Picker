@@ -1,4 +1,4 @@
-# NameSnap — Paste-Ready Notion Support / Marketing / Privacy Page
+# NameSnap — Support / Marketing / Privacy Copy
 
 _Last updated: 2026-03-19_
 
@@ -30,7 +30,7 @@ Paste names, tap Spin, and get a winner instantly.
 If you need help, found a bug, or want to suggest a feature, contact:
 
 **Marcus Kim**  
-Email: **Mracuth@gmail.com**
+Email: **sidequestsoftware@proton.me**
 
 ---
 
@@ -84,7 +84,7 @@ If this policy changes in a future release, the updated version will be posted o
 For support or privacy questions, contact:
 
 **Marcus Kim**  
-Email: **Mracuth@gmail.com**
+Email: **sidequestsoftware@proton.me**
 
 ---
 

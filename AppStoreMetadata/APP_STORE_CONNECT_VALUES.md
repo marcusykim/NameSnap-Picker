@@ -8,14 +8,15 @@
 - Primary Language: English (U.S.)
 - Age Rating: 4+
 - Price: Free
-- Free tier: up to 10 contestants for one session
+- Free tier: up to 16 contestants for one session
 - Monthly subscription product: namesnap.unlimited_monthly_099 ($0.99/month)
 - Lifetime unlock product: namesnap.unlimited_lifetime_699 ($6.99 one-time)
 - Publisher Display Name: Marcus Kim
-- Support URL: https://halved-fan-e5f.notion.site/NameSnap-Support-Privacy-311af69cbc3a80d5b757de3d27b04c6c
-- Marketing URL: https://halved-fan-e5f.notion.site/NameSnap-Support-Privacy-311af69cbc3a80d5b757de3d27b04c6c
-- Privacy Policy URL: https://halved-fan-e5f.notion.site/NameSnap-Support-Privacy-311af69cbc3a80d5b757de3d27b04c6c
-- Support Email: Mracuth@gmail.com
+- Support URL: https://getnamesnap.web.app/support
+- Marketing URL: https://getnamesnap.web.app
+- Privacy Policy URL: https://getnamesnap.web.app/privacy
+- Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+- Support Email: sidequestsoftware@proton.me
 
 ## Notes
 - App uses local-only data.

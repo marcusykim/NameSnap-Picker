@@ -154,23 +154,23 @@ final class NameSnapViewModel: ObservableObject {
         return base[offset]
     }
 
-    private func nextDrawNumber() -> Int {
-        (entries.map(\.drawNumber).max() ?? 0) + 1
+    private func renumberPoolEntries() {
+        for index in entries.indices {
+            entries[index].drawNumber = index + 1
+        }
     }
 
     @discardableResult
     func addNamesFromInput() -> Int {
-        let separators = CharacterSet(charactersIn: ",\n")
-        let names = rawInput
-            .components(separatedBy: separators)
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .map { line in
-                line.replacingOccurrences(of: "^[0-9]+[\\.)-]?\\s*", with: "", options: .regularExpression)
-            }
-            .filter { !$0.isEmpty }
+        addNames(parsedInputNames)
+    }
 
+    @discardableResult
+    func addNames(_ names: [String]) -> Int {
         guard !names.isEmpty else { return 0 }
-        var nextNumber = nextDrawNumber()
+        // Keep labels contiguous even if this pool was edited before adding more names.
+        renumberPoolEntries()
+        var nextNumber = entries.count + 1
         let newOnes = names.map { item -> NameEntry in
             defer { nextNumber += 1 }
             return NameEntry(drawNumber: nextNumber, name: item)
@@ -191,6 +191,7 @@ final class NameSnapViewModel: ObservableObject {
         let before = entries.count
         entries.removeAll { previous.contains($0.id) }
         pickedIds.subtract(previous)
+        renumberPoolEntries()
         normalizeWheelIndexIfNeeded(forceCenter: true)
         lastAddedBatch.removeAll()
         return before - entries.count
@@ -311,6 +312,7 @@ final class NameSnapViewModel: ObservableObject {
     func removeEntry(_ entry: NameEntry) {
         entries.removeAll { $0.id == entry.id }
         pickedIds.remove(entry.id)
+        renumberPoolEntries()
         normalizeWheelIndexIfNeeded(forceCenter: true)
     }
 
@@ -486,6 +488,7 @@ final class NameSnapPurchaseManager: ObservableObject {
 }
 
 struct ContentView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @StateObject private var vm = NameSnapViewModel()
     @StateObject private var purchases = NameSnapPurchaseManager()
     @State private var showCenterAlert = false
@@ -501,6 +504,7 @@ struct ContentView: View {
     @State private var suppressNoRepeatToggleConfirm = false
     @State private var suppressNextWheelSettleCommit = false
     @State private var showUpgradeConfirm = false
+    @State private var showDuplicateConfirm = false
     @State private var purchasingPlan: NameSnapPurchaseManager.Plan? = nil
     @State private var upgradeErrorText: String?
     @State private var showSoundOnHint = false
@@ -520,8 +524,58 @@ struct ContentView: View {
     @State private var winnerRemovalSequence: Int = 0
     @State private var pendingWinnerSnapshot: NameEntry?
     @State private var pendingWinnerDisplay: String = ""
+    @State private var pendingNamesForAddition: [String] = []
+    @State private var pendingDuplicateInputNames: [String] = []
 
     private let flashColors: [Color] = [.pink, .yellow, .cyan, .green, .orange, .purple]
+    private let freeContestantLimit = 16
+    private let privacyPolicyURL = URL(string: "https://getnamesnap.web.app/privacy")!
+    private let standardEULAURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+
+    private var shouldShowUpgradeForUITesting: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-ui-upgrade")
+        #else
+        false
+        #endif
+    }
+
+    private var lifetimePriceText: String {
+        purchases.lifetimeProduct?.displayPrice ?? "$6.99"
+    }
+
+    private var monthlyPriceText: String {
+        purchases.monthlyProduct?.displayPrice ?? "$0.99"
+    }
+
+    private var lifetimePurchaseButton: some View {
+        Button(purchasingPlan == .lifetime ? "Purchasing…" : "Unlock Lifetime \(lifetimePriceText)") {
+            dismissKeyboard()
+            guard purchasingPlan == nil else { return }
+            purchasingPlan = .lifetime
+            upgradeErrorText = nil
+            Task {
+                let success = await purchases.purchase(plan: .lifetime)
+                purchasingPlan = nil
+                if success {
+                    withAnimation { showUpgradeConfirm = false }
+                    showBigAlert("✅ Unlimited Unlocked")
+                    let namesToAdd = pendingNamesForAddition
+                    pendingNamesForAddition.removeAll()
+                    addNamesToPoolNow(namesToAdd)
+                } else {
+                    upgradeErrorText = "Couldn’t complete purchase. Check connection and try again."
+                }
+            }
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(.indigo)
+        .font(titleFamilyFont(size: 13))
+        .multilineTextAlignment(.center)
+        .lineLimit(2)
+        .minimumScaleFactor(0.7)
+        .disabled(purchasingPlan != nil)
+    }
 
     private var titleFont: Font {
         if UIFont(name: "RubikMonoOne-Regular", size: 38) != nil {
@@ -568,36 +622,51 @@ struct ContentView: View {
             }
             Text(parts.message)
                 .font(titleFamilyFont(size: textSize))
+                .lineLimit(3)
+                .minimumScaleFactor(0.6)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .multilineTextAlignment(.center)
     }
 
     @ViewBuilder
     private func centerAlertSymbol(_ symbol: String, size: CGFloat = 28) -> some View {
-        if symbol.contains("✅") || symbol.contains("✔") {
-            ZStack {
-                RoundedRectangle(cornerRadius: 7, style: .continuous)
-                    .fill(Color.green)
-                    .frame(width: 30, height: 30)
-                Path { path in
-                    path.move(to: CGPoint(x: 8, y: 15.5))
-                    path.addLine(to: CGPoint(x: 13, y: 20.5))
-                    path.addLine(to: CGPoint(x: 23, y: 9.5))
-                }
-                .stroke(.white, style: StrokeStyle(lineWidth: 3.4, lineCap: .round, lineJoin: .round))
-                .frame(width: 30, height: 30)
-            }
-            .accessibilityLabel("Success")
-        } else if symbol.contains("✨") {
-            Image("sparkle_emoji")
+        if let assetName = emojiAssetName(for: symbol) {
+            Image(assetName)
                 .resizable()
                 .scaledToFit()
                 .frame(width: size + 8, height: size + 8)
-                .accessibilityLabel("Upgrade")
+                .accessibilityLabel(emojiAccessibilityLabel(for: symbol))
         } else {
             Text(verbatim: symbol)
                 .font(.system(size: size))
         }
+    }
+
+    private func emojiAssetName(for symbol: String) -> String? {
+        if symbol.contains("✅") || symbol.contains("✔") { return "success_emoji" }
+        if symbol.contains("🎉") { return "party_popper_emoji" }
+        if symbol.contains("✨") { return "sparkle_emoji" }
+        if symbol.contains("↩") { return "undo_emoji" }
+        if symbol.contains("🧹") { return "broom_emoji" }
+        if symbol.contains("⚠") { return "warning_emoji" }
+        if symbol.contains("♻") { return "recycle_emoji" }
+        if symbol.contains("🔈") { return "sound_emoji" }
+        if symbol.contains("🔁") { return "repeat_emoji" }
+        return nil
+    }
+
+    private func emojiAccessibilityLabel(for symbol: String) -> String {
+        if symbol.contains("✅") || symbol.contains("✔") { return "Success" }
+        if symbol.contains("🎉") { return "Winner" }
+        if symbol.contains("✨") { return "Upgrade" }
+        if symbol.contains("↩") { return "Undo" }
+        if symbol.contains("🧹") { return "Cleared" }
+        if symbol.contains("⚠") { return "Warning" }
+        if symbol.contains("♻") { return "Reset" }
+        if symbol.contains("🔈") { return "Sound" }
+        if symbol.contains("🔁") { return "Repeat" }
+        return "Status"
     }
 
     private func dismissKeyboard() {
@@ -633,16 +702,52 @@ struct ContentView: View {
     private func canAddContestants(currentCount: Int, incomingCount: Int) -> Bool {
         guard incomingCount > 0 else { return true }
         if purchases.isUnlimitedUnlocked { return true }
-        return (currentCount + incomingCount) <= 10
+        return (currentCount + incomingCount) <= freeContestantLimit
     }
 
-    private func addNamesToPoolNow() {
+    private func normalizedName(_ name: String) -> String {
+        name
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+    }
+
+    private func hasPoolDuplicates(in names: [String]) -> Bool {
+        let existingNames = Set(vm.entries.map { normalizedName($0.name) })
+        return names.contains { existingNames.contains(normalizedName($0)) }
+    }
+
+    private func poolDuplicateCount(in names: [String]) -> Int {
+        let existingNames = Set(vm.entries.map { normalizedName($0.name) })
+        return names.filter { existingNames.contains(normalizedName($0)) }.count
+    }
+
+    private func namesExcludingPoolDuplicates(_ names: [String]) -> [String] {
+        let existingNames = Set(vm.entries.map { normalizedName($0.name) })
+        return names.filter { !existingNames.contains(normalizedName($0)) }
+    }
+
+    private func beginAddingNames(_ names: [String]) {
+        guard !names.isEmpty else {
+            showBigAlert("No New Names to Add")
+            return
+        }
+
+        if !canAddContestants(currentCount: vm.entries.count, incomingCount: names.count) {
+            pendingNamesForAddition = names
+            withAnimation { showUpgradeConfirm = true }
+            return
+        }
+
+        addNamesToPoolNow(names)
+    }
+
+    private func addNamesToPoolNow(_ names: [String]) {
         if vm.visualMode == .wheel {
             suppressNextWheelSettleCommit = true
             suppressWheelSettle = true
         }
 
-        let added = vm.addNamesFromInput()
+        let added = vm.addNames(names)
         guard added > 0 else {
             if vm.visualMode == .wheel {
                 suppressWheelSettle = false
@@ -830,17 +935,16 @@ struct ContentView: View {
 
                                 Button("Add These Names to Pool") {
                                     dismissKeyboard()
-                                    let incoming = vm.parsedInputNames.count
-                                    guard incoming > 0 else { return }
+                                    let incoming = vm.parsedInputNames
+                                    guard !incoming.isEmpty else { return }
 
-                                    let proposedTotal = vm.entries.count + incoming
-                                    if !purchases.isUnlimitedUnlocked && proposedTotal > 10 {
-                                        dismissKeyboard()
-                                        withAnimation { showUpgradeConfirm = true }
+                                    if hasPoolDuplicates(in: incoming) {
+                                        pendingDuplicateInputNames = incoming
+                                        withAnimation { showDuplicateConfirm = true }
                                         return
                                     }
 
-                                    addNamesToPoolNow()
+                                    beginAddingNames(incoming)
                                 }
                                 .buttonStyle(.borderedProminent)
                                 .tint(.indigo)
@@ -1217,17 +1321,72 @@ struct ContentView: View {
                 }
             }
             .overlay {
-                if showUpgradeConfirm {
+                if showDuplicateConfirm {
+                    let duplicateCount = poolDuplicateCount(in: pendingDuplicateInputNames)
+
                     ZStack {
                         Color.black.opacity(0.25)
                             .ignoresSafeArea()
 
                         VStack(spacing: 12) {
-                            symbolTitleLabel("✨ Upgrade to Unlimited?", textSize: 22, symbolSize: 24)
+                            Text("Duplicates found")
+                                .font(titleFamilyFont(size: 22))
+                                .multilineTextAlignment(.center)
 
-                            Text("Free supports up to 10 contestants.")
+                            Text("\(duplicateCount) name\(duplicateCount == 1 ? "" : "s") already exist in this pool.")
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+
+                            HStack(spacing: 10) {
+                                Button("Skip duplicates") {
+                                    let namesToAdd = namesExcludingPoolDuplicates(pendingDuplicateInputNames)
+                                    pendingDuplicateInputNames.removeAll()
+                                    withAnimation { showDuplicateConfirm = false }
+                                    beginAddingNames(namesToAdd)
+                                }
+                                .buttonStyle(.bordered)
+                                .font(titleFamilyFont(size: 13))
+
+                                Button("Add all anyway") {
+                                    let namesToAdd = pendingDuplicateInputNames
+                                    pendingDuplicateInputNames.removeAll()
+                                    withAnimation { showDuplicateConfirm = false }
+                                    beginAddingNames(namesToAdd)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(.indigo)
+                                .font(titleFamilyFont(size: 13))
+                            }
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 20)
+                        .background(.ultraThinMaterial)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(.white.opacity(0.65), lineWidth: 2)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .shadow(radius: 12)
+                        .padding(.horizontal, 22)
+                    }
+                    .transition(.opacity)
+                }
+            }
+            .overlay {
+                if showUpgradeConfirm {
+                    ZStack {
+                        Color.black.opacity(0.25)
+                            .ignoresSafeArea()
+
+                        VStack(spacing: 0) {
+                            ScrollView {
+                                VStack(spacing: 12) {
+                            symbolTitleLabel("✨ Upgrade to Unlimited?", textSize: 22, symbolSize: 24)
+
+                            Text("Free supports up to \(freeContestantLimit) contestants.")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.black.opacity(0.78))
                                 .multilineTextAlignment(.center)
 
                             VStack(alignment: .leading, spacing: 4) {
@@ -1236,40 +1395,42 @@ struct ContentView: View {
                                 Text("• Restore purchases anytime")
                             }
                             .font(.footnote.weight(.semibold))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.black.opacity(0.76))
+                            .fixedSize(horizontal: false, vertical: true)
 
-                            HStack(spacing: 10) {
-                                Button("Not Now") {
-                                    dismissKeyboard()
-                                    withAnimation { showUpgradeConfirm = false }
-                                }
-                                .buttonStyle(.bordered)
-                                .font(titleFamilyFont(size: 13))
+                            Text("Unlimited Monthly renews every month until canceled. Unlimited Lifetime is a one-time purchase.")
+                                .font(.caption)
+                                .foregroundStyle(.black.opacity(0.72))
+                                .multilineTextAlignment(.center)
 
-                                Button(purchasingPlan == .lifetime ? "Purchasing…" : "Unlock Lifetime $6.99") {
-                                    dismissKeyboard()
-                                    guard purchasingPlan == nil else { return }
-                                    purchasingPlan = .lifetime
-                                    upgradeErrorText = nil
-                                    Task {
-                                        let success = await purchases.purchase(plan: .lifetime)
-                                        purchasingPlan = nil
-                                        if success {
+                            Group {
+                                if dynamicTypeSize.isAccessibilitySize {
+                                    VStack(spacing: 10) {
+                                        lifetimePurchaseButton
+                                        Button("Not Now") {
+                                            dismissKeyboard()
+                                            pendingNamesForAddition.removeAll()
                                             withAnimation { showUpgradeConfirm = false }
-                                            showBigAlert("✅ Unlimited Unlocked")
-                                            addNamesToPoolNow()
-                                        } else {
-                                            upgradeErrorText = "Couldn’t complete purchase. Check connection and try again."
                                         }
+                                        .buttonStyle(.bordered)
+                                        .font(titleFamilyFont(size: 13))
+                                    }
+                                } else {
+                                    HStack(spacing: 10) {
+                                        Button("Not Now") {
+                                            dismissKeyboard()
+                                            pendingNamesForAddition.removeAll()
+                                            withAnimation { showUpgradeConfirm = false }
+                                        }
+                                        .buttonStyle(.bordered)
+                                        .font(titleFamilyFont(size: 13))
+
+                                        lifetimePurchaseButton
                                     }
                                 }
-                                .buttonStyle(.borderedProminent)
-                                .tint(.indigo)
-                                .font(titleFamilyFont(size: 13))
-                                .disabled(purchasingPlan != nil)
                             }
 
-                            Button(purchasingPlan == .monthly ? "Purchasing…" : "Or Monthly $0.99") {
+                            Button(purchasingPlan == .monthly ? "Purchasing…" : "Unlimited Monthly — \(monthlyPriceText)/month") {
                                 dismissKeyboard()
                                 guard purchasingPlan == nil else { return }
                                 purchasingPlan = .monthly
@@ -1277,10 +1438,12 @@ struct ContentView: View {
                                 Task {
                                     let success = await purchases.purchase(plan: .monthly)
                                     purchasingPlan = nil
-                                    if success {
-                                        withAnimation { showUpgradeConfirm = false }
-                                        showBigAlert("✅ Unlimited Unlocked")
-                                        addNamesToPoolNow()
+                                        if success {
+                                            withAnimation { showUpgradeConfirm = false }
+                                            showBigAlert("✅ Unlimited Unlocked")
+                                            let namesToAdd = pendingNamesForAddition
+                                            pendingNamesForAddition.removeAll()
+                                            addNamesToPoolNow(namesToAdd)
                                     } else {
                                         upgradeErrorText = "Monthly plan unavailable or purchase cancelled."
                                     }
@@ -1288,6 +1451,9 @@ struct ContentView: View {
                             }
                             .buttonStyle(.bordered)
                             .font(titleFamilyFont(size: 12))
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.7)
                             .disabled(purchasingPlan != nil)
 
                             Button("Restore Purchases") {
@@ -1304,7 +1470,7 @@ struct ContentView: View {
                             }
                             .buttonStyle(.plain)
                             .font(.footnote.weight(.semibold))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.black.opacity(0.7))
 
                             if let upgradeErrorText {
                                 Text(upgradeErrorText)
@@ -1312,10 +1478,37 @@ struct ContentView: View {
                                     .foregroundStyle(.red)
                                     .multilineTextAlignment(.center)
                             }
+                            }
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 20)
+                            .frame(maxWidth: .infinity)
+                            .dynamicTypeSize(...DynamicTypeSize.accessibility2)
+                            }
+                            .scrollBounceBehavior(.basedOnSize)
+
+                            Divider()
+
+                            Group {
+                                if dynamicTypeSize.isAccessibilitySize {
+                                    VStack(spacing: 6) {
+                                        Link("Privacy Policy", destination: privacyPolicyURL)
+                                        Link("Terms of Use", destination: standardEULAURL)
+                                    }
+                                } else {
+                                    HStack(spacing: 12) {
+                                        Link("Privacy Policy", destination: privacyPolicyURL)
+                                        Link("Terms of Use", destination: standardEULAURL)
+                                    }
+                                }
+                            }
+                            .font(.caption.weight(.semibold))
+                            .tint(.indigo)
+                            .padding(.vertical, 10)
+                            .accessibilityElement(children: .contain)
+                            .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                         }
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 20)
-                        .background(.ultraThinMaterial)
+                        .frame(height: dynamicTypeSize.isAccessibilitySize ? UIScreen.main.bounds.height * 0.78 : 480)
+                        .background(Color(red: 0.96, green: 0.97, blue: 0.94))
                         .overlay(
                             RoundedRectangle(cornerRadius: 18)
                                 .stroke(.white.opacity(0.65), lineWidth: 2)
@@ -1323,6 +1516,7 @@ struct ContentView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         .shadow(radius: 12)
                         .padding(.horizontal, 22)
+                        .padding(.vertical, 20)
                     }
                     .transition(.opacity)
                 }
@@ -1403,21 +1597,23 @@ struct ContentView: View {
                 }
             }
             .overlay(alignment: .bottom) {
-                VStack(spacing: 10) {
-                    Button("Reset This Pool") { showResetPoolConfirm = true }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.indigo)
-                        .font(titleFamilyFont(size: 14))
-                    Button("Clear This Pool") { showClearPoolConfirm = true }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.red)
-                        .font(titleFamilyFont(size: 14))
+                if !showUpgradeConfirm {
+                    VStack(spacing: 10) {
+                        Button("Reset This Pool") { showResetPoolConfirm = true }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.indigo)
+                            .font(titleFamilyFont(size: 14))
+                        Button("Clear This Pool") { showClearPoolConfirm = true }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.red)
+                            .font(titleFamilyFont(size: 14))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 8)
+                    .padding(.bottom, 10)
+                    .background(NSTheme.bg)
+                    .ignoresSafeArea(edges: .bottom)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.top, 8)
-                .padding(.bottom, 10)
-                .background(NSTheme.bg)
-                .ignoresSafeArea(edges: .bottom)
             }
             .onChange(of: vm.wheelIndex) { _ in
                 guard vm.visualMode == .wheel else { return }
@@ -1487,6 +1683,9 @@ struct ContentView: View {
                 noRepeatToggleUIValue = vm.noRepeatMode
                 pendingNoRepeatValue = vm.noRepeatMode
                 runLaunchSilentModeCheckIfNeeded()
+                if shouldShowUpgradeForUITesting {
+                    showUpgradeConfirm = true
+                }
             }
             .onChange(of: vm.noRepeatMode) { newValue in
                 if !showNoRepeatToggleConfirm {

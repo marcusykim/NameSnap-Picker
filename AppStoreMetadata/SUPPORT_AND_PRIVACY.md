@@ -6,7 +6,7 @@ _Last updated: 2026-02-23_
 If you need help, found a bug, or want to suggest a feature, contact:
 
 **Marcus Kim**
-Email: Mracuth@gmail.com
+Email: sidequestsoftware@proton.me
 
 ## Privacy Policy
 NameSnap is designed to be privacy-first.
@@ -37,4 +37,4 @@ If this policy changes in future releases, the updated version will be posted on
 ## Contact
 For privacy questions, contact:
 **Marcus Kim**
-Email: Mracuth@gmail.com
+Email: sidequestsoftware@proton.me

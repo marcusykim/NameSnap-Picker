@@ -14,7 +14,21 @@
 
   ],
   "products" : [
-
+    {
+      "displayPrice" : "6.99",
+      "familyShareable" : false,
+      "internalID" : "namesnap-unlimited-lifetime",
+      "localizations" : [
+        {
+          "description" : "Unlock unlimited contestants forever.",
+          "displayName" : "NameSnap Unlimited Lifetime",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "namesnap.unlimited_lifetime_699",
+      "referenceName" : "NameSnap Unlimited Lifetime",
+      "type" : "Non-Consumable"
+    }
   ],
   "settings" : {
     "_askToBuyEnabled" : false,
@@ -31,7 +45,34 @@
     "_timeRate" : 0
   },
   "subscriptionGroups" : [
-
+    {
+      "id" : "namesnap-unlimited",
+      "localizations" : [
+        {
+          "description" : "Unlimited contestants for NameSnap Picker.",
+          "displayName" : "NameSnap Unlimited",
+          "locale" : "en_US"
+        }
+      ],
+      "name" : "NameSnap Unlimited",
+      "subscriptions" : [
+        {
+          "displayPrice" : "0.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "localizations" : [
+            {
+              "description" : "Unlock unlimited contestants with a monthly subscription.",
+              "displayName" : "NameSnap Unlimited Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "namesnap.unlimited_monthly_099",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "NameSnap Unlimited Monthly"
+        }
+      ]
+    }
   ],
   "version" : {
     "major" : 4,

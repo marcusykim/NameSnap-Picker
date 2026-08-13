@@ -50,6 +50,9 @@
             ReferencedContainer = "container:NameSnap.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <StoreKitConfigurationFileReference
+         identifier = "../../NameSnap/SupportingFiles/NameSnap.storekit">
+      </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
