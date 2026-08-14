@@ -1,49 +1,25 @@
-# NameSnap
+# NameSnap Picker
 
-Playful random name picker for classrooms, giveaways, party games, and streams.
+NameSnap is a playful, privacy-first random-name picker for classrooms, giveaways, party games, and streams.
 
-## Core MVP
-- Paste/import names (comma/newline)
-- Spin animation with haptics
-- No-repeat mode
-- Include/exclude contestants
-- Winner history (local only)
+## Highlights
 
-## Privacy
-- No account
-- No tracking
-- Local-only data
+- Paste or import a list of names
+- Animated spin-to-select interaction with haptic feedback
+- No-repeat mode and local winner history
+- Include and exclude controls for contestants
+- Local-only data: no account and no tracking
 
-## TestFlight Upload (Option B)
+## Technology
 
-### One command setup (with App Store Connect API key or Apple ID)
+- Swift and SwiftUI
+- StoreKit prototype for local purchase-flow testing
+- Xcode project with iPhone and iPad assets
 
-Create these environment variables once in your shell:
+## Public repository notes
 
-```bash
-export APP_STORE_CONNECT_API_KEY_PATH=/Users/marcuskim/.AuthKey_4HA95XB6S5.p8
-export APP_STORE_CONNECT_API_KEY_ID=4HA95XB6S5
-export APP_STORE_CONNECT_API_KEY_ISSUER_ID=67c52852-b22f-4e49-ad81-df53bf4476fb
-export APP_STORE_CONNECT_API_KEY_ISSUER_ID=REPLACE_WITH_ISSUER_ID
-```
+This repository is intended as a portfolio and code-review sample. Publishing credentials, signing material, account identifiers, and other local deployment configuration are deliberately excluded. Configure those values only in your local environment or in your CI secret store; never commit them to source control.
 
-Then run:
+## Portfolio
 
-```bash
-./scripts/namesnap-upload-testflight.sh
-
-# Or Apple ID mode (if API auth is not available)
-export APP_STORE_CONNECT_APPLE_ID=you@appleid.com
-export APP_STORE_CONNECT_APP_SPECIFIC_PASSWORD='@env:APP_SPECIFIC_PASSWORD'
-export APP_SPECIFIC_PASSWORD='xxxx xxxx xxxx xxxx xxxx'
-export APP_STORE_CONNECT_PROVIDER_PUBLIC_ID=67c52852-b22f-4e49-ad81-df53bf4476fb  # if needed
-
-./scripts/namesnap-upload-testflight.sh
-```
-
-Optional flags:
-
-- `--build-number 4` to force a specific `CURRENT_PROJECT_VERSION`
-- `--skip-validate` to skip `xcrun altool --validate-app`
-- `--skip-upload` to only create the IPA
-- `--key-path`, `--key-id`, `--issuer-id` to override env vars
+See the broader mobile portfolio at [github.com/marcusykim](https://github.com/marcusykim).
