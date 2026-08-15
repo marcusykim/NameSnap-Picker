@@ -2,7 +2,7 @@ default_platform(:ios)
 
 APP_IDENTIFIER = "com.marcuskim.namesnap"
 APP_VERSION = "2.0"
-APP_BUILD = "11"
+APP_BUILD = "15"
 API_KEY_ID = "4HA95XB6S5"
 API_KEY_ISSUER_ID = "67c52852-b22f-4e49-ad81-df53bf4476fb"
 API_KEY_PATH = "/Users/marcuskim/.AuthKey_4HA95XB6S5.p8"
@@ -61,7 +61,7 @@ platform :ios do
     )
   end
 
-  desc "Select build 11 and submit NameSnap 2.0 for full App Store review"
+  desc "Select build 15 and submit NameSnap 2.0 for full App Store review"
   lane :submit_production do
     upload_to_app_store(
       api_key: namesnap_api_key,

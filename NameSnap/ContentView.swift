@@ -410,6 +410,7 @@ final class NameSnapPurchaseManager: ObservableObject {
     @Published var isUnlimitedUnlocked = false
     @Published var lifetimeProduct: Product?
     @Published var monthlyProduct: Product?
+    @Published private(set) var storeEnvironment: AppStore.Environment?
 
     private let lifetimeProductIds = [
         "namesnap.unlimited_lifetime_699"
@@ -420,6 +421,17 @@ final class NameSnapPurchaseManager: ObservableObject {
 
     private var allProductIds: [String] {
         lifetimeProductIds + monthlyProductIds
+    }
+
+    var isTestStoreEnvironment: Bool {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-ui-test-store") ||
+            ProcessInfo.processInfo.environment["NAMESNAP_UI_TEST_STORE"] == "1" {
+            return true
+        }
+        #endif
+
+        return storeEnvironment == .sandbox || storeEnvironment == .xcode
     }
 
     init() {
@@ -440,9 +452,22 @@ final class NameSnapPurchaseManager: ObservableObject {
     }
 
     func refreshEntitlements() async {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["NAMESNAP_UI_TEST_PRODUCTION_ENTITLEMENT"] == "1" {
+            isUnlimitedUnlocked = true
+            storeEnvironment = .production
+            return
+        } else if ProcessInfo.processInfo.environment["NAMESNAP_UI_TEST_ENTITLEMENT"] == "1" {
+            isUnlimitedUnlocked = true
+            storeEnvironment = .sandbox
+            return
+        }
+        #endif
+
         isUnlimitedUnlocked = false
         for await result in Transaction.currentEntitlements {
             guard case .verified(let transaction) = result else { continue }
+            storeEnvironment = transaction.environment
             if lifetimeProductIds.contains(transaction.productID) || monthlyProductIds.contains(transaction.productID) {
                 isUnlimitedUnlocked = true
                 return
@@ -469,6 +494,7 @@ final class NameSnapPurchaseManager: ObservableObject {
             switch result {
             case .success(let verification):
                 guard case .verified(let transaction) = verification else { return false }
+                storeEnvironment = transaction.environment
                 isUnlimitedUnlocked = true
                 await transaction.finish()
                 return true
@@ -526,6 +552,7 @@ struct ContentView: View {
     @State private var pendingWinnerDisplay: String = ""
     @State private var pendingNamesForAddition: [String] = []
     @State private var pendingDuplicateInputNames: [String] = []
+    @State private var didRunThresholdPaywallCheck = false
 
     private let flashColors: [Color] = [.pink, .yellow, .cyan, .green, .orange, .purple]
     private let freeContestantLimit = 16
@@ -538,6 +565,42 @@ struct ContentView: View {
         #else
         false
         #endif
+    }
+
+    private var shouldTriggerThresholdPaywallForUITesting: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-ui-threshold-paywall") ||
+            ProcessInfo.processInfo.environment["NAMESNAP_UI_THRESHOLD"] == "1"
+        #else
+        false
+        #endif
+    }
+
+    private var shouldSimulateTestEntitlementForUITesting: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-ui-test-entitlement") ||
+            ProcessInfo.processInfo.environment["NAMESNAP_UI_TEST_ENTITLEMENT"] == "1"
+        #else
+        false
+        #endif
+    }
+
+    private var shouldSimulateProductionEntitlementForUITesting: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["NAMESNAP_UI_TEST_PRODUCTION_ENTITLEMENT"] == "1"
+        #else
+        false
+        #endif
+    }
+
+    private var thresholdContestantCountForUITesting: Int {
+        #if DEBUG
+        if let value = ProcessInfo.processInfo.environment["NAMESNAP_UI_CONTESTANT_COUNT"],
+           let count = Int(value), count > 0 {
+            return count
+        }
+        #endif
+        return freeContestantLimit + 1
     }
 
     private var lifetimePriceText: String {
@@ -699,10 +762,11 @@ struct ContentView: View {
         }
     }
 
-    private func canAddContestants(currentCount: Int, incomingCount: Int) -> Bool {
-        guard incomingCount > 0 else { return true }
-        if purchases.isUnlimitedUnlocked { return true }
-        return (currentCount + incomingCount) <= freeContestantLimit
+    private func shouldPresentPaywall(currentCount: Int, incomingCount: Int) -> Bool {
+        guard incomingCount > 0 else { return false }
+        guard (currentCount + incomingCount) > freeContestantLimit else { return false }
+        if !purchases.isUnlimitedUnlocked { return true }
+        return purchases.isTestStoreEnvironment
     }
 
     private func normalizedName(_ name: String) -> String {
@@ -732,7 +796,7 @@ struct ContentView: View {
             return
         }
 
-        if !canAddContestants(currentCount: vm.entries.count, incomingCount: names.count) {
+        if shouldPresentPaywall(currentCount: vm.entries.count, incomingCount: names.count) {
             pendingNamesForAddition = names
             withAnimation { showUpgradeConfirm = true }
             return
@@ -907,6 +971,8 @@ struct ContentView: View {
                         Text("NameSnap")
                             .font(titleFont)
                             .foregroundStyle(NSTheme.skyBlue)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
                             .frame(maxWidth: .infinity, alignment: .leading)
 
                         card {
@@ -1430,7 +1496,7 @@ struct ContentView: View {
                                 }
                             }
 
-                            Button(purchasingPlan == .monthly ? "Purchasing…" : "Unlimited Monthly — \(monthlyPriceText)/month") {
+                            Button(purchasingPlan == .monthly ? "Purchasing…" : "Or Monthly \(monthlyPriceText)") {
                                 dismissKeyboard()
                                 guard purchasingPlan == nil else { return }
                                 purchasingPlan = .monthly
@@ -1438,12 +1504,12 @@ struct ContentView: View {
                                 Task {
                                     let success = await purchases.purchase(plan: .monthly)
                                     purchasingPlan = nil
-                                        if success {
-                                            withAnimation { showUpgradeConfirm = false }
-                                            showBigAlert("✅ Unlimited Unlocked")
-                                            let namesToAdd = pendingNamesForAddition
-                                            pendingNamesForAddition.removeAll()
-                                            addNamesToPoolNow(namesToAdd)
+                                    if success {
+                                        withAnimation { showUpgradeConfirm = false }
+                                        showBigAlert("✅ Unlimited Unlocked")
+                                        let namesToAdd = pendingNamesForAddition
+                                        pendingNamesForAddition.removeAll()
+                                        addNamesToPoolNow(namesToAdd)
                                     } else {
                                         upgradeErrorText = "Monthly plan unavailable or purchase cancelled."
                                     }
@@ -1507,7 +1573,7 @@ struct ContentView: View {
                             .accessibilityElement(children: .contain)
                             .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                         }
-                        .frame(height: dynamicTypeSize.isAccessibilitySize ? UIScreen.main.bounds.height * 0.78 : 480)
+                        .frame(height: dynamicTypeSize.isAccessibilitySize ? UIScreen.main.bounds.height * 0.88 : 480)
                         .background(Color(red: 0.96, green: 0.97, blue: 0.94))
                         .overlay(
                             RoundedRectangle(cornerRadius: 18)
@@ -1597,7 +1663,7 @@ struct ContentView: View {
                 }
             }
             .overlay(alignment: .bottom) {
-                if !showUpgradeConfirm {
+                if !showUpgradeConfirm && !vm.entries.isEmpty {
                     VStack(spacing: 10) {
                         Button("Reset This Pool") { showResetPoolConfirm = true }
                             .buttonStyle(.borderedProminent)
@@ -1683,7 +1749,17 @@ struct ContentView: View {
                 noRepeatToggleUIValue = vm.noRepeatMode
                 pendingNoRepeatValue = vm.noRepeatMode
                 runLaunchSilentModeCheckIfNeeded()
-                if shouldShowUpgradeForUITesting {
+                if shouldTriggerThresholdPaywallForUITesting && !didRunThresholdPaywallCheck {
+                    didRunThresholdPaywallCheck = true
+                    if shouldSimulateTestEntitlementForUITesting || shouldSimulateProductionEntitlementForUITesting {
+                        purchases.isUnlimitedUnlocked = true
+                    }
+                    let names = (1...thresholdContestantCountForUITesting).map { "Contestant \($0)" }
+                    vm.rawInput = names.enumerated().map { "\($0.offset + 1). \($0.element)" }.joined(separator: "\n")
+                    DispatchQueue.main.async {
+                        beginAddingNames(names)
+                    }
+                } else if shouldShowUpgradeForUITesting {
                     showUpgradeConfirm = true
                 }
             }
@@ -1735,6 +1811,7 @@ struct ContentView: View {
             .preferredColorScheme(.light)
             .navigationBarHidden(true)
         }
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
     }
 
     @ViewBuilder
