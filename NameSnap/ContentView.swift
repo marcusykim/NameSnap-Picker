@@ -78,29 +78,142 @@ private struct WinnerCelebration: Identifiable {
 }
 
 enum NSTheme {
+    static let ink = Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255)
     static let bg = Color(red: 224 / 255, green: 244 / 255, blue: 171 / 255)
     static let skyBlue = Color(red: 107 / 255, green: 163 / 255, blue: 204 / 255)
     static let tan = Color(red: 199 / 255, green: 171 / 255, blue: 138 / 255)
     static let card = Color(red: 242 / 255, green: 244 / 255, blue: 250 / 255)
     static let yellow = Color(red: 247 / 255, green: 220 / 255, blue: 96 / 255)
+    static let lavender = Color(red: 163 / 255, green: 154 / 255, blue: 207 / 255)
+    static let violet = Color(red: 88 / 255, green: 86 / 255, blue: 214 / 255)
+    static let hotPink = Color(red: 1, green: 45 / 255, blue: 85 / 255)
+    static let warmWhite = Color(red: 249 / 255, green: 248 / 255, blue: 244 / 255)
+
+    static let pageGradient = LinearGradient(
+        colors: [
+            bg,
+            Color(red: 218 / 255, green: 214 / 255, blue: 244 / 255),
+            Color(red: 244 / 255, green: 246 / 255, blue: 252 / 255)
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
+    static let panelGradient = LinearGradient(
+        colors: [lavender.opacity(0.72), Color.white.opacity(0.96), card],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
+    static let fieldGradient = LinearGradient(
+        colors: [Color.white, Color(red: 239 / 255, green: 239 / 255, blue: 252 / 255)],
+        startPoint: .top,
+        endPoint: .bottomTrailing
+    )
 }
 
 private struct NameSnapActionModalSurface: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .background(.ultraThinMaterial)
+            .background(NSTheme.panelGradient)
+            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 18)
-                    .stroke(.white.opacity(0.65), lineWidth: 2)
+                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                    .stroke(NSTheme.ink, lineWidth: 3)
             )
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(radius: 12)
+            .background {
+                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                    .fill(NSTheme.violet)
+                    .offset(x: 7, y: 9)
+            }
+            .shadow(color: NSTheme.ink.opacity(0.2), radius: 20, x: 0, y: 16)
+    }
+}
+
+private struct NameSnapPanelSurface: ViewModifier {
+    let cornerRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        content
+            .background(NSTheme.panelGradient)
+            .clipShape(shape)
+            .overlay(shape.stroke(NSTheme.ink, lineWidth: 2.5))
+            .background {
+                shape
+                    .fill(NSTheme.violet)
+                    .offset(x: 6, y: 7)
+            }
+            .shadow(color: NSTheme.ink.opacity(0.14), radius: 12, x: 0, y: 10)
+    }
+}
+
+private enum NameSnapButtonTone {
+    case primary
+    case secondary
+    case destructive
+    case warm
+
+    var fill: LinearGradient {
+        switch self {
+        case .primary:
+            return LinearGradient(colors: [NSTheme.lavender, NSTheme.skyBlue], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .secondary:
+            return LinearGradient(colors: [Color.white, NSTheme.card], startPoint: .top, endPoint: .bottomTrailing)
+        case .destructive:
+            return LinearGradient(colors: [NSTheme.hotPink, Color(red: 1, green: 112 / 255, blue: 96 / 255)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .warm:
+            return LinearGradient(colors: [NSTheme.yellow, NSTheme.tan], startPoint: .topLeading, endPoint: .bottomTrailing)
+        }
+    }
+}
+
+private struct NameSnapButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+    let tone: NameSnapButtonTone
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(NSTheme.ink)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 11)
+            .frame(maxWidth: .infinity, minHeight: 46)
+            .background(tone.fill)
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(NSTheme.ink, lineWidth: 2.5))
+            .shadow(color: NSTheme.ink, radius: 0, x: 0, y: configuration.isPressed ? 1 : 5)
+            .offset(y: configuration.isPressed ? 4 : 0)
+            .opacity(isEnabled ? 1 : 0.42)
+            .animation(.spring(response: 0.2, dampingFraction: 0.72), value: configuration.isPressed)
+    }
+}
+
+private struct NameSnapModeButtonStyle: ButtonStyle {
+    let isSelected: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(celebrationTitleFont(size: 10))
+            .foregroundStyle(NSTheme.ink)
+            .padding(.horizontal, 10)
+            .frame(maxWidth: .infinity, minHeight: 42)
+            .background(isSelected ? NameSnapButtonTone.warm.fill : NameSnapButtonTone.secondary.fill)
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(NSTheme.ink, lineWidth: 2))
+            .shadow(color: isSelected ? NSTheme.violet : Color.clear, radius: 0, x: 0, y: isSelected ? 4 : 0)
+            .offset(y: configuration.isPressed ? 2 : 0)
+            .animation(.spring(response: 0.22, dampingFraction: 0.72), value: configuration.isPressed)
     }
 }
 
 private extension View {
     func nameSnapActionModalSurface() -> some View {
         modifier(NameSnapActionModalSurface())
+    }
+
+    func nameSnapPanelSurface(cornerRadius: CGFloat = 24) -> some View {
+        modifier(NameSnapPanelSurface(cornerRadius: cornerRadius))
     }
 }
 
@@ -1037,8 +1150,7 @@ struct ContentView: View {
                 }
             }
         }
-        .buttonStyle(.borderedProminent)
-        .tint(.indigo)
+        .buttonStyle(NameSnapButtonStyle(tone: .primary))
         .font(titleFamilyFont(size: 13))
         .multilineTextAlignment(.center)
         .lineLimit(2)
@@ -1451,7 +1563,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                NSTheme.bg
+                NSTheme.pageGradient
                     .ignoresSafeArea()
                     .contentShape(Rectangle())
                     .onTapGesture {
@@ -1459,26 +1571,69 @@ struct ContentView: View {
                     }
 
                 ScrollView {
-                    VStack(spacing: 16) {
-                        Text("NameSnap")
-                            .font(titleFont)
-                            .foregroundStyle(NSTheme.skyBlue)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.5)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                    VStack(spacing: 20) {
+                        HStack(alignment: .center, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("NAMESNAP")
+                                    .font(titleFont)
+                                    .foregroundStyle(NSTheme.ink)
+                                    .shadow(color: NSTheme.skyBlue, radius: 0, x: 3, y: 3)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.5)
+
+                                Text("RANDOM PICKER")
+                                    .font(titleFamilyFont(size: 9))
+                                    .foregroundStyle(NSTheme.violet)
+                                    .tracking(2.2)
+                            }
+
+                            Spacer(minLength: 6)
+
+                            Text(vm.entries.isEmpty ? "READY TO BUILD" : "\(vm.availableEntries.count) ELIGIBLE")
+                                .font(titleFamilyFont(size: 8))
+                                .foregroundStyle(NSTheme.ink)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 9)
+                                .background(NSTheme.yellow)
+                                .clipShape(Capsule())
+                                .overlay(Capsule().stroke(NSTheme.ink, lineWidth: 2))
+                                .shadow(color: NSTheme.violet, radius: 0, x: 3, y: 4)
+                        }
+                        .padding(.horizontal, 2)
 
                         card {
-                            VStack(alignment: .leading, spacing: 10) {
-                                Text("Contestant List")
-                                    .font(.headline)
+                            VStack(alignment: .leading, spacing: 14) {
+                                HStack(alignment: .firstTextBaseline) {
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text("CONTESTANT LIST")
+                                            .font(titleFamilyFont(size: 15))
+                                            .foregroundStyle(NSTheme.ink)
+
+                                        Text("One name per line. Numbers stay with the pool.")
+                                            .font(.caption.weight(.semibold))
+                                            .foregroundStyle(NSTheme.ink.opacity(0.64))
+                                    }
+
+                                    Spacer()
+
+                                    Text("\(vm.parsedInputNames.count) READY")
+                                        .font(titleFamilyFont(size: 7))
+                                        .foregroundStyle(NSTheme.ink)
+                                        .padding(.horizontal, 9)
+                                        .padding(.vertical, 7)
+                                        .background(NSTheme.yellow.opacity(0.88))
+                                        .clipShape(Capsule())
+                                        .overlay(Capsule().stroke(NSTheme.ink, lineWidth: 1.5))
+                                }
 
                                 ZStack(alignment: .topLeading) {
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.white)
+                                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                        .fill(NSTheme.fieldGradient)
                                         .overlay(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .stroke(NSTheme.skyBlue.opacity(0.8), lineWidth: 2)
+                                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                                .stroke(NSTheme.ink, lineWidth: 2.5)
                                         )
+                                        .shadow(color: NSTheme.skyBlue, radius: 0, x: 4, y: 5)
 
                                     InlineTrashTextView(
                                         text: $vm.rawInput,
@@ -1491,7 +1646,7 @@ struct ContentView: View {
                                     .background(Color.clear)
                                 }
 
-                                Button("Add These Names to Pool") {
+                                Button("ADD THESE NAMES TO POOL") {
                                     dismissKeyboard()
                                     let incoming = vm.parsedInputNames
                                     guard !incoming.isEmpty else { return }
@@ -1504,62 +1659,73 @@ struct ContentView: View {
 
                                     beginAddingNames(incoming)
                                 }
-                                .buttonStyle(.borderedProminent)
-                                .tint(.indigo)
+                                .buttonStyle(NameSnapButtonStyle(tone: .primary))
                                 .font(titleFamilyFont(size: 14))
+                                .frame(maxWidth: .infinity)
                                 .scaleEffect(pulseAddButton ? 0.96 : 1)
 
-                                Button("Undo Last Add") {
-                                    dismissKeyboard()
-                                    let removed = vm.undoLastAdd()
-                                    guard removed > 0 else { return }
-                                    showBigAlert("↩️ Undid \(removed)")
-                                }
-                                .buttonStyle(.bordered)
-                                .tint(.orange)
-                                .font(titleFamilyFont(size: 13))
+                                HStack(spacing: 10) {
+                                    Button("UNDO LAST ADD") {
+                                        dismissKeyboard()
+                                        let removed = vm.undoLastAdd()
+                                        guard removed > 0 else { return }
+                                        showBigAlert("↩️ Undid \(removed)")
+                                    }
+                                    .buttonStyle(NameSnapButtonStyle(tone: .secondary))
+                                    .font(titleFamilyFont(size: 9))
+                                    .frame(maxWidth: .infinity)
 
-                                Button("Clear This List") {
-                                    dismissKeyboard()
-                                    vm.clearInputList()
-                                    showBigAlert("🧹 List Cleared")
+                                    Button("CLEAR THIS LIST") {
+                                        dismissKeyboard()
+                                        vm.clearInputList()
+                                        showBigAlert("🧹 List Cleared")
+                                    }
+                                    .buttonStyle(NameSnapButtonStyle(tone: .destructive))
+                                    .font(titleFamilyFont(size: 9))
+                                    .frame(maxWidth: .infinity)
                                 }
-                                    .buttonStyle(.borderedProminent)
-                                    .tint(.red)
-                                    .font(titleFamilyFont(size: 13))
+                            }
+                        }
 
-                                HStack {
+                        card {
+                            VStack(alignment: .leading, spacing: 14) {
+                                Text("DRAW SETUP")
+                                    .font(titleFamilyFont(size: 14))
+                                    .foregroundStyle(NSTheme.ink)
+
+                                HStack(spacing: 12) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("NO REPEATS")
+                                            .font(titleFamilyFont(size: 10))
+                                            .foregroundStyle(NSTheme.ink)
+                                        Text("Winners sit out until reset")
+                                            .font(.caption2.weight(.semibold))
+                                            .foregroundStyle(NSTheme.ink.opacity(0.62))
+                                    }
                                     Spacer()
-                                    Text("Input total: \(vm.parsedInputNames.count)")
-                                        .font(.caption.bold())
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 6)
-                                        .background(.ultraThinMaterial)
-                                        .clipShape(Capsule())
+                                    Toggle("", isOn: $noRepeatToggleUIValue)
+                                        .labelsHidden()
+                                        .tint(NSTheme.violet)
+                                        .onChange(of: noRepeatToggleUIValue) { newValue in
+                                            guard !suppressNoRepeatToggleConfirm else { return }
+                                            pendingNoRepeatValue = newValue
+                                            withAnimation { showNoRepeatToggleConfirm = true }
+                                        }
+                                }
+
+                                HStack(spacing: 10) {
+                                    ForEach(SpinVisualMode.allCases) { mode in
+                                        Button(mode == .classic ? "QUICK PICK" : "SPIN WHEEL") {
+                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                                vm.visualMode = mode
+                                            }
+                                        }
+                                        .buttonStyle(NameSnapModeButtonStyle(isSelected: vm.visualMode == mode))
+                                        .accessibilityAddTraits(vm.visualMode == mode ? .isSelected : [])
+                                    }
                                 }
                             }
                         }
-
-                        HStack(spacing: 12) {
-                            Text("No repeats until reset")
-                                .font(.body.weight(.medium))
-                            Toggle("", isOn: $noRepeatToggleUIValue)
-                                .labelsHidden()
-                                .tint(.indigo)
-                                .onChange(of: noRepeatToggleUIValue) { newValue in
-                                    guard !suppressNoRepeatToggleConfirm else { return }
-                                    pendingNoRepeatValue = newValue
-                                    withAnimation { showNoRepeatToggleConfirm = true }
-                                }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .center)
-
-                        Picker("Spin Mode", selection: $vm.visualMode) {
-                            ForEach(SpinVisualMode.allCases) { mode in
-                                Text(mode.rawValue).tag(mode)
-                            }
-                        }
-                        .pickerStyle(.segmented)
 
                         if vm.visualMode == .classic {
                             Button {
@@ -1572,35 +1738,46 @@ struct ContentView: View {
                             } label: {
                                 ZStack {
                                     Circle()
-                                        .fill(NSTheme.tan)
-                                        .frame(width: 250, height: 250)
-                                        .opacity(0.55)
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [NSTheme.lavender, NSTheme.skyBlue],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
+                                        )
+                                        .frame(width: 258, height: 258)
+                                        .overlay(Circle().stroke(NSTheme.ink, lineWidth: 4))
+                                        .shadow(color: NSTheme.violet, radius: 0, x: 8, y: 10)
 
                                     Circle()
-                                        .fill(NSTheme.yellow)
-                                        .frame(width: 160, height: 160)
-                                        .shadow(color: NSTheme.yellow.opacity(0.5), radius: 10, y: 4)
+                                        .fill(NameSnapButtonTone.warm.fill)
+                                        .frame(width: 166, height: 166)
+                                        .overlay(Circle().stroke(NSTheme.ink, lineWidth: 3))
+                                        .shadow(color: NSTheme.ink, radius: 0, x: 4, y: 5)
 
-                                    Text(vm.isSpinning ? "Spinning" : "Spin")
-                                        .font(titleFamilyFont(size: 32))
-                                        .foregroundStyle(NSTheme.skyBlue)
+                                    Text(vm.isSpinning ? "SPINNING" : "SPIN")
+                                        .font(titleFamilyFont(size: vm.isSpinning ? 21 : 32))
+                                        .foregroundStyle(NSTheme.ink)
                                 }
                             }
+                            .buttonStyle(.plain)
                             .disabled(vm.isSpinning || vm.entries.isEmpty)
                             .opacity(vm.entries.isEmpty ? 0.45 : 1)
                             .padding(.vertical, 6)
                         } else {
                             card {
                                 VStack(alignment: .leading, spacing: 10) {
-                                    Text("Wheel")
+                                    Text("SPIN WHEEL")
                                         .font(titleFamilyFont(size: 16))
+                                        .foregroundStyle(NSTheme.ink)
                                     if vm.wheelVirtualRowCount == 0 {
                                         Text("No available contestants")
                                             .font(.subheadline.weight(.semibold))
-                                            .foregroundStyle(.secondary)
+                                            .foregroundStyle(NSTheme.ink.opacity(0.62))
                                             .frame(maxWidth: .infinity, minHeight: 140)
-                                            .background(.ultraThinMaterial)
-                                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                            .background(NSTheme.fieldGradient)
+                                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(NSTheme.ink, lineWidth: 2))
                                     } else {
                                         InfiniteWheelPicker(
                                             entries: vm.wheelBaseEntries,
@@ -1612,7 +1789,7 @@ struct ContentView: View {
                                         .contentShape(Rectangle())
                                     }
 
-                                    Button(vm.isSpinning ? "Spinning" : "Spin Wheel") {
+                                    Button(vm.isSpinning ? "SPINNING" : "SPIN THE WHEEL") {
                                         dismissKeyboard()
                                         if vm.activeEntries.isEmpty && !vm.entries.isEmpty {
                                             showBigAlert("⚠️ All winners have been selected")
@@ -1622,9 +1799,9 @@ struct ContentView: View {
                                             vm.spin()
                                         }
                                     }
-                                    .buttonStyle(.borderedProminent)
-                                    .tint(.indigo)
+                                    .buttonStyle(NameSnapButtonStyle(tone: .warm))
                                     .font(titleFamilyFont(size: 15))
+                                    .frame(maxWidth: .infinity)
                                     .disabled(vm.isSpinning || vm.entries.isEmpty)
                                     .opacity(vm.entries.isEmpty ? 0.45 : 1)
                                 }
@@ -1633,24 +1810,31 @@ struct ContentView: View {
 
                         if !vm.selectedName.isEmpty {
                             Text(vm.selectedName)
-                                .font(.title2.bold())
+                                .font(titleFamilyFont(size: 24))
+                                .foregroundStyle(NSTheme.ink)
+                                .multilineTextAlignment(.center)
+                                .minimumScaleFactor(0.62)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 18)
                                 .background(
                                     LinearGradient(
-                                        colors: [NSTheme.yellow.opacity(0.4), Color.orange.opacity(0.18)],
+                                        colors: [NSTheme.yellow, NSTheme.tan.opacity(0.82)],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     )
                                 )
-                                .clipShape(RoundedRectangle(cornerRadius: 14))
+                                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                                .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(NSTheme.ink, lineWidth: 3))
+                                .shadow(color: NSTheme.violet, radius: 0, x: 6, y: 7)
                         }
 
                         if !vm.history.isEmpty {
                             card {
                                 VStack(alignment: .leading, spacing: 8) {
-                                    Text("Recent winners")
-                                        .font(.headline)
+                                    Text("RECENT WINNERS")
+                                        .font(titleFamilyFont(size: 14))
+                                        .foregroundStyle(NSTheme.ink)
                                     ForEach(vm.history) { item in
                                         Text("• \(item.displayText)")
                                     }
@@ -1661,10 +1845,20 @@ struct ContentView: View {
                         if !vm.entries.isEmpty {
                             card {
                                 VStack(alignment: .leading, spacing: 8) {
-                                    Text("Pool")
-                                        .font(.headline)
-                                        .foregroundColor(.black)
-                                        .foregroundColor(.black)
+                                    HStack {
+                                        Text("ACTIVE POOL")
+                                            .font(titleFamilyFont(size: 14))
+                                            .foregroundStyle(NSTheme.ink)
+                                        Spacer()
+                                        Text("\(vm.poolEntriesForDisplay.count) TOTAL")
+                                            .font(titleFamilyFont(size: 7))
+                                            .foregroundStyle(NSTheme.ink)
+                                            .padding(.horizontal, 9)
+                                            .padding(.vertical, 7)
+                                            .background(NSTheme.yellow.opacity(0.88))
+                                            .clipShape(Capsule())
+                                            .overlay(Capsule().stroke(NSTheme.ink, lineWidth: 1.5))
+                                    }
                                     ForEach(vm.poolEntriesForDisplay) { entry in
                                         HStack(spacing: 10) {
                                             Button {
@@ -1672,9 +1866,10 @@ struct ContentView: View {
                                             } label: {
                                                 HStack(spacing: 10) {
                                                     Image(systemName: entry.isIncluded ? "checkmark.circle.fill" : "circle")
-                                                        .foregroundStyle(entry.isIncluded ? Color.indigo : Color.gray)
+                                                        .foregroundStyle(entry.isIncluded ? NSTheme.violet : Color.gray)
                                                     Text("\(entry.drawNumber). \(entry.name)")
-                                                        .foregroundColor(.black)
+                                                        .foregroundStyle(NSTheme.ink)
+                                                        .font(.body.weight(.semibold))
                                                     Spacer()
                                                 }
                                                 .padding(.vertical, 4)
@@ -1690,16 +1885,11 @@ struct ContentView: View {
                                             }
                                             .buttonStyle(.plain)
                                         }
-                                    }
-
-                                    HStack {
-                                        Spacer()
-                                        Text("Pool total: \(vm.poolEntriesForDisplay.count)")
-                                            .font(.caption.bold())
-                                            .padding(.horizontal, 10)
-                                            .padding(.vertical, 6)
-                                            .background(.ultraThinMaterial)
-                                            .clipShape(Capsule())
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 7)
+                                        .background(NSTheme.fieldGradient)
+                                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(NSTheme.ink.opacity(0.72), lineWidth: 1.5))
                                     }
                                 }
                             }
@@ -1759,7 +1949,7 @@ struct ContentView: View {
 
                             Text("This keeps names, but resets inclusion and no-repeat history.")
                                 .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(NSTheme.ink.opacity(0.68))
                                 .multilineTextAlignment(.center)
 
                             HStack(spacing: 10) {
@@ -1767,7 +1957,7 @@ struct ContentView: View {
                                     dismissKeyboard()
                                     withAnimation { showResetPoolConfirm = false }
                                 }
-                                .buttonStyle(.bordered)
+                                .buttonStyle(NameSnapButtonStyle(tone: .secondary))
                                 .font(titleFamilyFont(size: 13))
 
                                 Button("Reset Pool") {
@@ -1784,8 +1974,7 @@ struct ContentView: View {
                                         suppressWheelSettle = false
                                     }
                                 }
-                                .buttonStyle(.borderedProminent)
-                                .tint(.indigo)
+                                .buttonStyle(NameSnapButtonStyle(tone: .warm))
                                 .font(titleFamilyFont(size: 13))
                             }
                         }
@@ -1809,7 +1998,7 @@ struct ContentView: View {
 
                             Text("This removes all names from the current pool.")
                                 .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(NSTheme.ink.opacity(0.68))
                                 .multilineTextAlignment(.center)
 
                             HStack(spacing: 10) {
@@ -1817,7 +2006,7 @@ struct ContentView: View {
                                     dismissKeyboard()
                                     withAnimation { showClearPoolConfirm = false }
                                 }
-                                .buttonStyle(.bordered)
+                                .buttonStyle(NameSnapButtonStyle(tone: .secondary))
                                 .font(titleFamilyFont(size: 13))
 
                                 Button("Clear Pool") {
@@ -1834,8 +2023,7 @@ struct ContentView: View {
                                         suppressWheelSettle = false
                                     }
                                 }
-                                .buttonStyle(.borderedProminent)
-                                .tint(.red)
+                                .buttonStyle(NameSnapButtonStyle(tone: .destructive))
                                 .font(titleFamilyFont(size: 13))
                             }
                         }
@@ -1861,8 +2049,7 @@ struct ContentView: View {
                                 dismissKeyboard()
                                 withAnimation { showSoundOnHint = false }
                             }
-                            .buttonStyle(.borderedProminent)
-                            .tint(.indigo)
+                            .buttonStyle(NameSnapButtonStyle(tone: .warm))
                             .font(titleFamilyFont(size: 13))
                         }
                         .padding(.horizontal, 18)
@@ -1889,7 +2076,7 @@ struct ContentView: View {
 
                             Text("\(duplicateCount) name\(duplicateCount == 1 ? "" : "s") already exist in this pool.")
                                 .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(NSTheme.ink.opacity(0.68))
                                 .multilineTextAlignment(.center)
 
                             HStack(spacing: 10) {
@@ -1899,7 +2086,7 @@ struct ContentView: View {
                                     withAnimation { showDuplicateConfirm = false }
                                     beginAddingNames(namesToAdd)
                                 }
-                                .buttonStyle(.bordered)
+                                .buttonStyle(NameSnapButtonStyle(tone: .secondary))
                                 .font(titleFamilyFont(size: 13))
 
                                 Button("Add all anyway") {
@@ -1908,8 +2095,7 @@ struct ContentView: View {
                                     withAnimation { showDuplicateConfirm = false }
                                     beginAddingNames(namesToAdd)
                                 }
-                                .buttonStyle(.borderedProminent)
-                                .tint(.indigo)
+                                .buttonStyle(NameSnapButtonStyle(tone: .primary))
                                 .font(titleFamilyFont(size: 13))
                             }
                         }
@@ -1961,7 +2147,7 @@ struct ContentView: View {
                                             pendingNamesForAddition.removeAll()
                                             withAnimation { showUpgradeConfirm = false }
                                         }
-                                        .buttonStyle(.bordered)
+                                        .buttonStyle(NameSnapButtonStyle(tone: .secondary))
                                         .font(titleFamilyFont(size: 13))
                                     }
                                 } else {
@@ -1971,7 +2157,7 @@ struct ContentView: View {
                                             pendingNamesForAddition.removeAll()
                                             withAnimation { showUpgradeConfirm = false }
                                         }
-                                        .buttonStyle(.bordered)
+                                        .buttonStyle(NameSnapButtonStyle(tone: .secondary))
                                         .font(titleFamilyFont(size: 13))
 
                                         lifetimePurchaseButton
@@ -1998,7 +2184,7 @@ struct ContentView: View {
                                     }
                                 }
                             }
-                            .buttonStyle(.bordered)
+                            .buttonStyle(NameSnapButtonStyle(tone: .secondary))
                             .font(titleFamilyFont(size: 12))
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
@@ -2051,7 +2237,7 @@ struct ContentView: View {
                                 }
                             }
                             .font(.caption.weight(.semibold))
-                            .tint(.indigo)
+                            .tint(NSTheme.violet)
                             .padding(.vertical, 10)
                             .accessibilityElement(children: .contain)
                             .dynamicTypeSize(...DynamicTypeSize.accessibility2)
@@ -2076,7 +2262,7 @@ struct ContentView: View {
 
                             Text("This will reset the current pool and no-repeat history. Continue?")
                                 .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(NSTheme.ink.opacity(0.68))
                                 .multilineTextAlignment(.center)
 
                             HStack(spacing: 10) {
@@ -2088,7 +2274,7 @@ struct ContentView: View {
                                     suppressNoRepeatToggleConfirm = false
                                     withAnimation { showNoRepeatToggleConfirm = false }
                                 }
-                                .buttonStyle(.bordered)
+                                .buttonStyle(NameSnapButtonStyle(tone: .secondary))
                                 .font(titleFamilyFont(size: 13))
 
                                 Button("Confirm") {
@@ -2121,8 +2307,7 @@ struct ContentView: View {
                                         }
                                     }
                                 }
-                                .buttonStyle(.borderedProminent)
-                                .tint(.indigo)
+                                .buttonStyle(NameSnapButtonStyle(tone: .warm))
                                 .font(titleFamilyFont(size: 13))
                             }
                         }
@@ -2137,26 +2322,38 @@ struct ContentView: View {
             }
             .overlay(alignment: .bottom) {
                 if !showUpgradeConfirm && winnerCelebration == nil && !vm.entries.isEmpty {
-                    VStack(spacing: 10) {
-                        Button("Reset This Pool") { showResetPoolConfirm = true }
-                            .buttonStyle(.borderedProminent)
-                            .tint(.indigo)
-                            .font(titleFamilyFont(size: 14))
-                        Button("Clear This Pool") { showClearPoolConfirm = true }
-                            .buttonStyle(.borderedProminent)
-                            .tint(.red)
-                            .font(titleFamilyFont(size: 14))
+                    HStack(spacing: 12) {
+                        Button("RESET POOL") { showResetPoolConfirm = true }
+                            .buttonStyle(NameSnapButtonStyle(tone: .secondary))
+                            .font(titleFamilyFont(size: 10))
+                            .frame(maxWidth: .infinity)
+                        Button("CLEAR POOL") { showClearPoolConfirm = true }
+                            .buttonStyle(NameSnapButtonStyle(tone: .destructive))
+                            .font(titleFamilyFont(size: 10))
+                            .frame(maxWidth: .infinity)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.top, 8)
-                    .padding(.bottom, 10)
-                    .background(NSTheme.bg)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+                    .padding(.bottom, 12)
+                    .background(NSTheme.pageGradient)
+                    .overlay(alignment: .top) {
+                        Rectangle()
+                            .fill(NSTheme.ink)
+                            .frame(height: 2)
+                    }
                     .ignoresSafeArea(edges: .bottom)
                 }
             }
             .onChange(of: vm.wheelIndex) { _ in
                 guard vm.visualMode == .wheel else { return }
                 vm.normalizeWheelIndexIfNeeded()
+
+                #if DEBUG
+                // The deterministic wheel fixture is a static visual inspection state,
+                // not a simulated swipe. Keep it from scheduling a winner reveal.
+                guard screenshotFixtureStateForUITesting != "wheel" else { return }
+                #endif
 
                 // During post-spin lock, keep winner frozen so manual-settle path can't re-commit a new name.
                 guard Date() >= spinWinnerLockUntil else { return }
@@ -2273,14 +2470,9 @@ struct ContentView: View {
     @ViewBuilder
     private func card<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         content()
-            .padding(14)
+            .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(NSTheme.card)
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(NSTheme.skyBlue.opacity(0.12), lineWidth: 1)
-            )
+            .nameSnapPanelSurface()
     }
 }
 
