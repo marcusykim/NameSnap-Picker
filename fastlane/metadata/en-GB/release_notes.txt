@@ -1,0 +1,6 @@
+• A playful redesigned picker for iPhone and iPad
+• Wheel and classic winner-reveal modes
+• Numbered contestants with quick include, exclude, and delete controls
+• No Repeat mode with quick reset
+• Winner history for recent draws
+• Up to 16 contestants free, with unlimited available as an upgrade

@@ -75,6 +75,7 @@ platform :ios do
       skip_metadata: true,
       skip_screenshots: true,
       submit_for_review: true,
+      reject_if_possible: true,
       run_precheck_before_submit: false,
       automatic_release: true,
       force: true,

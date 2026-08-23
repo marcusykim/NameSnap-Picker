@@ -1,0 +1,31 @@
+NameSnap is a playful random name picker built for speed.
+
+Paste names, tap Spin, and get a fair winner in seconds.
+
+Perfect for:
+• Classroom participation
+• Giveaways and raffles
+• Team picks and party games
+• Livestream audience contests
+
+What you can do:
+• Paste names from any list, separated by commas or lines
+• Spin with haptics for fun reveal moments
+• Turn on No Repeat mode to avoid duplicate winners
+• Include or exclude participants with one tap
+• Track recent winners
+
+Built to be simple:
+Free to start. No account required. No analytics tracking. No clutter.
+Just open, paste, and pick.
+
+NameSnap is designed for moments where you need a quick, fair decision and want it to feel exciting.
+
+SUBSCRIPTION TERMS
+NameSnap Unlimited Monthly unlocks unlimited contestants and renews monthly until canceled. The current localized price is shown before purchase. You can manage or cancel the subscription in your Apple Account settings. A one-time Unlimited Lifetime purchase is also available.
+
+Terms of Use (Apple Standard EULA):
+https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+
+Privacy Policy:
+https://getnamesnap.web.app/privacy
