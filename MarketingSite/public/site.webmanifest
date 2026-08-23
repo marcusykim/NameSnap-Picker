@@ -1,0 +1,23 @@
+{
+  "name": "NameSnap",
+  "short_name": "NameSnap",
+  "description": "A fast, playful random name picker for classrooms, giveaways, games, teams, and live streams.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f3e8",
+  "theme_color": "#5856d6",
+  "icons": [
+    {
+      "src": "/namesnap-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/namesnap-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

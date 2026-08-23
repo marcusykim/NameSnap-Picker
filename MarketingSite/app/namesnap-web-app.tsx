@@ -7,7 +7,14 @@ import { type ClipboardEvent as ReactClipboardEvent, type CSSProperties, type Ke
 type Entry = { id: string; drawNumber: number; name: string; included: boolean };
 type Winner = { id: string; name: string; number: number; pickedAt: string };
 type PickerMode = "classic" | "wheel";
-type CelebrationHero = "dancer" | "guitarist" | "dynamite" | "hype-mascot" | "pixel-bomb" | "breakdancer" | "dj" | "drummer" | "skater" | "trumpet";
+type CelebrationHero =
+  | "dancer" | "guitarist" | "dynamite" | "hype-mascot" | "pixel-bomb"
+  | "breakdancer" | "dj" | "drummer" | "skater" | "trumpet"
+  | "saxophonist" | "cheer-captain" | "magician" | "skateboarder"
+  | "soccer-striker" | "basketball-dunker" | "astronaut" | "robot"
+  | "superhero" | "opera-singer" | "punk-vocalist" | "keytarist"
+  | "disco-dancer" | "conductor" | "juggler" | "pirate-captain"
+  | "knight" | "rocket-scientist" | "gamer" | "rodeo-star";
 type Celebration = {
   variation: number;
   hero: CelebrationHero;
@@ -50,8 +57,16 @@ const AUDIO_TRACKS = [
   "/sounds/celebration_crowd.mp3", "/sounds/celebration_fanfare.mp3",
   "/sounds/celebration_fireworks.mp3", "/sounds/celebration_explosion.mp3",
 ];
-const CELEBRATION_HEROES: CelebrationHero[] = ["dancer", "guitarist", "dynamite", "hype-mascot", "pixel-bomb", "breakdancer", "dj", "drummer", "skater", "trumpet"];
-const CELEBRATION_VARIATION_COUNT = 100;
+const CELEBRATION_HEROES: CelebrationHero[] = [
+  "dancer", "guitarist", "dynamite", "hype-mascot", "pixel-bomb",
+  "breakdancer", "dj", "drummer", "skater", "trumpet",
+  "saxophonist", "cheer-captain", "magician", "skateboarder",
+  "soccer-striker", "basketball-dunker", "astronaut", "robot",
+  "superhero", "opera-singer", "punk-vocalist", "keytarist",
+  "disco-dancer", "conductor", "juggler", "pirate-captain",
+  "knight", "rocket-scientist", "gamer", "rodeo-star",
+];
+const CELEBRATION_VARIATION_COUNT = 300;
 const CELEBRATION_HEADLINES = ["THE PICK IS IN", "ABSOLUTE LEGEND", "WINNER ENERGY", "MAKE SOME NOISE", "MAIN CHARACTER MOMENT"];
 const HERO_LABELS: Record<CelebrationHero, string> = {
   dancer: "Victory dance",
@@ -64,6 +79,26 @@ const HERO_LABELS: Record<CelebrationHero, string> = {
   drummer: "Thunderous drum solo",
   skater: "Victory on wheels",
   trumpet: "Stadium fanfare",
+  saxophonist: "Saxophone victory solo",
+  "cheer-captain": "Jump-and-cheer finale",
+  magician: "Confetti magic",
+  skateboarder: "Kickflip victory",
+  "soccer-striker": "Goal celebration",
+  "basketball-dunker": "Victory dunk",
+  astronaut: "Zero-gravity victory",
+  robot: "Robot victory dance",
+  superhero: "Hero landing",
+  "opera-singer": "Final victory note",
+  "punk-vocalist": "Punk encore",
+  keytarist: "Keytar takeover",
+  "disco-dancer": "Disco victory",
+  conductor: "Triumphant finale",
+  juggler: "Victory juggling act",
+  "pirate-captain": "Treasure champion",
+  knight: "Shield-raised champion",
+  "rocket-scientist": "Rocket-powered genius",
+  gamer: "Game-winning jump",
+  "rodeo-star": "Rodeo victory",
 };
 
 function makeId() {

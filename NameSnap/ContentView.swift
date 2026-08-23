@@ -39,6 +39,26 @@ private enum WinnerCelebrationHero: String, CaseIterable {
     case drummer
     case skater
     case trumpet
+    case saxophonist
+    case cheerCaptain = "cheer-captain"
+    case magician
+    case skateboarder
+    case soccerStriker = "soccer-striker"
+    case basketballDunker = "basketball-dunker"
+    case astronaut
+    case robot
+    case superhero
+    case operaSinger = "opera-singer"
+    case punkVocalist = "punk-vocalist"
+    case keytarist
+    case discoDancer = "disco-dancer"
+    case conductor
+    case juggler
+    case pirateCaptain = "pirate-captain"
+    case knight
+    case rocketScientist = "rocket-scientist"
+    case gamer
+    case rodeoStar = "rodeo-star"
 
     var label: String {
         switch self {
@@ -52,12 +72,32 @@ private enum WinnerCelebrationHero: String, CaseIterable {
         case .drummer: return "Thunderous drum solo"
         case .skater: return "Victory on wheels"
         case .trumpet: return "Stadium fanfare"
+        case .saxophonist: return "Saxophone victory solo"
+        case .cheerCaptain: return "Jump-and-cheer finale"
+        case .magician: return "Confetti magic"
+        case .skateboarder: return "Kickflip victory"
+        case .soccerStriker: return "Goal celebration"
+        case .basketballDunker: return "Victory dunk"
+        case .astronaut: return "Zero-gravity victory"
+        case .robot: return "Robot victory dance"
+        case .superhero: return "Hero landing"
+        case .operaSinger: return "Final victory note"
+        case .punkVocalist: return "Punk encore"
+        case .keytarist: return "Keytar takeover"
+        case .discoDancer: return "Disco victory"
+        case .conductor: return "Triumphant finale"
+        case .juggler: return "Victory juggling act"
+        case .pirateCaptain: return "Treasure champion"
+        case .knight: return "Shield-raised champion"
+        case .rocketScientist: return "Rocket-powered genius"
+        case .gamer: return "Game-winning jump"
+        case .rodeoStar: return "Rodeo victory"
         }
     }
 }
 
 private struct WinnerCelebration: Identifiable {
-    static let variationCount = 100
+    static let variationCount = 300
     static let audioNames = [
         "techno_upbeat_01", "techno_upbeat_02", "techno_upbeat_03", "techno_upbeat_04",
         "techno_upbeat_alt_01", "techno_upbeat_alt_02", "techno_upbeat_alt_03", "techno_upbeat_alt_04",

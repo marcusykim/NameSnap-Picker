@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
+import { access, readFile } from "node:fs/promises";
+import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 const supportEmail = "sidequestsoftware@proton.me";
+const testDirectory = path.dirname(fileURLToPath(import.meta.url));
+const marketingDirectory = path.resolve(testDirectory, "..");
 
 async function render(pathname = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -85,4 +90,73 @@ test("publishes web purchase terms and platform entitlement boundaries", async (
   assert.match(html, /Web purchases unlock NameSnap Web only/i);
   assert.match(html, /iPhone and iPad app only/i);
   assert.match(html, /mailto:sidequestsoftware@proton\.me\?subject=NameSnap%20Terms/i);
+});
+
+test("publishes the redesigned NameSnap icon across browser and installed-app surfaces", async () => {
+  const staticHtml = await readFile(path.join(marketingDirectory, "static/index.html"), "utf8");
+  const manifest = JSON.parse(
+    await readFile(path.join(marketingDirectory, "public/site.webmanifest"), "utf8"),
+  );
+
+  assert.match(staticHtml, /namesnap-icon-32\.png/);
+  assert.match(staticHtml, /namesnap-icon-192\.png/);
+  assert.match(staticHtml, /namesnap-apple-touch-icon\.png/);
+  assert.match(staticHtml, /site\.webmanifest/);
+  assert.deepEqual(
+    manifest.icons.map((icon) => icon.src),
+    ["/namesnap-icon-192.png", "/namesnap-icon-512.png"],
+  );
+
+  await Promise.all([
+    "namesnap-icon-32.png",
+    "namesnap-icon-192.png",
+    "namesnap-icon-512.png",
+    "namesnap-apple-touch-icon.png",
+    "namesnap-gravatar.png",
+  ].map((filename) => access(path.join(marketingDirectory, "public", filename))));
+});
+
+test("ships all 30 celebration heroes and exposes 300 visual variations", async () => {
+  const webAppSource = await readFile(
+    path.join(marketingDirectory, "app/namesnap-web-app.tsx"),
+    "utf8",
+  );
+  const heroNames = [
+    "dancer",
+    "guitarist",
+    "drummer",
+    "breakdancer",
+    "skater",
+    "dj",
+    "trumpet",
+    "hype-mascot",
+    "dynamite",
+    "saxophonist",
+    "cheer-captain",
+    "magician",
+    "skateboarder",
+    "soccer-striker",
+    "basketball-dunker",
+    "astronaut",
+    "robot",
+    "superhero",
+    "opera-singer",
+    "punk-vocalist",
+    "keytarist",
+    "disco-dancer",
+    "conductor",
+    "juggler",
+    "pirate-captain",
+    "knight",
+    "rocket-scientist",
+    "gamer",
+    "rodeo-star",
+    "pixel-bomb",
+  ];
+
+  assert.match(webAppSource, /CELEBRATION_VARIATION_COUNT = 300/);
+  await Promise.all(heroNames.map((hero) => {
+    const extension = hero === "pixel-bomb" ? "gif" : "png";
+    return access(path.join(marketingDirectory, "public/celebrations", `${hero}.${extension}`));
+  }));
 });

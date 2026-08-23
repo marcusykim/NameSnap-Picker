@@ -709,7 +709,7 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
 
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
 
-/* Winner celebration system: 10 heroes × 5 palettes × 2 directions = 100 variations. */
+/* Winner celebration system: 30 heroes × 5 palettes × 2 directions = 300 variations. */
 .winner-celebration-backdrop {
   --celebration-primary: #f7dc60;
   --celebration-secondary: #5856d6;

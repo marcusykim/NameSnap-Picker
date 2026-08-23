@@ -10,7 +10,14 @@ export const metadata: Metadata = {
     template: "%s | NameSnap",
   },
   description: "A fast, playful random name picker for classrooms, giveaways, games, teams, and live streams.",
-  icons: { icon: "/namesnap-icon.png", apple: "/namesnap-icon.png" },
+  icons: {
+    icon: [
+      { url: "/namesnap-icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/namesnap-icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/namesnap-apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  manifest: "/site.webmanifest",
   openGraph: {
     title: "NameSnap — Fair random picks in seconds",
     description: "Paste names, tap spin, and get a fair winner in seconds.",
