@@ -1,0 +1,15 @@
+name = "namesnap-web-payments"
+main = "src/index.ts"
+compatibility_date = "2026-08-22"
+workers_dev = true
+
+[vars]
+SITE_URL = "https://getnamesnap.web.app"
+STRIPE_MONTHLY_PAYMENT_LINK = "https://buy.stripe.com/aFa5kw8Jlfn84ehe6p9Zm00"
+STRIPE_LIFETIME_PAYMENT_LINK = "https://buy.stripe.com/dRm9AMe3Ffn8fWZe6p9Zm01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "namesnap-web-entitlements"
+database_id = "228c9c83-94b6-4a4e-b855-49ad9c026b87"
+migrations_dir = "migrations"

@@ -1,0 +1,720 @@
+"use client";
+
+/* eslint-disable @next/next/no-html-link-for-pages, @next/next/no-img-element, react-hooks/set-state-in-effect, jsx-a11y/label-has-associated-control */
+
+import { type ClipboardEvent as ReactClipboardEvent, type KeyboardEvent as ReactKeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+type Entry = { id: string; drawNumber: number; name: string; included: boolean };
+type Winner = { id: string; name: string; number: number; pickedAt: string };
+type PickerMode = "classic" | "wheel";
+
+const FREE_LIMIT = 16;
+const STORAGE_KEY = "namesnap.web.session.v1";
+const PENDING_NAMES_KEY = "namesnap.web.pending-upgrade.v1";
+const IDENTITY_KEY = "namesnap.web.identity.v1";
+const API_URL = "https://namesnap-web-payments.royal-fog-6bed.workers.dev";
+const APP_STORE_URL = "https://apps.apple.com/app/id6759588637";
+const WHEEL_COLORS = [
+  "#F7DC60",
+  "#6BA3CC",
+  "#E0F4AB",
+  "rgba(255, 45, 85, .52)",
+  "#C7AB8A",
+  "rgba(175, 82, 222, .45)",
+];
+const WHEEL_INK = "#15151B";
+const WHEEL_CARD = "#F2F4FA";
+const WHEEL_LABEL_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif';
+const AUDIO_TRACKS = [
+  "/sounds/techno_upbeat_01.mp3", "/sounds/techno_upbeat_02.mp3",
+  "/sounds/techno_upbeat_03.mp3", "/sounds/techno_upbeat_04.mp3",
+  "/sounds/techno_upbeat_alt_01.mp3", "/sounds/techno_upbeat_alt_02.mp3",
+  "/sounds/techno_upbeat_alt_03.mp3", "/sounds/techno_upbeat_alt_04.mp3",
+  "/sounds/techno_upbeat_alt_05.mp3", "/sounds/techno_upbeat_alt_06.mp3",
+];
+
+function makeId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function randomIndex(length: number) {
+  if (length <= 1) return 0;
+  const max = Math.floor(0x1_0000_0000 / length) * length;
+  const bucket = new Uint32Array(1);
+  do crypto.getRandomValues(bucket); while (bucket[0] >= max);
+  return bucket[0] % length;
+}
+
+function parseNames(input: string) {
+  return input
+    .split(/[\n,]+/)
+    .map((name) => name.replace(/^\s*\d+[.)-]?\s*/, "").trim())
+    .filter(Boolean);
+}
+
+function stagedInputRows(input: string) {
+  return input
+    .split("\n")
+    .map((name) => name.replace(/^\s*\d+[.)-]?\s*/, "").replace(/\r/g, ""))
+    .filter((name) => name.trim().length > 0);
+}
+
+function writeInputNames(names: string[]) {
+  return names
+    .filter((name) => name.trim().length > 0)
+    .map((name, index) => `${index + 1}. ${name}`)
+    .join("\n");
+}
+
+function TrashGlyph({ filled = false }: { filled?: boolean }) {
+  return <span className={`trash-glyph ${filled ? "trash-glyph-filled" : "trash-glyph-outline"}`} aria-hidden="true" />;
+}
+
+function NumberedNameEditor({ value, onChange }: { value: string; onChange: (next: string) => void }) {
+  const rows = stagedInputRows(value);
+  const rowRefs = useRef(new Map<number, HTMLInputElement>());
+
+  const focusRow = (index: number, placeCursorAtEnd = false) => {
+    window.requestAnimationFrame(() => {
+      const input = rowRefs.current.get(index);
+      input?.focus();
+      if (input && placeCursorAtEnd) input.setSelectionRange(input.value.length, input.value.length);
+    });
+  };
+
+  const commitRows = (nextRows: string[]) => onChange(writeInputNames(nextRows));
+
+  const updateRow = (index: number, nextValue: string) => {
+    if (nextValue.includes("\n") || nextValue.includes(",")) {
+      const incoming = parseNames(nextValue);
+      const nextRows = [...rows];
+      if (index < rows.length) nextRows.splice(index, 1, ...incoming);
+      else nextRows.push(...incoming);
+      commitRows(nextRows);
+      focusRow(Math.min(index + incoming.length, nextRows.length));
+      return;
+    }
+
+    const nextRows = [...rows];
+    if (index < rows.length) {
+      if (nextValue.trim().length) nextRows[index] = nextValue;
+      else nextRows.splice(index, 1);
+    } else if (nextValue.trim().length) {
+      nextRows.push(nextValue);
+    }
+    commitRows(nextRows);
+  };
+
+  const pasteAtRow = (event: ReactClipboardEvent<HTMLInputElement>, index: number) => {
+    const pasted = event.clipboardData.getData("text");
+    if (!pasted.includes("\n") && !pasted.includes(",")) return;
+    event.preventDefault();
+    const incoming = parseNames(pasted);
+    if (!incoming.length) return;
+    const nextRows = [...rows];
+    if (index < rows.length) nextRows.splice(index, 1, ...incoming);
+    else nextRows.push(...incoming);
+    commitRows(nextRows);
+    focusRow(Math.min(index + incoming.length, nextRows.length));
+  };
+
+  const handleRowKey = (event: ReactKeyboardEvent<HTMLInputElement>, index: number) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      focusRow(Math.min(index + 1, rows.length));
+      return;
+    }
+    if (event.key === "Backspace" && !event.currentTarget.value && index > 0) {
+      event.preventDefault();
+      focusRow(index - 1, true);
+    }
+  };
+
+  return (
+    <div className="name-editor" role="group" aria-label="Numbered contestant input">
+      {[...rows, ""].map((name, index) => {
+        const isEntryRow = index < rows.length;
+        return (
+          <div className={`name-editor-row ${isEntryRow ? "" : "name-editor-row-new"}`} key={index}>
+            <span className="name-editor-number" aria-hidden="true">{index + 1}.</span>
+            <input
+              id={index === 0 ? "contestant-input" : undefined}
+              ref={(node) => { if (node) rowRefs.current.set(index, node); else rowRefs.current.delete(index); }}
+              value={name}
+              onChange={(event) => updateRow(index, event.target.value)}
+              onPaste={(event) => pasteAtRow(event, index)}
+              onKeyDown={(event) => handleRowKey(event, index)}
+              placeholder={isEntryRow ? undefined : "Type or paste names here…"}
+              aria-label={`Contestant ${index + 1}`}
+              autoComplete="off"
+              spellCheck={false}
+            />
+            {isEntryRow ? (
+              <button
+                className="input-trash"
+                type="button"
+                aria-label={`Remove staged contestant ${index + 1}: ${name.trim()}`}
+                onClick={() => {
+                  const nextRows = rows.filter((_, rowIndex) => rowIndex !== index);
+                  commitRows(nextRows);
+                  focusRow(Math.min(index, nextRows.length));
+                }}
+              >
+                <TrashGlyph filled />
+              </button>
+            ) : <span className="trash-spacer" aria-hidden="true" />}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function renumberEntries(entries: Entry[]) {
+  return entries.map((entry, index) => ({ ...entry, drawNumber: index + 1 }));
+}
+
+function appendNumberedEntries(entries: Entry[], names: string[]) {
+  const normalized = renumberEntries(entries);
+  return [
+    ...normalized,
+    ...names.map((name, index) => ({
+      id: makeId(),
+      drawNumber: normalized.length + index + 1,
+      name,
+      included: true,
+    })),
+  ];
+}
+
+function restoreStoredEntries(value: unknown): Entry[] {
+  if (!Array.isArray(value)) return [];
+  const valid = value.filter((entry): entry is Partial<Entry> & { name: string } => (
+    !!entry && typeof entry === "object" && typeof entry.name === "string" && entry.name.trim().length > 0
+  ));
+  return valid.map((entry, index) => ({
+    id: typeof entry.id === "string" ? entry.id : makeId(),
+    drawNumber: index + 1,
+    name: entry.name.trim(),
+    included: entry.included !== false,
+  }));
+}
+
+function initials(name: string) {
+  return name.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("");
+}
+
+function fitWheelLabel(context: CanvasRenderingContext2D, entry: Entry, maxWidth: number) {
+  const prefix = `${entry.drawNumber}. `;
+  const fullLabel = `${prefix}${entry.name}`;
+  if (context.measureText(fullLabel).width <= maxWidth) return fullLabel;
+
+  const ellipsis = "…";
+  if (context.measureText(`${prefix}${ellipsis}`).width > maxWidth) return `${entry.drawNumber}.`;
+
+  let low = 0;
+  let high = entry.name.length;
+  while (low < high) {
+    const midpoint = Math.ceil((low + high) / 2);
+    const candidate = `${prefix}${entry.name.slice(0, midpoint).trimEnd()}${ellipsis}`;
+    if (context.measureText(candidate).width <= maxWidth) low = midpoint;
+    else high = midpoint - 1;
+  }
+  return `${prefix}${entry.name.slice(0, low).trimEnd()}${ellipsis}`;
+}
+
+async function apiJson(response: Response) {
+  try {
+    return await response.json();
+  } catch {
+    throw new Error("NameSnap checkout is temporarily unavailable. Please try again.");
+  }
+}
+
+function browserIdentity() {
+  const existing = localStorage.getItem(IDENTITY_KEY);
+  if (existing && /^[A-Za-z0-9_-]{43,128}$/.test(existing)) return existing;
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  const token = btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  localStorage.setItem(IDENTITY_KEY, token);
+  return token;
+}
+
+function apiFetch(path: string, init: RequestInit = {}) {
+  const headers = new Headers(init.headers);
+  headers.set("X-NameSnap-Identity", browserIdentity());
+  return fetch(`${API_URL}${path}`, { ...init, headers, cache: "no-store" });
+}
+
+export function NameSnapWebApp() {
+  const [input, setInput] = useState("");
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [history, setHistory] = useState<Winner[]>([]);
+  const [excludedIds, setExcludedIds] = useState<string[]>([]);
+  const [mode, setMode] = useState<PickerMode>("wheel");
+  const [noRepeats, setNoRepeats] = useState(true);
+  const [soundOn, setSoundOn] = useState(true);
+  const [presentation, setPresentation] = useState(false);
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [liveName, setLiveName] = useState("Ready when you are");
+  const [winner, setWinner] = useState<Winner | null>(null);
+  const [rotation, setRotation] = useState(0);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [pendingNames, setPendingNames] = useState<string[]>([]);
+  const [entitlementPlan, setEntitlementPlan] = useState<"monthly" | "lifetime" | null>(null);
+  const [checkoutBusy, setCheckoutBusy] = useState<"monthly" | "lifetime" | "restore" | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const timersRef = useRef<number[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
+      if (stored) {
+        setEntries(restoreStoredEntries(stored.entries));
+        setHistory(Array.isArray(stored.history) ? stored.history : []);
+        setExcludedIds(Array.isArray(stored.excludedIds) ? stored.excludedIds : []);
+        setMode(stored.mode === "classic" ? "classic" : "wheel");
+        setNoRepeats(stored.noRepeats !== false);
+        setSoundOn(stored.soundOn !== false);
+      }
+    } catch {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ entries, history, excludedIds, mode, noRepeats, soundOn }));
+  }, [entries, excludedIds, history, hydrated, mode, noRepeats, soundOn]);
+
+  useEffect(() => () => timersRef.current.forEach((timer) => window.clearTimeout(timer)), []);
+
+  useEffect(() => {
+    const syncFullscreenState = () => setPresentation(document.fullscreenElement === stageRef.current);
+    document.addEventListener("fullscreenchange", syncFullscreenState);
+    return () => document.removeEventListener("fullscreenchange", syncFullscreenState);
+  }, []);
+
+  const activeEntries = useMemo(
+    () => entries.filter((entry) => entry.included && (!noRepeats || !excludedIds.includes(entry.id))),
+    [entries, excludedIds, noRepeats],
+  );
+  const isPremium = entitlementPlan !== null;
+
+  const applyEntitlement = useCallback((data: { active?: boolean; plan?: string | null }) => {
+    if (data.active && (data.plan === "monthly" || data.plan === "lifetime")) {
+      setEntitlementPlan(data.plan);
+      return true;
+    }
+    setEntitlementPlan(null);
+    return false;
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const refresh = async () => {
+      const query = new URLSearchParams(window.location.search);
+      const checkoutSucceeded = query.get("checkout") === "success";
+      if (checkoutSucceeded) {
+        setShowUpgrade(true);
+        setCheckoutBusy("restore");
+        setCheckoutError(null);
+      }
+      try {
+        let unlocked = false;
+        const attempts = checkoutSucceeded ? 16 : 1;
+        for (let attempt = 0; attempt < attempts && !cancelled; attempt += 1) {
+          const response = await apiFetch("/api/status");
+          const data = await apiJson(response);
+          if (!response.ok) throw new Error(data.error ?? "Could not check web purchase status.");
+          unlocked = applyEntitlement(data);
+          if (!unlocked && checkoutSucceeded && attempt < attempts - 1) {
+            await new Promise((resolve) => window.setTimeout(resolve, 750));
+          }
+        }
+        if (cancelled) return;
+        if (!unlocked && checkoutSucceeded) throw new Error("Stripe received the checkout. Choose Restore web purchase in a moment while access finishes updating.");
+        if (unlocked && checkoutSucceeded) {
+          const queued = parseNames(sessionStorage.getItem(PENDING_NAMES_KEY) ?? "");
+          if (queued.length) {
+            setEntries((current) => appendNumberedEntries(current, queued));
+            sessionStorage.removeItem(PENDING_NAMES_KEY);
+          }
+          setShowUpgrade(false);
+        }
+        if (query.has("checkout")) window.history.replaceState({}, "", window.location.pathname);
+      } catch (error) {
+        if (query.has("checkout")) setCheckoutError(error instanceof Error ? error.message : "Could not check web purchase status.");
+      } finally {
+        if (checkoutSucceeded && !cancelled) setCheckoutBusy(null);
+      }
+    };
+    void refresh();
+    return () => { cancelled = true; };
+  }, [applyEntitlement]);
+
+  const drawWheel = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const size = Math.max(320, Math.min(canvas.clientWidth || 620, canvas.clientHeight || 620));
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = size * ratio;
+    canvas.height = size * ratio;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+    context.scale(ratio, ratio);
+    context.clearRect(0, 0, size, size);
+    const center = size / 2;
+    const radius = size / 2 - 12;
+    const visibleEntries = activeEntries;
+    const segmentCount = Math.max(visibleEntries.length, 1);
+    const segmentAngle = (Math.PI * 2) / segmentCount;
+
+    for (let index = 0; index < segmentCount; index += 1) {
+      const start = -Math.PI / 2 + index * segmentAngle;
+      const end = start + segmentAngle;
+      context.beginPath();
+      context.moveTo(center, center);
+      context.arc(center, center, radius, start, end);
+      context.closePath();
+      context.fillStyle = visibleEntries.length ? WHEEL_COLORS[index % WHEEL_COLORS.length] : WHEEL_CARD;
+      context.fill();
+      context.strokeStyle = "rgba(16, 18, 26, .72)";
+      context.lineWidth = visibleEntries.length <= 40 ? 2 : 0.7;
+      context.stroke();
+
+      if (visibleEntries.length && visibleEntries.length <= 40) {
+        context.save();
+        context.beginPath();
+        context.moveTo(center, center);
+        context.arc(center, center, radius, start, end);
+        context.closePath();
+        context.clip();
+        context.translate(center, center);
+        const labelAngle = start + segmentAngle / 2;
+        context.rotate(labelAngle);
+        const normalizedAngle = (labelAngle + Math.PI * 2) % (Math.PI * 2);
+        const shouldFlip = normalizedAngle > Math.PI / 2 && normalizedAngle < Math.PI * 1.5;
+        if (shouldFlip) context.rotate(Math.PI);
+        context.textBaseline = "middle";
+        context.fillStyle = WHEEL_INK;
+        const showFullLabel = visibleEntries.length <= 12;
+        const fontSize = showFullLabel
+          ? Math.max(11, Math.min(size < 400 ? 13 : 15, 210 / visibleEntries.length + 8))
+          : Math.max(10, Math.min(13, 150 / visibleEntries.length + 7));
+        context.font = `${showFullLabel ? 700 : 800} ${fontSize}px ${WHEEL_LABEL_FONT}`;
+
+        const labelStart = radius * (showFullLabel ? 0.3 : 0.62);
+        const anchorX = shouldFlip ? -labelStart : labelStart;
+        context.textAlign = shouldFlip ? "right" : "left";
+        const label = showFullLabel
+          ? fitWheelLabel(context, visibleEntries[index], radius - labelStart - 18)
+          : `${visibleEntries[index].drawNumber}.`;
+        context.fillText(label, anchorX, 0);
+        context.restore();
+      }
+    }
+
+    context.beginPath();
+    context.arc(center, center, radius * 0.2, 0, Math.PI * 2);
+    context.fillStyle = WHEEL_INK;
+    context.fill();
+    context.beginPath();
+    context.arc(center, center, radius * 0.13, 0, Math.PI * 2);
+    context.fillStyle = WHEEL_CARD;
+    context.fill();
+  }, [activeEntries]);
+
+  useEffect(() => {
+    drawWheel();
+    const resize = new ResizeObserver(drawWheel);
+    if (canvasRef.current) resize.observe(canvasRef.current);
+    void document.fonts?.ready.then(drawWheel);
+    return () => resize.disconnect();
+  }, [drawWheel]);
+
+  const playWinnerAudio = useCallback(() => {
+    if (!soundOn) return;
+    const audio = new Audio(AUDIO_TRACKS[randomIndex(AUDIO_TRACKS.length)]);
+    audio.volume = 0.82;
+    void audio.play().catch(() => undefined);
+    const timer = window.setTimeout(() => { audio.pause(); audio.currentTime = 0; }, 4800);
+    timersRef.current.push(timer);
+  }, [soundOn]);
+
+  const finishPick = useCallback((selected: Entry) => {
+    const number = selected.drawNumber;
+    const result = { id: makeId(), name: selected.name, number, pickedAt: new Date().toISOString() };
+    setLiveName(`${number}. ${selected.name}`);
+    setWinner(result);
+    setHistory((current) => [result, ...current].slice(0, 20));
+    if (noRepeats) setExcludedIds((current) => [...new Set([...current, selected.id])]);
+    setIsSpinning(false);
+    playWinnerAudio();
+  }, [noRepeats, playWinnerAudio]);
+
+  const spin = useCallback(() => {
+    if (isSpinning || !activeEntries.length) return;
+    setWinner(null);
+    setIsSpinning(true);
+    const selected = activeEntries[randomIndex(activeEntries.length)];
+
+    if (mode === "classic") {
+      const started = performance.now();
+      const tick = () => {
+        const elapsed = performance.now() - started;
+        if (elapsed >= 2200) { finishPick(selected); return; }
+        const preview = activeEntries[randomIndex(activeEntries.length)];
+        setLiveName(`${preview.drawNumber}. ${preview.name}`);
+        const timer = window.setTimeout(tick, Math.min(220, 45 + elapsed / 14));
+        timersRef.current.push(timer);
+      };
+      tick();
+      return;
+    }
+
+    const wheelIndex = activeEntries.findIndex((entry) => entry.id === selected.id);
+    const segmentAngle = 360 / Math.max(activeEntries.length, 1);
+    const target = (360 - (wheelIndex + 0.5) * segmentAngle + 360) % 360;
+    setRotation((current) => {
+      const normalized = ((current % 360) + 360) % 360;
+      const delta = (target - normalized + 360) % 360;
+      return current + 5 * 360 + delta;
+    });
+    const timer = window.setTimeout(() => finishPick(selected), 3900);
+    timersRef.current.push(timer);
+  }, [activeEntries, finishPick, isSpinning, mode]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.code === "Space" && !(event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLInputElement)) {
+        event.preventDefault();
+        spin();
+      }
+      if (event.key === "Escape") setWinner(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [spin]);
+
+  const addNames = () => {
+    const names = parseNames(input);
+    if (!names.length) return;
+    if (!isPremium && entries.length + names.length > FREE_LIMIT) {
+      setPendingNames(names);
+      setShowUpgrade(true);
+      return;
+    }
+    setEntries((current) => appendNumberedEntries(current, names));
+    setInput("");
+  };
+
+  const startCheckout = async (plan: "monthly" | "lifetime") => {
+    setCheckoutBusy(plan);
+    setCheckoutError(null);
+    sessionStorage.setItem(PENDING_NAMES_KEY, pendingNames.join("\n"));
+    try {
+      const response = await apiFetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await apiJson(response);
+      if (!response.ok || !data.url) throw new Error(data.error ?? "Checkout could not be started.");
+      window.location.assign(data.url);
+    } catch (error) {
+      setCheckoutError(error instanceof Error ? error.message : "Checkout could not be started.");
+      setCheckoutBusy(null);
+    }
+  };
+
+  const restorePurchase = async () => {
+    setCheckoutBusy("restore");
+    setCheckoutError(null);
+    try {
+      const response = await apiFetch("/api/status");
+      const data = await apiJson(response);
+      if (!response.ok) throw new Error(data.error ?? "Purchase status could not be checked.");
+      if (!applyEntitlement(data)) throw new Error("No active NameSnap web purchase was found in this browser.");
+      setShowUpgrade(false);
+    } catch (error) {
+      setCheckoutError(error instanceof Error ? error.message : "Purchase status could not be checked.");
+    } finally {
+      setCheckoutBusy(null);
+    }
+  };
+
+  const resetPool = useCallback(() => {
+    setExcludedIds([]);
+    setHistory([]);
+    setLiveName("Ready when you are");
+    setWinner(null);
+  }, []);
+
+  const removeEntry = (entryId: string) => {
+    setEntries((current) => renumberEntries(current.filter((entry) => entry.id !== entryId)));
+    setExcludedIds((current) => current.filter((id) => id !== entryId));
+  };
+
+  const clearPool = () => { setEntries([]); resetPool(); };
+
+  const togglePresentation = async () => {
+    const next = !presentation;
+    setPresentation(next);
+    if (next && stageRef.current?.requestFullscreen) await stageRef.current.requestFullscreen().catch(() => undefined);
+    else if (!next && document.fullscreenElement) await document.exitFullscreen().catch(() => undefined);
+  };
+
+  return (
+    <main className={`web-app ${presentation ? "is-presenting" : ""}`}>
+      <header className="app-bar">
+        <a className="brand" href="/" aria-label="NameSnap Web home">
+          <img src="/namesnap-icon.png" alt="" width={46} height={46} />
+          <span><b>NameSnap</b><small>WEB</small></span>
+        </a>
+        <div className="app-bar-center"><i /> FAIR PICKS · LIVE ON SCREEN</div>
+        <nav aria-label="NameSnap controls">
+          <button className="quiet-control sound-control" onClick={() => setSoundOn((current) => !current)} aria-pressed={soundOn}><img src="/brand/sound_emoji.png" alt="" />{soundOn ? "Sound on" : "Sound off"}</button>
+          {isPremium && entitlementPlan === "monthly" ? <a className="quiet-control" href="mailto:sidequestsoftware@proton.me?subject=NameSnap%20Web%20billing">Billing help</a> : null}
+          <a className="app-store-button" href={APP_STORE_URL} target="_blank" rel="noreferrer">iPhone + iPad <span aria-hidden="true">↗</span></a>
+          <button className="present-button" onClick={togglePresentation}>Present <span aria-hidden="true">↗</span></button>
+        </nav>
+      </header>
+
+      <div className="broadcast-shell">
+        <aside className="producer-panel" aria-label="Picker controls">
+          <div className="panel-heading">
+            <div><span>PICKER SETUP</span><h1>Contestant list</h1></div>
+            <span className="count-badge">{entries.length}<small>IN POOL</small></span>
+          </div>
+
+          <label className="input-label" htmlFor="contestant-input">Contestants</label>
+          <NumberedNameEditor value={input} onChange={setInput} />
+          <div className="input-meta"><span>{parseNames(input).length} ready to add</span><span>Names stay in this browser</span></div>
+          <button className="add-button" onClick={addNames} disabled={!parseNames(input).length}>Add names <span aria-hidden="true">＋</span></button>
+
+          <div className="control-block">
+            <span className="block-label">Reveal style</span>
+            <div className="segmented" role="group" aria-label="Reveal style">
+              <button className={mode === "classic" ? "active" : ""} onClick={() => setMode("classic")}>Quick pick</button>
+              <button className={mode === "wheel" ? "active" : ""} onClick={() => setMode("wheel")}>Spin wheel</button>
+            </div>
+          </div>
+
+          <label className="switch-row" htmlFor="no-repeats">
+            <span><b><img src="/brand/repeat_emoji.png" alt="" />No repeats</b><small>Winners sit out until reset</small></span>
+            <input id="no-repeats" type="checkbox" checked={noRepeats} onChange={(event) => { setNoRepeats(event.target.checked); resetPool(); }} />
+            <i aria-hidden="true" />
+          </label>
+
+          <div className="pool-tools">
+            <button onClick={resetPool} disabled={!history.length && !excludedIds.length}>Reset picks</button>
+            <button onClick={clearPool} disabled={!entries.length}>Clear all</button>
+          </div>
+
+          <div className="pool-preview">
+            <div><span>ACTIVE POOL</span><b>{activeEntries.length}</b></div>
+            {entries.length ? (
+              <ul>{entries.slice(0, 5).map((entry) => (
+                <li key={entry.id} className={excludedIds.includes(entry.id) ? "picked" : ""}>
+                  <i>{initials(entry.name)}</i><span>{entry.drawNumber}. {entry.name}</span>
+                  <button className="pool-trash" aria-label={`Remove ${entry.name}`} onClick={() => removeEntry(entry.id)}><TrashGlyph /></button>
+                </li>
+              ))}</ul>
+            ) : <p>Your draw is empty. Paste a list above to begin.</p>}
+            {entries.length > 5 && <small>+ {entries.length - 5} more contestants</small>}
+          </div>
+        </aside>
+
+        <section className="stage" ref={stageRef} aria-label="Live picker stage">
+          <div className="stage-topline">
+            <span className="live-chip"><i /> NAMESNAP LIVE</span>
+            <span>{activeEntries.length ? `${activeEntries.length} eligible` : "Waiting for contestants"}</span>
+            <span className="space-hint"><kbd>SPACE</kbd> to spin</span>
+          </div>
+
+          <div
+            className={`picker-display ${mode} ${isSpinning ? "spinning" : ""}`}
+            role="button"
+            tabIndex={0}
+            aria-label={activeEntries.length ? "Pick a winner" : "Add contestants before picking a winner"}
+            onClick={spin}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                spin();
+              }
+            }}
+          >
+            <div className="stage-burst burst-a" /><div className="stage-burst burst-b" />
+            {mode === "wheel" ? (
+              <div className="wheel-wrap">
+                <div className="wheel-pointer" aria-hidden="true" />
+                <canvas ref={canvasRef} className="wheel-canvas" style={{ transform: `rotate(${rotation}deg)`, transitionDuration: isSpinning ? "3.8s" : "0s" }} aria-label={`Wheel containing ${activeEntries.length} eligible contestants`} />
+                {!activeEntries.length && <div className="wheel-empty"><b>0</b><span>names in the draw</span></div>}
+              </div>
+            ) : (
+              <div className="classic-picker">
+                <span className="classic-kicker">NEXT UP</span><strong>{liveName}</strong>
+                <div className="classic-rings"><i /><i /><i /></div>
+              </div>
+            )}
+          </div>
+
+          <div className="stage-controls">
+            <button className="spin-button" onClick={spin} disabled={!activeEntries.length || isSpinning}><span>{isSpinning ? "Picking…" : mode === "wheel" ? "Spin the wheel" : "Pick a winner"}</span><i aria-hidden="true">→</i></button>
+            <div className="stage-status"><span>NO REPEATS</span><b>{noRepeats ? "ON" : "OFF"}</b></div>
+            <div className="stage-status"><span>RECENT PICKS</span><b>{history.length}</b></div>
+          </div>
+
+          {history.length > 0 && <div className="history-rail" aria-label="Recent winners"><span>RECENT</span>{history.slice(0, 4).map((item) => <button key={item.id} onClick={() => setWinner(item)}><i>{item.number}</i>{item.name}</button>)}</div>}
+        </section>
+      </div>
+
+      <section className="streamer-note">
+        <div><span>MADE FOR THE BIG SCREEN</span><h2>One link. One list. One unmistakable winner.</h2></div>
+        <p>Share this tab, capture it in OBS, or tap Present for a clean full-screen draw. Contestant names and winner history stay in this browser.</p>
+        <a href={APP_STORE_URL} target="_blank" rel="noreferrer">Get the iPhone + iPad app <span aria-hidden="true">↗</span></a>
+      </section>
+
+      <footer className="web-footer"><span>© 2026 NameSnap</span><nav><a href="/privacy">Privacy</a><a href="/support">Support</a><a href="/terms">Terms</a><a href="mailto:sidequestsoftware@proton.me">Contact</a></nav></footer>
+
+      {winner && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setWinner(null); }}>
+          <section className="winner-modal" role="dialog" aria-modal="true" aria-labelledby="winner-title">
+            <div className="confetti" aria-hidden="true"><i /><i /><i /><i /><i /><i /></div>
+            <img className="modal-emoji" src="/brand/party_popper_emoji.png" alt="Winner" />
+            <span className="winner-kicker">WINNER</span><h2 id="winner-title">{winner.number}. {winner.name}</h2><p>Winner from the numbered pool</p>
+            <div><button className="winner-done" onClick={() => setWinner(null)}>Keep going</button><button className="winner-reset" onClick={() => { setWinner(null); resetPool(); }}>Reset picks</button></div>
+          </section>
+        </div>
+      )}
+
+      {showUpgrade && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowUpgrade(false); }}>
+          <section className="upgrade-modal" role="dialog" aria-modal="true" aria-labelledby="upgrade-title">
+            <button className="modal-close" aria-label="Close upgrade" onClick={() => { setPendingNames([]); setShowUpgrade(false); }}>×</button>
+            <span className="upgrade-spark" aria-hidden="true"><img src="/brand/sparkle_emoji.png" alt="" /></span><span className="upgrade-kicker">BIG DRAW ENERGY</span>
+            <h2 id="upgrade-title">Upgrade to Unlimited?</h2><p>Free supports up to {FREE_LIMIT} contestants.</p>
+            <ul><li>Unlimited contestants</li><li>Use presentation mode on stream</li><li>Restore access in this browser</li></ul>
+            <p className="renewal-copy">Unlimited Monthly renews every month until canceled. Unlimited Lifetime is a one-time purchase.</p>
+            <div className="plan-grid">
+              <button className="lifetime-plan" onClick={() => startCheckout("lifetime")} disabled={checkoutBusy !== null}><span>BEST VALUE</span><b>{checkoutBusy === "lifetime" ? "Opening checkout…" : "Unlock Lifetime"}</b><strong>$6.99</strong><small>one time on web</small></button>
+              <button className="monthly-plan" onClick={() => startCheckout("monthly")} disabled={checkoutBusy !== null}><span>FLEXIBLE</span><b>{checkoutBusy === "monthly" ? "Opening checkout…" : "Go Monthly"}</b><strong>$0.99</strong><small>per month on web</small></button>
+            </div>
+            <p className="platform-note">Web purchases unlock NameSnap Web. App Store purchases unlock the iPhone and iPad app.</p>
+            <button className="restore-button" onClick={restorePurchase} disabled={checkoutBusy !== null}>{checkoutBusy === "restore" ? "Checking…" : "Restore web purchase"}</button>
+            {checkoutError ? <p className="checkout-error" role="alert">{checkoutError}</p> : null}
+            <div className="legal-links"><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Use</a></div>
+            <input type="hidden" value={pendingNames.join("|")} readOnly />
+          </section>
+        </div>
+      )}
+    </main>
+  );
+}

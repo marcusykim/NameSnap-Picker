@@ -2,6 +2,10 @@
 
 Use iPhone 17 Pro Max (or latest 6.9" class) + one smaller phone size for coverage.
 
+Use this fictional 16-name free-tier sample pool in order so the screenshots tell one continuous story without depicting or implying endorsement by a real public figure:
+
+`Maya Chen, Jordan Brooks, Sofia Patel, Liam Carter, Zoe Martinez, Noah Williams, Ava Thompson, Ethan Nguyen, Priya Shah, Miles Robinson, Chloe Davis, Leo Garcia, Aria Morgan, Caleb Foster, Nina Park, Owen Lewis`
+
 ## Shot 1 — Hero
 Screen: Main screen with loaded names + Spin button visible
 Caption: **Pick a winner in seconds**

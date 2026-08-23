@@ -10,9 +10,11 @@ xcuserdata/
 .ios-sim-state.json
 artifacts/
 jarvis-avatar.jpg
+MarketingSite/.dry-run/
 
 # Local Xcode build products
 .derivedData/
+.derivedData-ui/
 DerivedData/
 build/
 *.xcarchive

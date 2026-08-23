@@ -2,7 +2,7 @@ default_platform(:ios)
 
 APP_IDENTIFIER = "com.marcuskim.namesnap"
 APP_VERSION = "2.0"
-APP_BUILD = "15"
+APP_BUILD = "17"
 API_KEY_ID = "4HA95XB6S5"
 API_KEY_ISSUER_ID = "67c52852-b22f-4e49-ad81-df53bf4476fb"
 API_KEY_PATH = "/Users/marcuskim/.AuthKey_4HA95XB6S5.p8"
@@ -41,11 +41,14 @@ platform :ios do
       app_identifier: APP_IDENTIFIER,
       app_version: APP_VERSION,
       metadata_path: File.expand_path("metadata", __dir__),
-      skip_screenshots: true,
+      screenshots_path: File.expand_path("../AppStoreAssets/ReleaseScreenshots", __dir__),
+      skip_screenshots: false,
+      overwrite_screenshots: true,
       skip_binary_upload: true,
       submit_for_review: false,
       run_precheck_before_submit: false,
       automatic_release: true,
+      price_tier: 0,
       force: true,
       copyright: "2026 Marcus Kim",
       primary_category: "Utilities",
@@ -56,12 +59,12 @@ platform :ios do
         email_address: "sidequestsoftware@proton.me",
         demo_user: "",
         demo_password: "",
-        notes: "NameSnap is a random name picker for classrooms, giveaways, games, and live streams. No account is required. The free tier allows up to 16 contestants per session. Unlimited Monthly and Unlimited Lifetime are available from the Unlimited screen; Restore Purchases is on that same screen. The paywall clearly shows the monthly duration, localized StoreKit price, renewal disclosure, Privacy Policy link, and Apple Standard EULA link. The App Store description also includes the Standard EULA URL. Participant names and winner history stay on device."
+        notes: "NameSnap is a random name picker for classrooms, giveaways, games, and live streams. No account is required. The free tier allows up to 16 contestants per session. Unlimited Monthly provides ongoing access to unlimited recurring classroom, livestream, giveaway, and event sessions. Unlimited Lifetime provides that access as a one-time purchase. Restore Purchases is on the same Unlimited screen. The paywall clearly shows the monthly duration, localized StoreKit price, renewal disclosure, Privacy Policy link, and Apple Standard EULA link. The App Store description also includes the Standard EULA URL. Participant names and winner history stay on device."
       }
     )
   end
 
-  desc "Select build 15 and submit NameSnap 2.0 for full App Store review"
+  desc "Select build 17 and submit NameSnap 2.0 for full App Store review"
   lane :submit_production do
     upload_to_app_store(
       api_key: namesnap_api_key,

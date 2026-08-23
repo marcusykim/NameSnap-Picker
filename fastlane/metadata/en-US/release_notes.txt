@@ -1,6 +1,6 @@
-• Launching NameSnap
-• Paste names and spin a random winner instantly
+• A playful redesigned picker for iPhone and iPad
+• Wheel and classic winner-reveal modes
+• Numbered contestants with quick include, exclude, and delete controls
 • No Repeat mode with quick reset
-• Include or exclude contestants on the fly
 • Winner history for recent draws
-• Up to 16 contestants free
+• Up to 16 contestants free, with unlimited available as an upgrade

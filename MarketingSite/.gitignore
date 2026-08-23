@@ -40,3 +40,7 @@ yarn-error.log*
 /work/
 /firebase-public/
 /.firebase/
+/functions/
+/worker/.dry-run/
+/worker/.wrangler/
+/worker/worker/

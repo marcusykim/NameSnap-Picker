@@ -35,6 +35,25 @@ enum NSTheme {
     static let yellow = Color(red: 247 / 255, green: 220 / 255, blue: 96 / 255)
 }
 
+private struct NameSnapActionModalSurface: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .background(.ultraThinMaterial)
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(.white.opacity(0.65), lineWidth: 2)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .shadow(radius: 12)
+    }
+}
+
+private extension View {
+    func nameSnapActionModalSurface() -> some View {
+        modifier(NameSnapActionModalSurface())
+    }
+}
+
 enum SpinVisualMode: String, CaseIterable, Identifiable {
     case classic = "Classic"
     case wheel = "Wheel"
@@ -553,6 +572,7 @@ struct ContentView: View {
     @State private var pendingNamesForAddition: [String] = []
     @State private var pendingDuplicateInputNames: [String] = []
     @State private var didRunThresholdPaywallCheck = false
+    @State private var didConfigureScreenshotFixture = false
 
     private let flashColors: [Color] = [.pink, .yellow, .cyan, .green, .orange, .purple]
     private let freeContestantLimit = 16
@@ -601,6 +621,42 @@ struct ContentView: View {
         }
         #endif
         return freeContestantLimit + 1
+    }
+
+    private var screenshotFixtureStateForUITesting: String? {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["NAMESNAP_UI_SCREENSHOT_STATE"]
+            ?? screenshotFixtureArgumentValue("-ui-screenshot-state")
+        #else
+        nil
+        #endif
+    }
+
+    private var screenshotFixtureNamesForUITesting: [String] {
+        #if DEBUG
+        guard let rawNames = ProcessInfo.processInfo.environment["NAMESNAP_UI_SCREENSHOT_NAMES"]
+            ?? screenshotFixtureArgumentValue("-ui-screenshot-names") else {
+            return []
+        }
+        return rawNames
+            .split(separator: "|", omittingEmptySubsequences: true)
+            .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        #else
+        return []
+        #endif
+    }
+
+    private func screenshotFixtureArgumentValue(_ key: String) -> String? {
+        #if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let keyIndex = arguments.firstIndex(of: key) else { return nil }
+        let valueIndex = arguments.index(after: keyIndex)
+        guard arguments.indices.contains(valueIndex) else { return nil }
+        return arguments[valueIndex]
+        #else
+        return nil
+        #endif
     }
 
     private var lifetimePriceText: String {
@@ -762,11 +818,96 @@ struct ContentView: View {
         }
     }
 
+    private func configureScreenshotFixtureIfNeeded() -> Bool {
+        #if DEBUG
+        guard !didConfigureScreenshotFixture,
+              let state = screenshotFixtureStateForUITesting,
+              !state.isEmpty,
+              !screenshotFixtureNamesForUITesting.isEmpty else {
+            return false
+        }
+        didConfigureScreenshotFixture = true
+
+        let names = screenshotFixtureNamesForUITesting
+        vm.rawInput = names.enumerated().map { "\($0.offset + 1). \($0.element)" }.joined(separator: "\n")
+
+        switch state {
+        case "input":
+            break
+        case "added":
+            _ = vm.addNames(names)
+            centerAlertText = "✅ Names Added"
+            centerAlertScale = 1
+            showCenterAlert = true
+        case "classic":
+            _ = vm.addNames(names)
+            vm.visualMode = .classic
+        case "wheel":
+            _ = vm.addNames(names)
+            vm.visualMode = .wheel
+        case "winner":
+            _ = vm.addNames(names)
+            vm.visualMode = .wheel
+            let winnerIndex = min(6, names.count - 1)
+            didShowWinnerForCurrentSpin = true
+            suppressWheelSettle = true
+            vm.selectedName = "\(winnerIndex + 1). \(names[winnerIndex])"
+            vm.history = [WinnerRecord(drawNumber: winnerIndex + 1, name: names[winnerIndex])]
+            centerAlertText = "🎉 Winner: \(winnerIndex + 1). \(names[winnerIndex])"
+            centerAlertScale = 1
+            showCenterAlert = true
+        case "history":
+            _ = vm.addNames(names)
+            vm.visualMode = .classic
+            let winnerIndices = [16, 14, 11].filter { names.indices.contains($0) }
+            vm.history = winnerIndices.map { WinnerRecord(drawNumber: $0 + 1, name: names[$0]) }
+            if let winnerIndex = winnerIndices.first {
+                vm.selectedName = "\(winnerIndex + 1). \(names[winnerIndex])"
+            }
+        case "upgrade":
+            pendingNamesForAddition = names
+            showUpgradeConfirm = true
+        default:
+            return false
+        }
+
+        return true
+        #else
+        return false
+        #endif
+    }
+
+    private func handleViewAppear() {
+        noRepeatToggleUIValue = vm.noRepeatMode
+        pendingNoRepeatValue = vm.noRepeatMode
+
+        if configureScreenshotFixtureIfNeeded() {
+            didRunLaunchSilentCheck = true
+        } else {
+            runLaunchSilentModeCheckIfNeeded()
+        }
+
+        if screenshotFixtureStateForUITesting == nil,
+           shouldTriggerThresholdPaywallForUITesting,
+           !didRunThresholdPaywallCheck {
+            didRunThresholdPaywallCheck = true
+            if shouldSimulateTestEntitlementForUITesting || shouldSimulateProductionEntitlementForUITesting {
+                purchases.isUnlimitedUnlocked = true
+            }
+            let names = (1...thresholdContestantCountForUITesting).map { "Contestant \($0)" }
+            vm.rawInput = names.enumerated().map { "\($0.offset + 1). \($0.element)" }.joined(separator: "\n")
+            DispatchQueue.main.async {
+                beginAddingNames(names)
+            }
+        } else if shouldShowUpgradeForUITesting {
+            showUpgradeConfirm = true
+        }
+    }
+
     private func shouldPresentPaywall(currentCount: Int, incomingCount: Int) -> Bool {
         guard incomingCount > 0 else { return false }
         guard (currentCount + incomingCount) > freeContestantLimit else { return false }
-        if !purchases.isUnlimitedUnlocked { return true }
-        return purchases.isTestStoreEnvironment
+        return !purchases.isUnlimitedUnlocked
     }
 
     private func normalizedName(_ name: String) -> String {
@@ -844,6 +985,7 @@ struct ContentView: View {
             centerAlertScale = 1
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            guard screenshotFixtureStateForUITesting != "winner" else { return }
             withAnimation(.easeInOut(duration: 0.25)) {
                 showCenterAlert = false
             }
@@ -1116,7 +1258,8 @@ struct ContentView: View {
                                             rowCount: vm.wheelVirtualRowCount,
                                             animateProgrammaticChanges: vm.isSpinning
                                         )
-                                        .frame(height: 140)
+                                        .frame(maxWidth: .infinity, minHeight: 140, maxHeight: 140)
+                                        .contentShape(Rectangle())
                                     }
 
                                     Button(vm.isSpinning ? "Spinning" : "Spin Wheel") {
@@ -1215,6 +1358,8 @@ struct ContentView: View {
                         Spacer(minLength: 12)
                     }
                     .padding()
+                    .frame(maxWidth: 900)
+                    .frame(maxWidth: .infinity)
                     .padding(.bottom, 110)
                 }
                 .onTapGesture {
@@ -1234,13 +1379,7 @@ struct ContentView: View {
                     centerAlertLabel(centerAlertText)
                         .padding(.horizontal, 18)
                         .padding(.vertical, 20)
-                        .background(.ultraThinMaterial)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18)
-                                .stroke(.white.opacity(0.65), lineWidth: 2)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        .shadow(radius: 12)
+                        .nameSnapActionModalSurface()
                         .scaleEffect(centerAlertScale)
                         .transition(.scale.combined(with: .opacity))
                 }
@@ -1288,16 +1427,11 @@ struct ContentView: View {
                         }
                         .padding(.horizontal, 18)
                         .padding(.vertical, 20)
-                        .background(.ultraThinMaterial)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18)
-                                .stroke(.white.opacity(0.65), lineWidth: 2)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        .shadow(radius: 12)
+                        .frame(maxWidth: 560)
+                        .nameSnapActionModalSurface()
                         .padding(.horizontal, 22)
                     }
-                    .transition(.opacity)
+                    .transition(.scale(scale: 0.94).combined(with: .opacity))
                 }
             }
             .overlay {
@@ -1343,16 +1477,11 @@ struct ContentView: View {
                         }
                         .padding(.horizontal, 18)
                         .padding(.vertical, 20)
-                        .background(.ultraThinMaterial)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18)
-                                .stroke(.white.opacity(0.65), lineWidth: 2)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        .shadow(radius: 12)
+                        .frame(maxWidth: 560)
+                        .nameSnapActionModalSurface()
                         .padding(.horizontal, 22)
                     }
-                    .transition(.opacity)
+                    .transition(.scale(scale: 0.94).combined(with: .opacity))
                 }
             }
             .overlay {
@@ -1374,16 +1503,11 @@ struct ContentView: View {
                         }
                         .padding(.horizontal, 18)
                         .padding(.vertical, 20)
-                        .background(.ultraThinMaterial)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18)
-                                .stroke(.white.opacity(0.65), lineWidth: 2)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        .shadow(radius: 12)
+                        .frame(maxWidth: 560)
+                        .nameSnapActionModalSurface()
                         .padding(.horizontal, 22)
                     }
-                    .transition(.opacity)
+                    .transition(.scale(scale: 0.94).combined(with: .opacity))
                 }
             }
             .overlay {
@@ -1427,16 +1551,11 @@ struct ContentView: View {
                         }
                         .padding(.horizontal, 18)
                         .padding(.vertical, 20)
-                        .background(.ultraThinMaterial)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18)
-                                .stroke(.white.opacity(0.65), lineWidth: 2)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        .shadow(radius: 12)
+                        .frame(maxWidth: 560)
+                        .nameSnapActionModalSurface()
                         .padding(.horizontal, 22)
                     }
-                    .transition(.opacity)
+                    .transition(.scale(scale: 0.94).combined(with: .opacity))
                 }
             }
             .overlay {
@@ -1573,18 +1692,13 @@ struct ContentView: View {
                             .accessibilityElement(children: .contain)
                             .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                         }
-                        .frame(height: dynamicTypeSize.isAccessibilitySize ? UIScreen.main.bounds.height * 0.88 : 480)
-                        .background(Color(red: 0.96, green: 0.97, blue: 0.94))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18)
-                                .stroke(.white.opacity(0.65), lineWidth: 2)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        .shadow(radius: 12)
+                        .frame(height: dynamicTypeSize.isAccessibilitySize ? UIScreen.main.bounds.height * 0.88 : 390)
+                        .frame(maxWidth: 620)
+                        .nameSnapActionModalSurface()
                         .padding(.horizontal, 22)
                         .padding(.vertical, 20)
                     }
-                    .transition(.opacity)
+                    .transition(.scale(scale: 0.94).combined(with: .opacity))
                 }
             }
             .overlay {
@@ -1650,16 +1764,11 @@ struct ContentView: View {
                         }
                         .padding(.horizontal, 18)
                         .padding(.vertical, 20)
-                        .background(.ultraThinMaterial)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18)
-                                .stroke(.white.opacity(0.65), lineWidth: 2)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        .shadow(radius: 12)
+                        .frame(maxWidth: 560)
+                        .nameSnapActionModalSurface()
                         .padding(.horizontal, 22)
                     }
-                    .transition(.opacity)
+                    .transition(.scale(scale: 0.94).combined(with: .opacity))
                 }
             }
             .overlay(alignment: .bottom) {
@@ -1745,24 +1854,7 @@ struct ContentView: View {
             .onChange(of: vm.wheelVirtualRowCount) { _ in
                 vm.clampWheelIndexToWheelEntries()
             }
-            .onAppear {
-                noRepeatToggleUIValue = vm.noRepeatMode
-                pendingNoRepeatValue = vm.noRepeatMode
-                runLaunchSilentModeCheckIfNeeded()
-                if shouldTriggerThresholdPaywallForUITesting && !didRunThresholdPaywallCheck {
-                    didRunThresholdPaywallCheck = true
-                    if shouldSimulateTestEntitlementForUITesting || shouldSimulateProductionEntitlementForUITesting {
-                        purchases.isUnlimitedUnlocked = true
-                    }
-                    let names = (1...thresholdContestantCountForUITesting).map { "Contestant \($0)" }
-                    vm.rawInput = names.enumerated().map { "\($0.offset + 1). \($0.element)" }.joined(separator: "\n")
-                    DispatchQueue.main.async {
-                        beginAddingNames(names)
-                    }
-                } else if shouldShowUpgradeForUITesting {
-                    showUpgradeConfirm = true
-                }
-            }
+            .onAppear(perform: handleViewAppear)
             .onChange(of: vm.noRepeatMode) { newValue in
                 if !showNoRepeatToggleConfirm {
                     noRepeatToggleUIValue = newValue
@@ -1829,6 +1921,13 @@ struct ContentView: View {
 }
 
 
+private final class FullWidthPickerView: UIPickerView {
+    override var intrinsicContentSize: CGSize {
+        let inherited = super.intrinsicContentSize
+        return CGSize(width: UIView.noIntrinsicMetric, height: inherited.height)
+    }
+}
+
 private struct InfiniteWheelPicker: UIViewRepresentable {
     let entries: [NameEntry]
     @Binding var selection: Int
@@ -1838,7 +1937,9 @@ private struct InfiniteWheelPicker: UIViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
     func makeUIView(context: Context) -> UIPickerView {
-        let picker = UIPickerView()
+        let picker = FullWidthPickerView()
+        picker.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        picker.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         picker.dataSource = context.coordinator
         picker.delegate = context.coordinator
         context.coordinator.lastEntriesSignature = entriesSignature
@@ -1861,6 +1962,15 @@ private struct InfiniteWheelPicker: UIViewRepresentable {
         }
 
         context.coordinator.synchronizeSelection(in: uiView, animated: animateProgrammaticChanges)
+    }
+
+    func sizeThatFits(
+        _ proposal: ProposedViewSize,
+        uiView: UIPickerView,
+        context: Context
+    ) -> CGSize? {
+        guard let width = proposal.width else { return nil }
+        return CGSize(width: width, height: proposal.height ?? 140)
     }
 
     private var entriesSignature: String {
@@ -1931,10 +2041,30 @@ private struct InfiniteWheelPicker: UIViewRepresentable {
             34
         }
 
-        func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-            guard baseCount > 0 else { return nil }
+        func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
+            max(pickerView.bounds.width, 1)
+        }
+
+        func pickerView(
+            _ pickerView: UIPickerView,
+            viewForRow row: Int,
+            forComponent component: Int,
+            reusing view: UIView?
+        ) -> UIView {
+            let label = (view as? UILabel) ?? UILabel()
+            label.textAlignment = .center
+            label.font = .preferredFont(forTextStyle: .body)
+            label.adjustsFontForContentSizeCategory = true
+            label.textColor = .label
+            label.numberOfLines = 1
+            label.lineBreakMode = .byTruncatingTail
+            guard baseCount > 0 else {
+                label.text = nil
+                return label
+            }
             let entry = parent.entries[wrappedModulo(row, modulus: baseCount)]
-            return "\(entry.drawNumber). \(entry.name)"
+            label.text = "\(entry.drawNumber). \(entry.name)"
+            return label
         }
 
         func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
