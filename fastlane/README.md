@@ -37,7 +37,7 @@ Upload production listing metadata and final screenshots
 [bundle exec] fastlane ios submit_production
 ```
 
-Select build 11 and submit NameSnap 2.0 for full App Store review
+Select build 17 and submit NameSnap 2.0 for full App Store review
 
 ----
 

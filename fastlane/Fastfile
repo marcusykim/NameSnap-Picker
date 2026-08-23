@@ -48,11 +48,10 @@ platform :ios do
       submit_for_review: false,
       run_precheck_before_submit: false,
       automatic_release: true,
-      price_tier: 0,
       force: true,
       copyright: "2026 Marcus Kim",
-      primary_category: "Utilities",
-      secondary_category: "Entertainment",
+      primary_category: "UTILITIES",
+      secondary_category: "ENTERTAINMENT",
       app_review_information: {
         first_name: "Marcus",
         last_name: "Kim",
