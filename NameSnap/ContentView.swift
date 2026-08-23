@@ -34,6 +34,11 @@ private enum WinnerCelebrationHero: String, CaseIterable {
     case dynamite
     case hypeMascot = "hype-mascot"
     case pixelBomb = "pixel-bomb"
+    case breakdancer
+    case dj
+    case drummer
+    case skater
+    case trumpet
 
     var label: String {
         switch self {
@@ -42,12 +47,17 @@ private enum WinnerCelebrationHero: String, CaseIterable {
         case .dynamite: return "Celebration blast"
         case .hypeMascot: return "Maximum hype"
         case .pixelBomb: return "Bonus explosion"
+        case .breakdancer: return "Breakdance victory"
+        case .dj: return "Dance-floor takeover"
+        case .drummer: return "Thunderous drum solo"
+        case .skater: return "Victory on wheels"
+        case .trumpet: return "Stadium fanfare"
         }
     }
 }
 
 private struct WinnerCelebration: Identifiable {
-    static let variationCount = 50
+    static let variationCount = 100
     static let audioNames = [
         "techno_upbeat_01", "techno_upbeat_02", "techno_upbeat_03", "techno_upbeat_04",
         "techno_upbeat_alt_01", "techno_upbeat_alt_02", "techno_upbeat_alt_03", "techno_upbeat_alt_04",
@@ -996,6 +1006,7 @@ final class NameSnapPurchaseManager: ObservableObject {
 
 struct ContentView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @StateObject private var vm = NameSnapViewModel()
     @StateObject private var purchases = NameSnapPurchaseManager()
     @State private var showCenterAlert = false
@@ -1212,42 +1223,51 @@ struct ContentView: View {
 
     @ViewBuilder
     private func centerAlertSymbol(_ symbol: String, size: CGFloat = 28) -> some View {
-        if let assetName = emojiAssetName(for: symbol) {
-            Image(assetName)
+        if let assetName = emojiAssetName(for: symbol), let image = UIImage(named: assetName) {
+            Image(uiImage: image)
                 .resizable()
                 .scaledToFit()
                 .frame(width: size + 8, height: size + 8)
                 .accessibilityLabel(emojiAccessibilityLabel(for: symbol))
         } else {
             Text(verbatim: symbol)
-                .font(.system(size: size))
+                .font(.system(size: size, weight: .regular, design: .default))
+                .accessibilityLabel(emojiAccessibilityLabel(for: symbol))
         }
     }
 
     private func emojiAssetName(for symbol: String) -> String? {
-        if symbol.contains("✅") || symbol.contains("✔") { return "success_emoji" }
-        if symbol.contains("🎉") { return "party_popper_emoji" }
-        if symbol.contains("✨") { return "sparkle_emoji" }
-        if symbol.contains("↩") { return "undo_emoji" }
-        if symbol.contains("🧹") { return "broom_emoji" }
-        if symbol.contains("⚠") { return "warning_emoji" }
-        if symbol.contains("♻") { return "recycle_emoji" }
-        if symbol.contains("🔈") { return "sound_emoji" }
-        if symbol.contains("🔁") { return "repeat_emoji" }
+        let normalized = normalizedEmojiSymbol(symbol)
+        if normalized.contains("✅") || normalized.contains("✔") { return "success_emoji" }
+        if normalized.contains("🎉") { return "party_popper_emoji" }
+        if normalized.contains("✨") { return "sparkle_emoji" }
+        if normalized.contains("↩") { return "undo_emoji" }
+        if normalized.contains("🧹") { return "broom_emoji" }
+        if normalized.contains("⚠") { return "warning_emoji" }
+        if normalized.contains("♻") { return "recycle_emoji" }
+        if normalized.contains("🔈") { return "sound_emoji" }
+        if normalized.contains("🔁") { return "repeat_emoji" }
         return nil
     }
 
     private func emojiAccessibilityLabel(for symbol: String) -> String {
-        if symbol.contains("✅") || symbol.contains("✔") { return "Success" }
-        if symbol.contains("🎉") { return "Winner" }
-        if symbol.contains("✨") { return "Upgrade" }
-        if symbol.contains("↩") { return "Undo" }
-        if symbol.contains("🧹") { return "Cleared" }
-        if symbol.contains("⚠") { return "Warning" }
-        if symbol.contains("♻") { return "Reset" }
-        if symbol.contains("🔈") { return "Sound" }
-        if symbol.contains("🔁") { return "Repeat" }
+        let normalized = normalizedEmojiSymbol(symbol)
+        if normalized.contains("✅") || normalized.contains("✔") { return "Success" }
+        if normalized.contains("🎉") { return "Winner" }
+        if normalized.contains("✨") { return "Upgrade" }
+        if normalized.contains("↩") { return "Undo" }
+        if normalized.contains("🧹") { return "Cleared" }
+        if normalized.contains("⚠") { return "Warning" }
+        if normalized.contains("♻") { return "Reset" }
+        if normalized.contains("🔈") { return "Sound" }
+        if normalized.contains("🔁") { return "Repeat" }
         return "Status"
+    }
+
+    private func normalizedEmojiSymbol(_ symbol: String) -> String {
+        symbol
+            .replacingOccurrences(of: "\u{FE0E}", with: "")
+            .replacingOccurrences(of: "\u{FE0F}", with: "")
     }
 
     private func dismissKeyboard() {
@@ -1307,6 +1327,10 @@ struct ContentView: View {
         case "wheel":
             _ = vm.addNames(names)
             vm.visualMode = .wheel
+        case "reset-confirm":
+            _ = vm.addNames(names)
+            vm.visualMode = .wheel
+            showResetPoolConfirm = true
         case "winner":
             _ = vm.addNames(names)
             vm.visualMode = .wheel
@@ -1458,18 +1482,24 @@ struct ContentView: View {
         winnerCelebration = nextCelebration
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         playCelebrationSoundReliably(audioName: nextCelebration.audioName)
-        showWinnerFlash = true
-        flashIndex = 0
+        if !reduceMotion {
+            showWinnerFlash = true
+            flashIndex = 0
 
-        for step in 0..<10 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + (Double(step) * 0.08)) {
-                flashIndex = step % flashColors.count
+            // Pulse the whole display for the length of the winner soundtrack.
+            // The 0.55-second cadence stays well below rapid-strobe territory.
+            for step in 0..<10 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + (Double(step) * 0.55)) {
+                    withAnimation(.easeInOut(duration: 0.22)) {
+                        flashIndex = step % flashColors.count
+                    }
+                }
             }
-        }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
-            withAnimation(.easeOut(duration: 0.2)) {
-                showWinnerFlash = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.65) {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    showWinnerFlash = false
+                }
             }
         }
     }
@@ -1532,7 +1562,7 @@ struct ContentView: View {
                 let player = try AVAudioPlayer(contentsOf: url)
                 player.prepareToPlay()
                 player.currentTime = 0
-                player.numberOfLoops = 0
+                player.numberOfLoops = player.duration < 5.8 ? -1 : 0
                 player.volume = 0.76
 
                 guard player.play() else {

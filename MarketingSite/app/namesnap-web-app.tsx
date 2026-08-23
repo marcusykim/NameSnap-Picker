@@ -7,7 +7,7 @@ import { type ClipboardEvent as ReactClipboardEvent, type CSSProperties, type Ke
 type Entry = { id: string; drawNumber: number; name: string; included: boolean };
 type Winner = { id: string; name: string; number: number; pickedAt: string };
 type PickerMode = "classic" | "wheel";
-type CelebrationHero = "dancer" | "guitarist" | "dynamite" | "hype-mascot" | "pixel-bomb";
+type CelebrationHero = "dancer" | "guitarist" | "dynamite" | "hype-mascot" | "pixel-bomb" | "breakdancer" | "dj" | "drummer" | "skater" | "trumpet";
 type Celebration = {
   variation: number;
   hero: CelebrationHero;
@@ -50,8 +50,8 @@ const AUDIO_TRACKS = [
   "/sounds/celebration_crowd.mp3", "/sounds/celebration_fanfare.mp3",
   "/sounds/celebration_fireworks.mp3", "/sounds/celebration_explosion.mp3",
 ];
-const CELEBRATION_HEROES: CelebrationHero[] = ["dancer", "guitarist", "dynamite", "hype-mascot", "pixel-bomb"];
-const CELEBRATION_VARIATION_COUNT = 50;
+const CELEBRATION_HEROES: CelebrationHero[] = ["dancer", "guitarist", "dynamite", "hype-mascot", "pixel-bomb", "breakdancer", "dj", "drummer", "skater", "trumpet"];
+const CELEBRATION_VARIATION_COUNT = 100;
 const CELEBRATION_HEADLINES = ["THE PICK IS IN", "ABSOLUTE LEGEND", "WINNER ENERGY", "MAKE SOME NOISE", "MAIN CHARACTER MOMENT"];
 const HERO_LABELS: Record<CelebrationHero, string> = {
   dancer: "Victory dance",
@@ -59,6 +59,11 @@ const HERO_LABELS: Record<CelebrationHero, string> = {
   dynamite: "Celebration blast",
   "hype-mascot": "Maximum hype",
   "pixel-bomb": "Bonus explosion",
+  breakdancer: "Breakdance victory",
+  dj: "Dance-floor takeover",
+  drummer: "Thunderous drum solo",
+  skater: "Victory on wheels",
+  trumpet: "Stadium fanfare",
 };
 
 function makeId() {
@@ -569,6 +574,9 @@ export function NameSnapWebApp() {
     const audio = new Audio(track);
     winnerAudioRef.current = audio;
     audio.volume = 0.76;
+    // Short one-shot effects loop under the celebration so every winner gets
+    // a continuous soundtrack for the full 5.8-second celebration window.
+    audio.loop = true;
     void audio.play().catch(() => undefined);
     const timer = window.setTimeout(() => {
       if (winnerAudioRef.current === audio) stopWinnerAudio();
@@ -888,12 +896,14 @@ export function NameSnapWebApp() {
             <div className="celebration-particles">
               {celebrationPieces.map((piece) => <i key={piece.index} style={piece.style} />)}
             </div>
-            <img
-              className={`celebration-hero celebration-hero-${celebration.hero}`}
-              src={celebration.hero === "pixel-bomb" ? "/celebrations/pixel-bomb.gif" : `/celebrations/${celebration.hero}.png`}
-              alt=""
-            />
           </div>
+
+          <img
+            className={`celebration-hero celebration-hero-${celebration.hero}`}
+            src={celebration.hero === "pixel-bomb" ? "/celebrations/pixel-bomb.gif" : `/celebrations/${celebration.hero}.png`}
+            alt=""
+            aria-hidden="true"
+          />
 
           <section className="winner-modal winner-celebration" role="dialog" aria-modal="true" aria-live="assertive" aria-labelledby="winner-title" aria-describedby="winner-message">
             <button type="button" className="winner-close" aria-label="Close winner celebration" onClick={dismissWinner}>×</button>
