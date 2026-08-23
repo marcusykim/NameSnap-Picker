@@ -4,6 +4,7 @@ import UIKit
 import AudioToolbox
 import AVFoundation
 import StoreKit
+import ImageIO
 
 struct NameEntry: Identifiable, Codable, Hashable {
     let id: UUID
@@ -25,6 +26,55 @@ struct WinnerRecord: Identifiable, Hashable {
     let name: String
 
     var displayText: String { "\(drawNumber). \(name)" }
+}
+
+private enum WinnerCelebrationHero: String, CaseIterable {
+    case dancer
+    case guitarist
+    case dynamite
+    case hypeMascot = "hype-mascot"
+    case pixelBomb = "pixel-bomb"
+
+    var label: String {
+        switch self {
+        case .dancer: return "Victory dance"
+        case .guitarist: return "Face-melting solo"
+        case .dynamite: return "Celebration blast"
+        case .hypeMascot: return "Maximum hype"
+        case .pixelBomb: return "Bonus explosion"
+        }
+    }
+}
+
+private struct WinnerCelebration: Identifiable {
+    static let variationCount = 50
+    static let audioNames = [
+        "techno_upbeat_01", "techno_upbeat_02", "techno_upbeat_03", "techno_upbeat_04",
+        "techno_upbeat_alt_01", "techno_upbeat_alt_02", "techno_upbeat_alt_03", "techno_upbeat_alt_04",
+        "techno_upbeat_alt_05", "techno_upbeat_alt_06", "celebration_airhorn", "celebration_metal",
+        "celebration_crowd", "celebration_fanfare", "celebration_fireworks", "celebration_explosion"
+    ]
+    static let headlines = ["THE PICK IS IN", "ABSOLUTE LEGEND", "WINNER ENERGY", "MAKE SOME NOISE", "MAIN CHARACTER MOMENT"]
+
+    let id = UUID()
+    let variation: Int
+    let drawNumber: Int
+    let winnerName: String
+
+    var hero: WinnerCelebrationHero {
+        WinnerCelebrationHero.allCases[variation % WinnerCelebrationHero.allCases.count]
+    }
+    var palette: Int { (variation / WinnerCelebrationHero.allCases.count) % 5 }
+    var entersFromRight: Bool { variation < Self.variationCount / 2 }
+    var audioName: String { Self.audioNames[variation % Self.audioNames.count] }
+    var headline: String { Self.headlines[palette] }
+
+    init(displayText: String, variation: Int = Int.random(in: 0..<WinnerCelebration.variationCount)) {
+        let parts = displayText.split(separator: ".", maxSplits: 1, omittingEmptySubsequences: true)
+        drawNumber = Int(parts.first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "") ?? 1
+        winnerName = parts.count > 1 ? String(parts[1]).trimmingCharacters(in: .whitespacesAndNewlines) : displayText
+        self.variation = ((variation % Self.variationCount) + Self.variationCount) % Self.variationCount
+    }
 }
 
 enum NSTheme {
@@ -51,6 +101,305 @@ private struct NameSnapActionModalSurface: ViewModifier {
 private extension View {
     func nameSnapActionModalSurface() -> some View {
         modifier(NameSnapActionModalSurface())
+    }
+}
+
+private func celebrationTitleFont(size: CGFloat) -> Font {
+    if UIFont(name: "RubikMonoOne-Regular", size: size) != nil {
+        return .custom("RubikMonoOne-Regular", size: size)
+    }
+    if UIFont(name: "Rubik Mono One", size: size) != nil {
+        return .custom("Rubik Mono One", size: size)
+    }
+    return .system(size: size, weight: .black, design: .rounded)
+}
+
+private struct AnimatedGIFImage: UIViewRepresentable {
+    let resourceName: String
+
+    func makeUIView(context: Context) -> UIImageView {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        imageView.clipsToBounds = false
+        imageView.image = Self.animatedImage(named: resourceName)
+        return imageView
+    }
+
+    func updateUIView(_ uiView: UIImageView, context: Context) {}
+
+    private static func animatedImage(named resourceName: String) -> UIImage? {
+        let rootURL = Bundle.main.url(forResource: resourceName, withExtension: "gif")
+        let nestedURL = Bundle.main.url(forResource: resourceName, withExtension: "gif", subdirectory: "Celebrations")
+        guard let url = rootURL ?? nestedURL,
+              let source = CGImageSourceCreateWithURL(url as CFURL, nil) else {
+            return nil
+        }
+
+        var frames: [UIImage] = []
+        var totalDuration: TimeInterval = 0
+        for index in 0..<CGImageSourceGetCount(source) {
+            guard let frame = CGImageSourceCreateImageAtIndex(source, index, nil) else { continue }
+            let properties = CGImageSourceCopyPropertiesAtIndex(source, index, nil) as? [CFString: Any]
+            let gifProperties = properties?[kCGImagePropertyGIFDictionary] as? [CFString: Any]
+            let unclampedDelay = gifProperties?[kCGImagePropertyGIFUnclampedDelayTime] as? Double
+            let delay = unclampedDelay ?? (gifProperties?[kCGImagePropertyGIFDelayTime] as? Double) ?? 0.08
+            frames.append(UIImage(cgImage: frame))
+            totalDuration += max(delay, 0.035)
+        }
+
+        guard !frames.isEmpty else { return nil }
+        return UIImage.animatedImage(with: frames, duration: max(totalDuration, 0.1))
+    }
+}
+
+private struct WinnerCelebrationOverlay: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let celebration: WinnerCelebration
+    let onDismiss: () -> Void
+    let onReset: () -> Void
+
+    @State private var animateHero = false
+    @State private var animateConfetti = false
+    @State private var animateCard = false
+
+    private var palette: [Color] {
+        switch celebration.palette {
+        case 1: return [NSTheme.bg, NSTheme.skyBlue, NSTheme.yellow]
+        case 2: return [Color(red: 1, green: 45 / 255, blue: 85 / 255), NSTheme.yellow, NSTheme.skyBlue]
+        case 3: return [NSTheme.skyBlue, Color(red: 1, green: 45 / 255, blue: 85 / 255), NSTheme.bg]
+        case 4: return [NSTheme.tan, Color(red: 88 / 255, green: 86 / 255, blue: 214 / 255), NSTheme.yellow]
+        default: return [NSTheme.yellow, Color(red: 88 / 255, green: 86 / 255, blue: 214 / 255), Color(red: 1, green: 45 / 255, blue: 85 / 255)]
+        }
+    }
+
+    var body: some View {
+        GeometryReader { proxy in
+            let compact = proxy.size.width < 700
+            let cardWidth = compact ? proxy.size.width - 24 : min(proxy.size.width * 0.72, 760)
+            let cardHeight = compact ? proxy.size.height - 24 : min(proxy.size.height - 56, 650)
+            let heroWidth = compact ? min(proxy.size.width * 0.5, 220) : min(proxy.size.width * 0.36, 520)
+
+            ZStack {
+                Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255)
+                    .overlay(
+                        RadialGradient(
+                            colors: [palette[0].opacity(0.46), .clear],
+                            center: .center,
+                            startRadius: 20,
+                            endRadius: max(proxy.size.width, proxy.size.height) * 0.62
+                        )
+                    )
+                    .ignoresSafeArea()
+
+                if !reduceMotion {
+                    AnimatedGIFImage(resourceName: "confetti-burst")
+                        .frame(width: min(proxy.size.width * 0.62, 430), height: min(proxy.size.width * 0.62, 430))
+                        .rotationEffect(.degrees(-14))
+                        .offset(x: -proxy.size.width * 0.34, y: -proxy.size.height * 0.28)
+                        .opacity(0.9)
+
+                    confettiRain(in: proxy.size)
+                }
+
+                celebrationHero(compact: compact, width: heroWidth)
+                    .offset(
+                        x: compact ? 0 : (celebration.entersFromRight ? proxy.size.width * 0.37 : -proxy.size.width * 0.37),
+                        y: compact ? -proxy.size.height * 0.31 : 0
+                    )
+                    // On iPhone the hero occupies the reserved header space inside the card.
+                    // On iPad it becomes a background flourish so it can never cover a long
+                    // winner name or either action button.
+                    .zIndex(compact ? 4 : 2)
+
+                celebrationCard(compact: compact)
+                    .frame(width: max(cardWidth, 0), height: max(cardHeight, 0))
+                    .scaleEffect(reduceMotion ? 1 : (animateCard ? 1 : 0.74))
+                    .rotationEffect(.degrees(reduceMotion ? 0 : (animateCard ? 0 : -3)))
+                    .opacity(reduceMotion ? 1 : (animateCard ? 1 : 0))
+                    .zIndex(3)
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+        }
+        .ignoresSafeArea()
+        .onAppear {
+            if reduceMotion {
+                animateHero = true
+                animateCard = true
+                return
+            }
+            withAnimation(.spring(response: 0.7, dampingFraction: 0.68)) { animateCard = true }
+            withAnimation(.spring(response: 0.82, dampingFraction: 0.58).delay(0.08)) { animateHero = true }
+            animateConfetti = true
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Winner celebration. Number \(celebration.drawNumber), \(celebration.winnerName)")
+    }
+
+    @ViewBuilder
+    private func celebrationHero(compact: Bool, width: CGFloat) -> some View {
+        Group {
+            if celebration.hero == .pixelBomb {
+                AnimatedGIFImage(resourceName: celebration.hero.rawValue)
+            } else if let image = rasterHeroImage(named: celebration.hero.rawValue) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+            } else {
+                Image("party_popper_emoji")
+                    .resizable()
+                    .scaledToFit()
+            }
+        }
+        .frame(width: celebration.hero == .pixelBomb ? width * 0.7 : width, height: compact ? width : width * 1.08)
+        .shadow(color: .black.opacity(0.34), radius: 24, x: 0, y: 18)
+        .scaleEffect(reduceMotion ? 0.78 : (animateHero ? 1 : 0.45))
+        .rotationEffect(.degrees(reduceMotion ? 0 : (animateHero ? (celebration.entersFromRight ? 3 : -3) : (celebration.entersFromRight ? 24 : -24))))
+        .offset(x: reduceMotion ? 0 : (animateHero ? 0 : (celebration.entersFromRight ? width * 1.8 : -width * 1.8)))
+        .opacity(reduceMotion ? 0.36 : (animateHero ? 1 : 0))
+    }
+
+    private func rasterHeroImage(named name: String) -> UIImage? {
+        if let bundled = UIImage(named: name) { return bundled }
+        let rootURL = Bundle.main.url(forResource: name, withExtension: "png")
+        let nestedURL = Bundle.main.url(forResource: name, withExtension: "png", subdirectory: "Celebrations")
+        guard let url = rootURL ?? nestedURL else { return nil }
+        return UIImage(contentsOfFile: url.path)
+    }
+
+    private func celebrationCard(compact: Bool) -> some View {
+        ZStack(alignment: .topTrailing) {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+                    Color.clear.frame(height: compact ? 270 : 16)
+
+                    Text(celebration.headline)
+                        .font(celebrationTitleFont(size: compact ? 12 : 17))
+                        .foregroundStyle(Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255))
+                        .tracking(compact ? 1.1 : 1.8)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, compact ? 14 : 20)
+                        .padding(.vertical, compact ? 7 : 9)
+                        .background(palette[0])
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255), lineWidth: 2))
+
+                    Text("CELEBRATION \(celebration.variation + 1) / \(WinnerCelebration.variationCount) · \(celebration.hero.label.uppercased())")
+                        .font(.system(size: compact ? 7 : 9, weight: .black))
+                        .foregroundStyle(Color(red: 96 / 255, green: 117 / 255, blue: 139 / 255))
+                        .tracking(1.1)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 10)
+                        .padding(.horizontal, 12)
+
+                    Text("\(celebration.drawNumber)")
+                        .font(celebrationTitleFont(size: compact ? 38 : 57))
+                        .foregroundStyle(Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255))
+                        .frame(width: compact ? 84 : 124, height: compact ? 84 : 124)
+                        .background(palette[0])
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255), lineWidth: compact ? 3 : 4))
+                        .shadow(color: palette[2], radius: 0, x: compact ? 5 : 8, y: compact ? 6 : 9)
+                        .rotationEffect(.degrees(-4))
+                        .padding(.top, compact ? 15 : 24)
+
+                    Text(celebration.winnerName)
+                        .font(celebrationTitleFont(size: compact ? 39 : 62))
+                        .foregroundStyle(Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255))
+                        .multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.55)
+                        .lineLimit(3)
+                        .padding(.top, compact ? 18 : 26)
+                        .padding(.horizontal, 8)
+
+                    Text("Winner #\(celebration.drawNumber) from the numbered pool. Make some noise!")
+                        .font(.system(size: compact ? 13 : 16, weight: .bold))
+                        .foregroundStyle(Color(red: 69 / 255, green: 93 / 255, blue: 115 / 255))
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 12)
+                        .padding(.horizontal, 10)
+
+                    HStack(spacing: 10) {
+                        Button("Keep Going", action: onDismiss)
+                            .buttonStyle(.plain)
+                            .font(celebrationTitleFont(size: compact ? 9 : 11))
+                            .frame(maxWidth: .infinity, minHeight: 52)
+                            .background(palette[0])
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255), lineWidth: 2))
+                            .shadow(color: Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255), radius: 0, x: 4, y: 5)
+
+                        Button("Reset Picks", action: onReset)
+                            .buttonStyle(.plain)
+                            .font(celebrationTitleFont(size: compact ? 8 : 10))
+                            .frame(maxWidth: .infinity, minHeight: 52)
+                            .background(.white.opacity(0.92))
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255), lineWidth: 2))
+                    }
+                    .padding(.top, compact ? 22 : 30)
+                    .padding(.horizontal, compact ? 2 : 24)
+                    .padding(.bottom, compact ? 22 : 28)
+                }
+                .padding(.horizontal, compact ? 18 : 40)
+            }
+
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 17, weight: .black))
+                    .foregroundStyle(Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255))
+                    .frame(width: 46, height: 46)
+                    .background(.white.opacity(0.94))
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255), lineWidth: 2))
+            }
+            .buttonStyle(.plain)
+            .padding(14)
+            .accessibilityLabel("Close winner celebration")
+        }
+        .background(
+            RadialGradient(
+                colors: [palette[0].opacity(0.32), Color(red: 247 / 255, green: 248 / 255, blue: 252 / 255).opacity(0.96)],
+                center: .top,
+                startRadius: 10,
+                endRadius: 500
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: compact ? 28 : 44, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: compact ? 28 : 44, style: .continuous).stroke(Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255), lineWidth: compact ? 3 : 4))
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: compact ? 28 : 44, style: .continuous)
+                    .fill(Color.black.opacity(0.32))
+                    .blur(radius: 26)
+                    .offset(y: 26)
+                RoundedRectangle(cornerRadius: compact ? 28 : 44, style: .continuous)
+                    .fill(palette[1])
+                    .offset(x: compact ? 7 : 12, y: compact ? 8 : 14)
+            }
+        }
+    }
+
+    private func confettiRain(in size: CGSize) -> some View {
+        ZStack {
+            ForEach(0..<72, id: \.self) { index in
+                let seed = celebration.variation * 97 + index * 41
+                let pieceWidth = CGFloat(7 + (seed * 7) % 12)
+                let x = CGFloat((seed * 29) % 101) / 100 * size.width
+                let drift = CGFloat(((seed * 17) % 45) - 22) / 100 * size.width
+                let duration = 2.2 + Double((seed * 23) % 2300) / 1000
+                let delay = -Double((seed * 13) % 1800) / 1000
+
+                RoundedRectangle(cornerRadius: index.isMultiple(of: 3) ? pieceWidth : 2)
+                    .fill(palette[index % palette.count])
+                    .overlay(RoundedRectangle(cornerRadius: 2).stroke(.black.opacity(0.45), lineWidth: 1))
+                    .frame(width: index.isMultiple(of: 5) ? pieceWidth * 1.8 : pieceWidth, height: index.isMultiple(of: 5) ? pieceWidth * 0.6 : pieceWidth * 1.7)
+                    .position(x: x, y: animateConfetti ? size.height + 90 : -90)
+                    .offset(x: animateConfetti ? drift : 0)
+                    .rotationEffect(.degrees(animateConfetti ? Double((seed * 31) % 720) : 0))
+                    .animation(.linear(duration: duration).repeatForever(autoreverses: false).delay(delay), value: animateConfetti)
+            }
+        }
+        .allowsHitTesting(false)
     }
 }
 
@@ -557,6 +906,7 @@ struct ContentView: View {
     @State private var didShowWinnerForCurrentSpin = false
     @State private var flashIndex = 0
     @State private var showWinnerFlash = false
+    @State private var winnerCelebration: WinnerCelebration?
     @State private var winnerAudioPlayer: AVAudioPlayer?
     @State private var winnerAudioStopWorkItem: DispatchWorkItem?
     @State private var wheelSettleWorkItem: DispatchWorkItem?
@@ -853,9 +1203,7 @@ struct ContentView: View {
             suppressWheelSettle = true
             vm.selectedName = "\(winnerIndex + 1). \(names[winnerIndex])"
             vm.history = [WinnerRecord(drawNumber: winnerIndex + 1, name: names[winnerIndex])]
-            centerAlertText = "🎉 Winner: \(winnerIndex + 1). \(names[winnerIndex])"
-            centerAlertScale = 1
-            showCenterAlert = true
+            winnerCelebration = WinnerCelebration(displayText: vm.selectedName, variation: 11)
         case "history":
             _ = vm.addNames(names)
             vm.visualMode = .classic
@@ -994,8 +1342,10 @@ struct ContentView: View {
 
 
     private func triggerWinnerEffects(name: String) {
-        showBigAlert("🎉 Winner: \(name)")
-        playCelebrationSoundReliably()
+        let nextCelebration = WinnerCelebration(displayText: name)
+        winnerCelebration = nextCelebration
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        playCelebrationSoundReliably(audioName: nextCelebration.audioName)
         showWinnerFlash = true
         flashIndex = 0
 
@@ -1012,31 +1362,28 @@ struct ContentView: View {
         }
     }
 
-    private func playCelebrationSoundReliably() {
-        playRandomCelebrationSound()
+    private func dismissWinnerCelebration() {
+        winnerAudioStopWorkItem?.cancel()
+        winnerAudioPlayer?.stop()
+        winnerAudioPlayer = nil
+        withAnimation(.easeOut(duration: 0.2)) {
+            winnerCelebration = nil
+        }
+    }
+
+    private func playCelebrationSoundReliably(audioName: String) {
+        playRandomCelebrationSound(preferredName: audioName)
 
         // Rare simulator/audio-session race: retry once if playback did not start.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
             if winnerAudioPlayer?.isPlaying != true {
-                playRandomCelebrationSound()
+                playRandomCelebrationSound(preferredName: audioName)
             }
         }
     }
 
-    private func playRandomCelebrationSound() {
-        // Preferred: bundled techno winner clips.
-        let customNames = [
-            "techno_upbeat_01",
-            "techno_upbeat_02",
-            "techno_upbeat_03",
-            "techno_upbeat_04",
-            "techno_upbeat_alt_01",
-            "techno_upbeat_alt_02",
-            "techno_upbeat_alt_03",
-            "techno_upbeat_alt_04",
-            "techno_upbeat_alt_05",
-            "techno_upbeat_alt_06"
-        ]
+    private func playRandomCelebrationSound(preferredName: String? = nil) {
+        let customNames = WinnerCelebration.audioNames
         let extensions = ["mp3", "wav", "m4a", "aiff"]
 
         winnerAudioStopWorkItem?.cancel()
@@ -1051,11 +1398,11 @@ struct ContentView: View {
             print("Audio session setup failed: \(error.localizedDescription)")
         }
 
-        var availableURLs: [URL] = []
+        var availableURLs: [(name: String, url: URL)] = []
         for name in customNames {
             for ext in extensions {
                 if let url = Bundle.main.url(forResource: name, withExtension: ext) {
-                    availableURLs.append(url)
+                    availableURLs.append((name, url))
                 }
             }
         }
@@ -1065,13 +1412,16 @@ struct ContentView: View {
             return
         }
 
-        for url in availableURLs.shuffled() {
+        let preferredURLs = availableURLs.filter { $0.name == preferredName }
+        let fallbackURLs = availableURLs.filter { $0.name != preferredName }.shuffled()
+        for item in preferredURLs + fallbackURLs {
+            let url = item.url
             do {
                 let player = try AVAudioPlayer(contentsOf: url)
                 player.prepareToPlay()
                 player.currentTime = 0
                 player.numberOfLoops = 0
-                player.volume = 1.0
+                player.volume = 0.76
 
                 guard player.play() else {
                     print("Audio play() returned false for \(url.lastPathComponent)")
@@ -1088,7 +1438,7 @@ struct ContentView: View {
                     }
                 }
                 winnerAudioStopWorkItem = stopItem
-                DispatchQueue.main.asyncAfter(deadline: .now() + 4.8, execute: stopItem)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5.8, execute: stopItem)
                 return
             } catch {
                 print("Failed to play custom SFX \(url.lastPathComponent): \(error.localizedDescription)")
@@ -1382,6 +1732,20 @@ struct ContentView: View {
                         .nameSnapActionModalSurface()
                         .scaleEffect(centerAlertScale)
                         .transition(.scale.combined(with: .opacity))
+                }
+            }
+            .overlay {
+                if let celebration = winnerCelebration {
+                    WinnerCelebrationOverlay(
+                        celebration: celebration,
+                        onDismiss: dismissWinnerCelebration,
+                        onReset: {
+                            dismissWinnerCelebration()
+                            withAnimation { showResetPoolConfirm = true }
+                        }
+                    )
+                    .transition(.opacity)
+                    .zIndex(20)
                 }
             }
             .overlay {
@@ -1772,7 +2136,7 @@ struct ContentView: View {
                 }
             }
             .overlay(alignment: .bottom) {
-                if !showUpgradeConfirm && !vm.entries.isEmpty {
+                if !showUpgradeConfirm && winnerCelebration == nil && !vm.entries.isEmpty {
                     VStack(spacing: 10) {
                         Button("Reset This Pool") { showResetPoolConfirm = true }
                             .buttonStyle(.borderedProminent)

@@ -41,6 +41,9 @@ test("server-renders the NameSnap web picker with App Store routing", async () =
   assert.match(html, /class="name-editor-number"[^>]*>1(?:<!-- -->)?\.<\/span>/);
   assert.match(html, /Spin the wheel/);
   assert.match(html, /IN POOL/);
+  assert.match(html, /View full list/);
+  assert.match(html, /Names in the draw/);
+  assert.match(html, /Add contestants above/);
   assert.match(html, /iPhone \+ iPad/);
   assert.match(html, /https:\/\/apps\.apple\.com\/app\/id6759588637/);
   assert.match(html, new RegExp(`mailto:${supportEmail.replace(".", "\\.")}`));

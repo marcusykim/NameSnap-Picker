@@ -16,15 +16,21 @@ token = Spaceship::ConnectAPI::Token.create(
   filepath: KEY_PATH
 )
 
-def request(token, method, path, body: nil)
+def request(token, method, path, body: nil, allow_not_found: false)
   uri = URI("https://api.appstoreconnect.apple.com#{path}")
-  request_class = { get: Net::HTTP::Get, post: Net::HTTP::Post }.fetch(method)
+  request_class = {
+    get: Net::HTTP::Get,
+    post: Net::HTTP::Post,
+    patch: Net::HTTP::Patch,
+    delete: Net::HTTP::Delete
+  }.fetch(method)
   req = request_class.new(uri)
   req["Authorization"] = "Bearer #{token.text}"
   req["Content-Type"] = "application/json" if body
   req.body = JSON.generate(body) if body
   response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |http| http.request(req) }
   parsed = response.body.to_s.empty? ? {} : JSON.parse(response.body)
+  return {} if allow_not_found && response.code.to_i == 404
   unless response.code.to_i.between?(200, 299)
     details = Array(parsed["errors"]).map do |error|
       [error["status"], error["code"], error["title"], error["detail"]].compact.join(" · ")
@@ -57,6 +63,27 @@ def add_build_to_group(token, group_id, build_id)
     "/v1/betaGroups/#{group_id}/relationships/builds",
     body: { data: [{ type: "builds", id: build_id }] }
   )
+end
+
+def app_store_versions(token)
+  request(
+    token,
+    :get,
+    "/v1/apps/#{APP_ID}/appStoreVersions?filter%5Bplatform%5D=IOS&limit=20"
+  ).fetch("data", [])
+end
+
+def version_submission(token, version_id)
+  request(
+    token,
+    :get,
+    "/v1/appStoreVersions/#{version_id}/relationships/appStoreVersionSubmission",
+    allow_not_found: true
+  )["data"]
+end
+
+def review_submissions(token)
+  request(token, :get, "/v1/apps/#{APP_ID}/reviewSubmissions?limit=200").fetch("data", [])
 end
 
 case ARGV.fetch(0, "build-status")
@@ -110,6 +137,49 @@ when "testflight-status"
         end
       }
     end
+  )
+when "submission-status"
+  puts JSON.pretty_generate(
+    review_submissions: review_submissions(token).map do |submission|
+      {
+        id: submission["id"],
+        state: submission.dig("attributes", "state"),
+        submitted_date: submission.dig("attributes", "submittedDate"),
+        platform: submission.dig("attributes", "platform")
+      }
+    end,
+    versions: app_store_versions(token).map do |version|
+      {
+        id: version["id"],
+        version: version.dig("attributes", "versionString"),
+        state: version.dig("attributes", "appStoreState"),
+        submission: version_submission(token, version.fetch("id"))
+      }
+    end
+  )
+when "cancel-submission"
+  submission = review_submissions(token).find do |candidate|
+    %w[WAITING_FOR_REVIEW IN_REVIEW].include?(candidate.dig("attributes", "state"))
+  end
+  abort("NameSnap has no review submission that can be canceled") unless submission
+
+  updated = request(
+    token,
+    :patch,
+    "/v1/reviewSubmissions/#{submission.fetch("id")}",
+    body: {
+      data: {
+        type: "reviewSubmissions",
+        id: submission.fetch("id"),
+        attributes: { canceled: true }
+      }
+    }
+  ).fetch("data")
+  puts JSON.pretty_generate(
+    submission_id: submission["id"],
+    previous_state: submission.dig("attributes", "state"),
+    current_state: updated.dig("attributes", "state"),
+    canceled: true
   )
 else
   abort("Unknown command: #{ARGV[0]}")

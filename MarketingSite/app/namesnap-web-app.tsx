@@ -2,13 +2,28 @@
 
 /* eslint-disable @next/next/no-html-link-for-pages, @next/next/no-img-element, react-hooks/set-state-in-effect, jsx-a11y/label-has-associated-control */
 
-import { type ClipboardEvent as ReactClipboardEvent, type KeyboardEvent as ReactKeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type ClipboardEvent as ReactClipboardEvent, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type Entry = { id: string; drawNumber: number; name: string; included: boolean };
 type Winner = { id: string; name: string; number: number; pickedAt: string };
 type PickerMode = "classic" | "wheel";
+type CelebrationHero = "dancer" | "guitarist" | "dynamite" | "hype-mascot" | "pixel-bomb";
+type Celebration = {
+  variation: number;
+  hero: CelebrationHero;
+  palette: number;
+  direction: "left" | "right";
+  audio: string;
+};
+type Confirmation = {
+  kicker: string;
+  message: string;
+  confirmLabel: string;
+  onConfirm: () => void;
+};
 
 const FREE_LIMIT = 16;
+const POOL_PREVIEW_LIMIT = 20;
 const STORAGE_KEY = "namesnap.web.session.v1";
 const PENDING_NAMES_KEY = "namesnap.web.pending-upgrade.v1";
 const IDENTITY_KEY = "namesnap.web.identity.v1";
@@ -31,7 +46,20 @@ const AUDIO_TRACKS = [
   "/sounds/techno_upbeat_alt_01.mp3", "/sounds/techno_upbeat_alt_02.mp3",
   "/sounds/techno_upbeat_alt_03.mp3", "/sounds/techno_upbeat_alt_04.mp3",
   "/sounds/techno_upbeat_alt_05.mp3", "/sounds/techno_upbeat_alt_06.mp3",
+  "/sounds/celebration_airhorn.mp3", "/sounds/celebration_metal.mp3",
+  "/sounds/celebration_crowd.mp3", "/sounds/celebration_fanfare.mp3",
+  "/sounds/celebration_fireworks.mp3", "/sounds/celebration_explosion.mp3",
 ];
+const CELEBRATION_HEROES: CelebrationHero[] = ["dancer", "guitarist", "dynamite", "hype-mascot", "pixel-bomb"];
+const CELEBRATION_VARIATION_COUNT = 50;
+const CELEBRATION_HEADLINES = ["THE PICK IS IN", "ABSOLUTE LEGEND", "WINNER ENERGY", "MAKE SOME NOISE", "MAIN CHARACTER MOMENT"];
+const HERO_LABELS: Record<CelebrationHero, string> = {
+  dancer: "Victory dance",
+  guitarist: "Face-melting solo",
+  dynamite: "Celebration blast",
+  "hype-mascot": "Maximum hype",
+  "pixel-bomb": "Bonus explosion",
+};
 
 function makeId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
@@ -44,6 +72,40 @@ function randomIndex(length: number) {
   const bucket = new Uint32Array(1);
   do crypto.getRandomValues(bucket); while (bucket[0] >= max);
   return bucket[0] % length;
+}
+
+function createCelebration(variation = randomIndex(CELEBRATION_VARIATION_COUNT)): Celebration {
+  const safeVariation = ((variation % CELEBRATION_VARIATION_COUNT) + CELEBRATION_VARIATION_COUNT) % CELEBRATION_VARIATION_COUNT;
+  return {
+    variation: safeVariation,
+    hero: CELEBRATION_HEROES[safeVariation % CELEBRATION_HEROES.length],
+    palette: Math.floor(safeVariation / CELEBRATION_HEROES.length) % 5,
+    direction: safeVariation < CELEBRATION_VARIATION_COUNT / 2 ? "right" : "left",
+    audio: AUDIO_TRACKS[safeVariation % AUDIO_TRACKS.length],
+  };
+}
+
+function celebrationParticles(variation: number) {
+  return Array.from({ length: 84 }, (_, index) => {
+    const seed = variation * 97 + index * 41;
+    const x = (seed * 29) % 101;
+    const drift = ((seed * 17) % 45) - 22;
+    const delay = -((seed * 13) % 1800);
+    const duration = 2200 + ((seed * 23) % 2300);
+    const rotation = (seed * 31) % 720;
+    const size = 7 + ((seed * 7) % 12);
+    return {
+      index,
+      style: {
+        "--piece-x": `${x}vw`,
+        "--piece-drift": `${drift}vw`,
+        "--piece-delay": `${delay}ms`,
+        "--piece-duration": `${duration}ms`,
+        "--piece-rotation": `${rotation}deg`,
+        "--piece-size": `${size}px`,
+      } as CSSProperties,
+    };
+  });
 }
 
 function parseNames(input: string) {
@@ -71,7 +133,11 @@ function TrashGlyph({ filled = false }: { filled?: boolean }) {
   return <span className={`trash-glyph ${filled ? "trash-glyph-filled" : "trash-glyph-outline"}`} aria-hidden="true" />;
 }
 
-function NumberedNameEditor({ value, onChange }: { value: string; onChange: (next: string) => void }) {
+function NumberedNameEditor({ value, onChange, onRequestRemove }: {
+  value: string;
+  onChange: (next: string) => void;
+  onRequestRemove: (name: string, remove: () => void) => void;
+}) {
   const rows = stagedInputRows(value);
   const rowRefs = useRef(new Map<number, HTMLInputElement>());
 
@@ -155,11 +221,11 @@ function NumberedNameEditor({ value, onChange }: { value: string; onChange: (nex
                 className="input-trash"
                 type="button"
                 aria-label={`Remove staged contestant ${index + 1}: ${name.trim()}`}
-                onClick={() => {
-                  const nextRows = rows.filter((_, rowIndex) => rowIndex !== index);
-                  commitRows(nextRows);
-                  focusRow(Math.min(index, nextRows.length));
-                }}
+                onClick={() => onRequestRemove(name.trim(), () => {
+                    const nextRows = rows.filter((_, rowIndex) => rowIndex !== index);
+                    commitRows(nextRows);
+                    focusRow(Math.min(index, nextRows.length));
+                  })}
               >
                 <TrashGlyph filled />
               </button>
@@ -259,6 +325,9 @@ export function NameSnapWebApp() {
   const [isSpinning, setIsSpinning] = useState(false);
   const [liveName, setLiveName] = useState("Ready when you are");
   const [winner, setWinner] = useState<Winner | null>(null);
+  const [celebration, setCelebration] = useState<Celebration | null>(null);
+  const [showPoolSheet, setShowPoolSheet] = useState(false);
+  const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [rotation, setRotation] = useState(0);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [pendingNames, setPendingNames] = useState<string[]>([]);
@@ -268,6 +337,10 @@ export function NameSnapWebApp() {
   const [hydrated, setHydrated] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const poolSheetCloseRef = useRef<HTMLButtonElement>(null);
+  const confirmationCancelRef = useRef<HTMLButtonElement>(null);
+  const winnerDoneRef = useRef<HTMLButtonElement>(null);
+  const winnerAudioRef = useRef<HTMLAudioElement | null>(null);
   const timersRef = useRef<number[]>([]);
 
   useEffect(() => {
@@ -292,7 +365,44 @@ export function NameSnapWebApp() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ entries, history, excludedIds, mode, noRepeats, soundOn }));
   }, [entries, excludedIds, history, hydrated, mode, noRepeats, soundOn]);
 
-  useEffect(() => () => timersRef.current.forEach((timer) => window.clearTimeout(timer)), []);
+  useEffect(() => () => {
+    timersRef.current.forEach((timer) => window.clearTimeout(timer));
+    winnerAudioRef.current?.pause();
+    winnerAudioRef.current = null;
+  }, []);
+
+  useEffect(() => {
+    if (!showPoolSheet) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const focusFrame = window.requestAnimationFrame(() => poolSheetCloseRef.current?.focus());
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showPoolSheet]);
+
+  useEffect(() => {
+    if (!confirmation) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const focusFrame = window.requestAnimationFrame(() => confirmationCancelRef.current?.focus());
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [confirmation]);
+
+  useEffect(() => {
+    if (!winner) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const focusTimer = window.setTimeout(() => winnerDoneRef.current?.focus(), 650);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [winner]);
 
   useEffect(() => {
     const syncFullscreenState = () => setPresentation(document.fullscreenElement === stageRef.current);
@@ -303,6 +413,10 @@ export function NameSnapWebApp() {
   const activeEntries = useMemo(
     () => entries.filter((entry) => entry.included && (!noRepeats || !excludedIds.includes(entry.id))),
     [entries, excludedIds, noRepeats],
+  );
+  const celebrationPieces = useMemo(
+    () => celebrationParticles(celebration?.variation ?? 0),
+    [celebration?.variation],
   );
   const isPremium = entitlementPlan !== null;
 
@@ -431,36 +545,62 @@ export function NameSnapWebApp() {
   }, [activeEntries]);
 
   useEffect(() => {
-    drawWheel();
+    if (mode !== "wheel") return;
+    const drawFrame = window.requestAnimationFrame(drawWheel);
     const resize = new ResizeObserver(drawWheel);
     if (canvasRef.current) resize.observe(canvasRef.current);
     void document.fonts?.ready.then(drawWheel);
-    return () => resize.disconnect();
-  }, [drawWheel]);
+    return () => {
+      window.cancelAnimationFrame(drawFrame);
+      resize.disconnect();
+    };
+  }, [drawWheel, mode]);
 
-  const playWinnerAudio = useCallback(() => {
+  const stopWinnerAudio = useCallback(() => {
+    if (!winnerAudioRef.current) return;
+    winnerAudioRef.current.pause();
+    winnerAudioRef.current.currentTime = 0;
+    winnerAudioRef.current = null;
+  }, []);
+
+  const playWinnerAudio = useCallback((track: string) => {
     if (!soundOn) return;
-    const audio = new Audio(AUDIO_TRACKS[randomIndex(AUDIO_TRACKS.length)]);
-    audio.volume = 0.82;
+    stopWinnerAudio();
+    const audio = new Audio(track);
+    winnerAudioRef.current = audio;
+    audio.volume = 0.76;
     void audio.play().catch(() => undefined);
-    const timer = window.setTimeout(() => { audio.pause(); audio.currentTime = 0; }, 4800);
+    const timer = window.setTimeout(() => {
+      if (winnerAudioRef.current === audio) stopWinnerAudio();
+    }, 5800);
     timersRef.current.push(timer);
-  }, [soundOn]);
+  }, [soundOn, stopWinnerAudio]);
+
+  const presentWinner = useCallback((result: Winner, playSound = true) => {
+    const nextCelebration = createCelebration();
+    setWinner(result);
+    setCelebration(nextCelebration);
+    if (playSound) playWinnerAudio(nextCelebration.audio);
+  }, [playWinnerAudio]);
+
+  const dismissWinner = useCallback(() => {
+    stopWinnerAudio();
+    setWinner(null);
+  }, [stopWinnerAudio]);
 
   const finishPick = useCallback((selected: Entry) => {
     const number = selected.drawNumber;
     const result = { id: makeId(), name: selected.name, number, pickedAt: new Date().toISOString() };
     setLiveName(`${number}. ${selected.name}`);
-    setWinner(result);
+    presentWinner(result);
     setHistory((current) => [result, ...current].slice(0, 20));
     if (noRepeats) setExcludedIds((current) => [...new Set([...current, selected.id])]);
     setIsSpinning(false);
-    playWinnerAudio();
-  }, [noRepeats, playWinnerAudio]);
+  }, [noRepeats, presentWinner]);
 
   const spin = useCallback(() => {
     if (isSpinning || !activeEntries.length) return;
-    setWinner(null);
+    dismissWinner();
     setIsSpinning(true);
     const selected = activeEntries[randomIndex(activeEntries.length)];
 
@@ -488,19 +628,26 @@ export function NameSnapWebApp() {
     });
     const timer = window.setTimeout(() => finishPick(selected), 3900);
     timersRef.current.push(timer);
-  }, [activeEntries, finishPick, isSpinning, mode]);
+  }, [activeEntries, dismissWinner, finishPick, isSpinning, mode]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (confirmation) {
+        if (event.key === "Escape") setConfirmation(null);
+        return;
+      }
       if (event.code === "Space" && !(event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLInputElement)) {
         event.preventDefault();
         spin();
       }
-      if (event.key === "Escape") setWinner(null);
+      if (event.key === "Escape") {
+        dismissWinner();
+        setShowPoolSheet(false);
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [spin]);
+  }, [confirmation, dismissWinner, spin]);
 
   const addNames = () => {
     const names = parseNames(input);
@@ -553,8 +700,8 @@ export function NameSnapWebApp() {
     setExcludedIds([]);
     setHistory([]);
     setLiveName("Ready when you are");
-    setWinner(null);
-  }, []);
+    dismissWinner();
+  }, [dismissWinner]);
 
   const removeEntry = (entryId: string) => {
     setEntries((current) => renumberEntries(current.filter((entry) => entry.id !== entryId)));
@@ -562,6 +709,33 @@ export function NameSnapWebApp() {
   };
 
   const clearPool = () => { setEntries([]); resetPool(); };
+
+  const requestResetPool = (afterReset?: () => void) => setConfirmation({
+    kicker: "RESET PICKS",
+    message: "Return every picked contestant to the eligible pool and clear recent winners? Your contestant list will stay.",
+    confirmLabel: "Reset picks",
+    onConfirm: () => { resetPool(); afterReset?.(); },
+  });
+
+  const requestClearPool = () => setConfirmation({
+    kicker: "CLEAR CONTESTANTS",
+    message: `Remove all ${entries.length} contestants and clear recent winners? This cannot be undone.`,
+    confirmLabel: "Clear all",
+    onConfirm: clearPool,
+  });
+
+  const requestRemoveEntry = (entry: Entry) => setConfirmation({
+    kicker: "REMOVE CONTESTANT",
+    message: `Remove “${entry.name}” from this contestant pool? Remaining contestants will be renumbered.`,
+    confirmLabel: "Remove name",
+    onConfirm: () => removeEntry(entry.id),
+  });
+
+  const confirmAction = () => {
+    const action = confirmation;
+    setConfirmation(null);
+    action?.onConfirm();
+  };
 
   const togglePresentation = async () => {
     const next = !presentation;
@@ -579,7 +753,7 @@ export function NameSnapWebApp() {
         </a>
         <div className="app-bar-center"><i /> FAIR PICKS · LIVE ON SCREEN</div>
         <nav aria-label="NameSnap controls">
-          <button className="quiet-control sound-control" onClick={() => setSoundOn((current) => !current)} aria-pressed={soundOn}><img src="/brand/sound_emoji.png" alt="" />{soundOn ? "Sound on" : "Sound off"}</button>
+          <button className="quiet-control sound-control" onClick={() => setSoundOn((current) => { if (current) stopWinnerAudio(); return !current; })} aria-pressed={soundOn}><img src="/brand/sound_emoji.png" alt="" />{soundOn ? "Sound on" : "Sound off"}</button>
           {isPremium && entitlementPlan === "monthly" ? <a className="quiet-control" href="mailto:sidequestsoftware@proton.me?subject=NameSnap%20Web%20billing">Billing help</a> : null}
           <a className="app-store-button" href={APP_STORE_URL} target="_blank" rel="noreferrer">iPhone + iPad <span aria-hidden="true">↗</span></a>
           <button className="present-button" onClick={togglePresentation}>Present <span aria-hidden="true">↗</span></button>
@@ -594,7 +768,16 @@ export function NameSnapWebApp() {
           </div>
 
           <label className="input-label" htmlFor="contestant-input">Contestants</label>
-          <NumberedNameEditor value={input} onChange={setInput} />
+          <NumberedNameEditor
+            value={input}
+            onChange={setInput}
+            onRequestRemove={(name, remove) => setConfirmation({
+              kicker: "DELETE DRAFT NAME",
+              message: `Delete “${name}” from the names waiting to be added? This cannot be undone.`,
+              confirmLabel: "Delete name",
+              onConfirm: remove,
+            })}
+          />
           <div className="input-meta"><span>{parseNames(input).length} ready to add</span><span>Names stay in this browser</span></div>
           <button className="add-button" onClick={addNames} disabled={!parseNames(input).length}>Add names <span aria-hidden="true">＋</span></button>
 
@@ -613,21 +796,29 @@ export function NameSnapWebApp() {
           </label>
 
           <div className="pool-tools">
-            <button onClick={resetPool} disabled={!history.length && !excludedIds.length}>Reset picks</button>
-            <button onClick={clearPool} disabled={!entries.length}>Clear all</button>
+            <button onClick={() => requestResetPool()} disabled={!history.length && !excludedIds.length}>Reset picks</button>
+            <button onClick={requestClearPool} disabled={!entries.length}>Clear all</button>
           </div>
 
-          <div className="pool-preview">
-            <div><span>ACTIVE POOL</span><b>{activeEntries.length}</b></div>
+          <div className={`pool-preview ${entries.length ? "is-clickable" : ""}`}>
+            <button className="pool-preview-surface" type="button" aria-label="Open the full contestant list" onClick={() => setShowPoolSheet(true)} disabled={!entries.length} />
+            <div className="pool-preview-header">
+              <div><span>ACTIVE POOL</span><b>{activeEntries.length}</b></div>
+              <span className={`pool-preview-cta ${entries.length ? "" : "is-disabled"}`}>
+                View full list <span aria-hidden="true">↗</span>
+              </span>
+            </div>
             {entries.length ? (
-              <ul>{entries.slice(0, 5).map((entry) => (
+              <ul>{entries.slice(0, POOL_PREVIEW_LIMIT).map((entry) => (
                 <li key={entry.id} className={excludedIds.includes(entry.id) ? "picked" : ""}>
                   <i>{initials(entry.name)}</i><span>{entry.drawNumber}. {entry.name}</span>
-                  <button className="pool-trash" aria-label={`Remove ${entry.name}`} onClick={() => removeEntry(entry.id)}><TrashGlyph /></button>
+                  <button type="button" className="pool-trash" aria-label={`Remove ${entry.name}`} onClick={() => requestRemoveEntry(entry)}><TrashGlyph /></button>
                 </li>
               ))}</ul>
             ) : <p>Your draw is empty. Paste a list above to begin.</p>}
-            {entries.length > 5 && <small>+ {entries.length - 5} more contestants</small>}
+            {entries.length > POOL_PREVIEW_LIMIT
+              ? <small>+ {entries.length - POOL_PREVIEW_LIMIT} more contestants · Open the full list</small>
+              : entries.length ? <small>Open the pane to see the full list</small> : null}
           </div>
         </aside>
 
@@ -656,7 +847,7 @@ export function NameSnapWebApp() {
               <div className="wheel-wrap">
                 <div className="wheel-pointer" aria-hidden="true" />
                 <canvas ref={canvasRef} className="wheel-canvas" style={{ transform: `rotate(${rotation}deg)`, transitionDuration: isSpinning ? "3.8s" : "0s" }} aria-label={`Wheel containing ${activeEntries.length} eligible contestants`} />
-                {!activeEntries.length && <div className="wheel-empty"><b>0</b><span>names in the draw</span></div>}
+                {!activeEntries.length && <div className="wheel-empty"><b>0</b><span>Names in the draw<small>Add contestants above</small></span></div>}
               </div>
             ) : (
               <div className="classic-picker">
@@ -672,7 +863,7 @@ export function NameSnapWebApp() {
             <div className="stage-status"><span>RECENT PICKS</span><b>{history.length}</b></div>
           </div>
 
-          {history.length > 0 && <div className="history-rail" aria-label="Recent winners"><span>RECENT</span>{history.slice(0, 4).map((item) => <button key={item.id} onClick={() => setWinner(item)}><i>{item.number}</i>{item.name}</button>)}</div>}
+          {history.length > 0 && <div className="history-rail" aria-label="Recent winners"><span>RECENT</span>{history.slice(0, 4).map((item) => <button key={item.id} onClick={() => presentWinner(item)}><i>{item.number}</i>{item.name}</button>)}</div>}
         </section>
       </div>
 
@@ -684,13 +875,84 @@ export function NameSnapWebApp() {
 
       <footer className="web-footer"><span>© 2026 NameSnap</span><nav><a href="/privacy">Privacy</a><a href="/support">Support</a><a href="/terms">Terms</a><a href="mailto:sidequestsoftware@proton.me">Contact</a></nav></footer>
 
-      {winner && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setWinner(null); }}>
-          <section className="winner-modal" role="dialog" aria-modal="true" aria-labelledby="winner-title">
-            <div className="confetti" aria-hidden="true"><i /><i /><i /><i /><i /><i /></div>
-            <img className="modal-emoji" src="/brand/party_popper_emoji.png" alt="Winner" />
-            <span className="winner-kicker">WINNER</span><h2 id="winner-title">{winner.number}. {winner.name}</h2><p>Winner from the numbered pool</p>
-            <div><button className="winner-done" onClick={() => setWinner(null)}>Keep going</button><button className="winner-reset" onClick={() => { setWinner(null); resetPool(); }}>Reset picks</button></div>
+      {winner && celebration && (
+        <div
+          key={`${winner.id}-${celebration.variation}`}
+          className={`modal-backdrop winner-celebration-backdrop celebration-palette-${celebration.palette} celebration-${celebration.direction}`}
+          role="presentation"
+          data-celebration-variation={celebration.variation + 1}
+        >
+          <div className="celebration-world" aria-hidden="true">
+            <img className="celebration-confetti-gif celebration-confetti-gif-a" src="/celebrations/confetti-burst.gif" alt="" />
+            <img className="celebration-confetti-gif celebration-confetti-gif-b" src="/celebrations/confetti-burst.gif" alt="" />
+            <div className="celebration-particles">
+              {celebrationPieces.map((piece) => <i key={piece.index} style={piece.style} />)}
+            </div>
+            <img
+              className={`celebration-hero celebration-hero-${celebration.hero}`}
+              src={celebration.hero === "pixel-bomb" ? "/celebrations/pixel-bomb.gif" : `/celebrations/${celebration.hero}.png`}
+              alt=""
+            />
+          </div>
+
+          <section className="winner-modal winner-celebration" role="dialog" aria-modal="true" aria-live="assertive" aria-labelledby="winner-title" aria-describedby="winner-message">
+            <button type="button" className="winner-close" aria-label="Close winner celebration" onClick={dismissWinner}>×</button>
+            <span className="winner-kicker">{CELEBRATION_HEADLINES[celebration.palette]}</span>
+            <span className="winner-variation">CELEBRATION {celebration.variation + 1} / {CELEBRATION_VARIATION_COUNT} · {HERO_LABELS[celebration.hero]}</span>
+            <div className="winner-number" aria-hidden="true">{winner.number}</div>
+            <h2 id="winner-title">{winner.name}</h2>
+            <p id="winner-message">Winner #{winner.number} from the numbered pool. Make some noise!</p>
+            <div className="winner-actions">
+              <button ref={winnerDoneRef} className="winner-done" onClick={dismissWinner}>Keep going</button>
+              <button className="winner-reset" onClick={() => { dismissWinner(); requestResetPool(); }}>Reset picks</button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {showPoolSheet && (
+        <div className="modal-backdrop pool-sheet-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowPoolSheet(false); }}>
+          <section className="pool-sheet" role="dialog" aria-modal="true" aria-labelledby="pool-sheet-title">
+            <div className="pool-sheet-handle" aria-hidden="true" />
+            <header>
+              <div>
+                <span>CONTESTANT POOL</span>
+                <h2 id="pool-sheet-title">All contestants</h2>
+                <p>{activeEntries.length} eligible · {entries.length} total</p>
+              </div>
+              <button ref={poolSheetCloseRef} type="button" className="pool-sheet-close" aria-label="Close contestant list" onClick={() => setShowPoolSheet(false)}>×</button>
+            </header>
+            <ul className="pool-sheet-list">
+              {entries.map((entry) => {
+                const picked = excludedIds.includes(entry.id);
+                return (
+                  <li key={entry.id} className={picked ? "picked" : ""}>
+                    <i>{initials(entry.name)}</i>
+                    <span><b>{entry.drawNumber}. {entry.name}</b><small>{picked ? "Picked · sitting out" : "Eligible for the next draw"}</small></span>
+                    <button type="button" className="pool-sheet-trash" aria-label={`Remove ${entry.name}`} onClick={() => requestRemoveEntry(entry)}><TrashGlyph /></button>
+                  </li>
+                );
+              })}
+            </ul>
+            <footer>
+              <button type="button" onClick={() => requestResetPool()} disabled={!history.length && !excludedIds.length}>Reset picks</button>
+              <button type="button" className="pool-sheet-done" onClick={() => setShowPoolSheet(false)}>Done</button>
+            </footer>
+          </section>
+        </div>
+      )}
+
+      {confirmation && (
+        <div className="modal-backdrop confirmation-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setConfirmation(null); }}>
+          <section className="confirmation-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirmation-title" aria-describedby="confirmation-message">
+            <span className="confirmation-kicker">{confirmation.kicker}</span>
+            <span className="confirmation-mark" aria-hidden="true">?</span>
+            <h2 id="confirmation-title">Are you sure?</h2>
+            <p id="confirmation-message">{confirmation.message}</p>
+            <div className="confirmation-actions">
+              <button ref={confirmationCancelRef} type="button" className="confirmation-cancel" onClick={() => setConfirmation(null)}>Cancel</button>
+              <button type="button" className="confirmation-confirm" onClick={confirmAction}>{confirmation.confirmLabel}</button>
+            </div>
           </section>
         </div>
       )}

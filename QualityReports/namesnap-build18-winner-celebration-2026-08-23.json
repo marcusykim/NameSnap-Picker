@@ -1,0 +1,86 @@
+{
+  "status": "PASS",
+  "overallScore": 94.4,
+  "criticalIssues": [],
+  "context": {
+    "firstUser": "A teacher, streamer, or group host who has just completed a fair random draw on iPhone or iPad.",
+    "primaryJob": "Make the selected contestant unmistakable, exciting, and easy to continue from without obscuring the result.",
+    "desiredResponse": "A high-energy shared celebration that still preserves the winner name, number, and next actions at a glance.",
+    "referenceProducts": [
+      "Jackbox Games — room-scale winner reveals with a single unmistakable result",
+      "Kahoot! — celebratory educational feedback with immediate next-step controls",
+      "Duolingo — playful character-led rewards that remain legible and task-focused"
+    ]
+  },
+  "categoryScores": {
+    "audienceResonance": 9.6,
+    "categoryRecognition": 9.4,
+    "productSpecificity": 9.8,
+    "primaryTaskClarity": 9.7,
+    "visualHierarchy": 9.5,
+    "compositionDiversity": 9.4,
+    "contentRealism": 9.3,
+    "domainArtifactFidelity": 9.5,
+    "crossScreenContinuity": 9.4,
+    "platformFidelity": 9.3,
+    "spatialEconomy": 9.0,
+    "typography": 9.3,
+    "accessibility": 9.1,
+    "interactionCredibility": 9.5,
+    "stateCompleteness": 9.5,
+    "distinctiveness": 9.7,
+    "appStorePlausibility": 9.3,
+    "implementationReadiness": 9.6
+  },
+  "diagnosticTests": {
+    "blurTest": {
+      "passed": true,
+      "evidence": "The winner number and name remain the dominant central mass on both phone and tablet, with the headline and actions forming a clear secondary hierarchy."
+    },
+    "silhouetteTest": {
+      "passed": true,
+      "evidence": "The framed result card, giant numbered badge, confetti field, and animated hero create a recognizable game-show reveal rather than a generic modal."
+    },
+    "fiveSecondTest": {
+      "passed": true,
+      "evidence": "The rendered views immediately communicate winner number 7, Julia Wolk, a celebration state, Keep Going, and Reset Picks."
+    },
+    "realityTest": {
+      "passed": true,
+      "evidence": "The fixture uses the same numbered contestant model, production fonts, responsive layout, bundled animation assets, and native controls as the shipping app."
+    },
+    "journeyTest": {
+      "passed": true,
+      "evidence": "The state provides a prominent winner, a non-destructive continuation path, an explicit reset path, and a close control without exposing the underlying reset controls."
+    },
+    "platformTest": {
+      "passed": true,
+      "evidence": "Fresh simulator renders were inspected at original resolution on a NameSnap iPhone 17 Pro and iPad Pro 13-inch, including safe areas and tablet-specific composition."
+    },
+    "buyerValueTest": {
+      "passed": true,
+      "evidence": "The celebration materially upgrades the shared picking moment with 50 visual combinations, varied licensed audio, haptics, confetti, and clear continuation controls."
+    },
+    "implementationTest": {
+      "passed": true,
+      "evidence": "The Debug simulator build succeeds, raster and GIF assets load from the app bundle, reduced-motion behavior is defined, and the final iPhone and iPad pixels were inspected after the tablet overlap repair."
+    }
+  },
+  "screenFindings": [
+    {
+      "screen": "rendered-build18/iphone-winner-v3-settled.png",
+      "finding": "The compact composition reserves the top of the card for the illustrated guitarist, keeps the winner result fully visible, and presents two large touch targets without exposing underlying controls."
+    },
+    {
+      "screen": "rendered-build18/ipad-winner-fixed.png",
+      "finding": "The tablet composition centers the entire result and keeps the animated hero behind the card edges, preserving the complete long winner name and both actions."
+    }
+  ],
+  "repairs": [
+    "Loaded standalone raster celebration files through Bundle paths after the first rendered phone pass exposed a missing hero image.",
+    "Moved hard shadows to card surfaces after the first pass revealed duplicated-looking text.",
+    "Reserved additional compact header space and hid the underlying reset controls while the winner overlay is active.",
+    "Rejected the first iPad render because the foreground guitarist obscured the winner name, then moved tablet heroes behind the result card and re-rendered successfully."
+  ],
+  "verdict": "PASS — build 18's winner celebration is clear, high-energy, responsive, and visually verified on both iPhone and iPad after repairing the tablet overlap."
+}
