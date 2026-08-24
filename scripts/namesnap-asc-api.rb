@@ -65,6 +65,22 @@ def add_build_to_group(token, group_id, build_id)
   )
 end
 
+def submit_build_for_beta_review(token, build_id)
+  request(
+    token,
+    :post,
+    "/v1/betaAppReviewSubmissions",
+    body: {
+      data: {
+        type: "betaAppReviewSubmissions",
+        relationships: {
+          build: { data: { type: "builds", id: build_id } }
+        }
+      }
+    }
+  ).fetch("data")
+end
+
 def app_store_versions(token)
   request(
     token,
@@ -137,6 +153,84 @@ when "testflight-status"
         end
       }
     end
+  )
+when "public-beta-status"
+  build_number = ARGV.fetch(1, "19")
+  build = build_for(token, build_number)
+  abort("Build #{build_number} is not available in App Store Connect") unless build
+  review_submission = request(
+    token,
+    :get,
+    "/v1/builds/#{build.fetch("id")}/betaAppReviewSubmission",
+    allow_not_found: true
+  )["data"]
+  puts JSON.pretty_generate(
+    build: {
+      id: build["id"],
+      build_number: build.dig("attributes", "version"),
+      processing_state: build.dig("attributes", "processingState"),
+      expired: build.dig("attributes", "expired")
+    },
+    beta_review_submission: review_submission && {
+      id: review_submission["id"],
+      state: review_submission.dig("attributes", "betaReviewState")
+    },
+    external_groups: beta_groups(token).reject { |group| group.dig("attributes", "isInternalGroup") }.map do |group|
+      {
+        id: group["id"],
+        name: group.dig("attributes", "name"),
+        public_link_enabled: group.dig("attributes", "publicLinkEnabled"),
+        public_link: group.dig("attributes", "publicLink"),
+        public_link_limit_enabled: group.dig("attributes", "publicLinkLimitEnabled"),
+        public_link_limit: group.dig("attributes", "publicLinkLimit"),
+        has_access_to_all_builds: group.dig("attributes", "hasAccessToAllBuilds"),
+        builds: beta_group_builds(token, group.fetch("id")).map do |candidate|
+          {
+            id: candidate["id"],
+            build_number: candidate.dig("attributes", "version"),
+            processing_state: candidate.dig("attributes", "processingState"),
+            expired: candidate.dig("attributes", "expired")
+          }
+        end
+      }
+    end
+  )
+when "enable-public-beta"
+  build_number = ARGV.fetch(1, "19")
+  build = build_for(token, build_number)
+  abort("Build #{build_number} is not available in App Store Connect") unless build
+  abort("Build #{build_number} is not valid") unless build.dig("attributes", "processingState") == "VALID"
+  abort("Build #{build_number} is expired") if build.dig("attributes", "expired")
+
+  external_groups = beta_groups(token).reject { |group| group.dig("attributes", "isInternalGroup") }
+  group = external_groups.find { |candidate| candidate.dig("attributes", "publicLinkEnabled") }
+  abort("NameSnap has no external TestFlight group with a public link") unless group
+
+  group_builds = beta_group_builds(token, group.fetch("id"))
+  unless group_builds.any? { |candidate| candidate["id"] == build["id"] }
+    add_build_to_group(token, group.fetch("id"), build.fetch("id"))
+  end
+
+  review_submission = request(
+    token,
+    :get,
+    "/v1/builds/#{build.fetch("id")}/betaAppReviewSubmission",
+    allow_not_found: true
+  )["data"]
+  review_submission ||= submit_build_for_beta_review(token, build.fetch("id"))
+
+  refreshed_group = request(token, :get, "/v1/betaGroups/#{group.fetch("id")}").fetch("data")
+  puts JSON.pretty_generate(
+    build_number: build_number,
+    build_id: build["id"],
+    group_id: refreshed_group["id"],
+    group_name: refreshed_group.dig("attributes", "name"),
+    public_link_enabled: refreshed_group.dig("attributes", "publicLinkEnabled"),
+    public_link: refreshed_group.dig("attributes", "publicLink"),
+    beta_review_submission: {
+      id: review_submission["id"],
+      state: review_submission.dig("attributes", "betaReviewState")
+    }
   )
 when "submission-status"
   puts JSON.pretty_generate(
