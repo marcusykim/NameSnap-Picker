@@ -707,6 +707,79 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
   .upgrade-modal h2 { font-size: 30px; line-height: 1.05; overflow-wrap: anywhere; }
 }
 
+.presentation-exit { display: none; }
+.web-app.is-presenting {
+  width: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: var(--ns-page-gradient);
+}
+.web-app.is-presenting .app-bar,
+.web-app.is-presenting .producer-panel,
+.web-app.is-presenting .streamer-note,
+.web-app.is-presenting .web-footer { display: none; }
+.web-app.is-presenting .broadcast-shell {
+  width: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+  display: block;
+  margin: 0;
+}
+.web-app.is-presenting .stage {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+  padding:
+    max(18px, env(safe-area-inset-top))
+    max(18px, env(safe-area-inset-right))
+    max(18px, env(safe-area-inset-bottom))
+    max(18px, env(safe-area-inset-left));
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.web-app.is-presenting .stage-topline { grid-template-columns: 1fr auto 1fr; }
+.web-app.is-presenting .space-hint { display: none; }
+.web-app.is-presenting .presentation-exit {
+  min-width: 112px;
+  min-height: 44px;
+  display: inline-flex;
+  justify-self: end;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 2.5px solid var(--ns-ink);
+  border-radius: var(--ns-radius-pill);
+  background: var(--ns-field-gradient);
+  color: var(--ns-ink);
+  box-shadow: 3px 4px 0 var(--namesnap-indigo);
+  font-family: "Rubik Mono One", sans-serif;
+  font-size: 8px;
+  cursor: pointer;
+}
+.web-app.is-presenting .presentation-exit span { font: 900 20px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; }
+.web-app.is-presenting .picker-display { min-height: 0; }
+.web-app.is-presenting .wheel-wrap { width: min(68dvh, 86vw, 800px); }
+
+@media (max-width: 560px) {
+  .web-app.is-presenting .stage {
+    min-height: 100dvh;
+    padding:
+      max(12px, env(safe-area-inset-top))
+      max(12px, env(safe-area-inset-right))
+      max(14px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+  }
+  .web-app.is-presenting .stage-topline { grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; }
+  .web-app.is-presenting .stage-topline > span:nth-child(2) { text-align: center; }
+  .web-app.is-presenting .presentation-exit { min-width: 92px; padding-inline: 10px; font-size: 7px; }
+  .web-app.is-presenting .picker-display { min-height: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
 
 /* Winner celebration system: 30 heroes × 5 palettes × 2 directions = 300 variations. */

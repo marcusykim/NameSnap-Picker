@@ -377,6 +377,8 @@ export function NameSnapWebApp() {
   const [hydrated, setHydrated] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const fullscreenSessionRef = useRef(false);
+  const fullscreenRequestStartedAtRef = useRef(0);
   const poolSheetCloseRef = useRef<HTMLButtonElement>(null);
   const confirmationCancelRef = useRef<HTMLButtonElement>(null);
   const winnerDoneRef = useRef<HTMLButtonElement>(null);
@@ -445,10 +447,35 @@ export function NameSnapWebApp() {
   }, [winner]);
 
   useEffect(() => {
-    const syncFullscreenState = () => setPresentation(document.fullscreenElement === stageRef.current);
+    const syncFullscreenState = () => {
+      if (document.fullscreenElement === stageRef.current) {
+        fullscreenSessionRef.current = true;
+        setPresentation(true);
+        return;
+      }
+
+      if (!fullscreenSessionRef.current) return;
+      const browserDroppedFullscreenDuringLaunch = performance.now() - fullscreenRequestStartedAtRef.current < 1200;
+      fullscreenSessionRef.current = false;
+      if (!browserDroppedFullscreenDuringLaunch) setPresentation(false);
+    };
     document.addEventListener("fullscreenchange", syncFullscreenState);
     return () => document.removeEventListener("fullscreenchange", syncFullscreenState);
   }, []);
+
+  useEffect(() => {
+    if (!presentation) return;
+    const previousOverflow = document.body.style.overflow;
+    const exitFallbackOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !document.fullscreenElement) setPresentation(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", exitFallbackOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", exitFallbackOnEscape);
+    };
+  }, [presentation]);
 
   const activeEntries = useMemo(
     () => entries.filter((entry) => entry.included && (!noRepeats || !excludedIds.includes(entry.id))),
@@ -780,11 +807,24 @@ export function NameSnapWebApp() {
     action?.onConfirm();
   };
 
+  const exitPresentation = async () => {
+    setPresentation(false);
+    fullscreenSessionRef.current = false;
+    if (document.fullscreenElement) await document.exitFullscreen().catch(() => undefined);
+  };
+
   const togglePresentation = async () => {
-    const next = !presentation;
-    setPresentation(next);
-    if (next && stageRef.current?.requestFullscreen) await stageRef.current.requestFullscreen().catch(() => undefined);
-    else if (!next && document.fullscreenElement) await document.exitFullscreen().catch(() => undefined);
+    if (presentation) {
+      await exitPresentation();
+      return;
+    }
+
+    setPresentation(true);
+    const shouldUseBrowserFullscreen = window.matchMedia("(min-width: 821px) and (pointer: fine)").matches;
+    if (shouldUseBrowserFullscreen && stageRef.current?.requestFullscreen) {
+      fullscreenRequestStartedAtRef.current = performance.now();
+      await stageRef.current.requestFullscreen().catch(() => undefined);
+    }
   };
 
   return (
@@ -799,7 +839,7 @@ export function NameSnapWebApp() {
           <button className="quiet-control sound-control" onClick={() => setSoundOn((current) => { if (current) stopWinnerAudio(); return !current; })} aria-pressed={soundOn}><img src="/brand/sound_emoji.png" alt="" />{soundOn ? "Sound on" : "Sound off"}</button>
           {isPremium && entitlementPlan === "monthly" ? <a className="quiet-control" href="mailto:sidequestsoftware@proton.me?subject=NameSnap%20Web%20billing">Billing help</a> : null}
           <a className="app-store-button" href={APP_STORE_URL} target="_blank" rel="noreferrer">iPhone + iPad <span aria-hidden="true">↗</span></a>
-          <button className="present-button" onClick={togglePresentation}>Present <span aria-hidden="true">↗</span></button>
+          <button className="present-button" onClick={togglePresentation} aria-pressed={presentation}>Present <span aria-hidden="true">↗</span></button>
         </nav>
       </header>
 
@@ -870,6 +910,7 @@ export function NameSnapWebApp() {
             <span className="live-chip"><i /> NAMESNAP LIVE</span>
             <span>{activeEntries.length ? `${activeEntries.length} eligible` : "Waiting for contestants"}</span>
             <span className="space-hint"><kbd>SPACE</kbd> to spin</span>
+            {presentation ? <button type="button" className="presentation-exit" onClick={exitPresentation} aria-label="Exit presentation mode">Exit view <span aria-hidden="true">×</span></button> : null}
           </div>
 
           <div

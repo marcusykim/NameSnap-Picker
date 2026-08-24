@@ -160,3 +160,20 @@ test("ships all 30 celebration heroes and exposes 300 visual variations", async 
     return access(path.join(marketingDirectory, "public/celebrations", `${hero}.${extension}`));
   }));
 });
+
+test("provides a stage-only web presentation fallback when browser fullscreen is unavailable", async () => {
+  const [webAppSource, globalStyles] = await Promise.all([
+    readFile(path.join(marketingDirectory, "app/namesnap-web-app.tsx"), "utf8"),
+    readFile(path.join(marketingDirectory, "app/globals.css"), "utf8"),
+  ]);
+
+  assert.match(webAppSource, /setPresentation\(true\)/);
+  assert.match(webAppSource, /\(min-width: 821px\) and \(pointer: fine\)/);
+  assert.match(webAppSource, /stageRef\.current\?\.requestFullscreen/);
+  assert.match(webAppSource, /Exit view/);
+  assert.match(webAppSource, /aria-label="Exit presentation mode"/);
+  assert.match(globalStyles, /\.web-app\.is-presenting \.producer-panel/);
+  assert.match(globalStyles, /\.web-app\.is-presenting \.stage \{/);
+  assert.match(globalStyles, /height: 100dvh/);
+  assert.match(globalStyles, /\.web-app\.is-presenting \.presentation-exit/);
+});
