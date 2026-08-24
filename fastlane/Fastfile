@@ -63,6 +63,28 @@ platform :ios do
     )
   end
 
+  desc "Replace NameSnap 2.0 screenshots and App Preview videos without changing metadata or submitting for review"
+  lane :upload_visual_assets do
+    ENV["FASTLANE_ENABLE_BETA_DELIVER_SYNC_SCREENSHOTS"] = "1"
+    upload_to_app_store(
+      api_key: namesnap_api_key,
+      app_identifier: APP_IDENTIFIER,
+      app_version: APP_VERSION,
+      screenshots_path: File.expand_path("../AppStoreAssets/ReleaseScreenshots", __dir__),
+      app_previews_path: File.expand_path("../AppStoreAssets/ReleasePreviews", __dir__),
+      preview_frame_time_code: "00:00:05:00",
+      sync_screenshots: true,
+      overwrite_preview_videos: true,
+      skip_app_version_update: true,
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_screenshots: false,
+      submit_for_review: false,
+      run_precheck_before_submit: false,
+      force: true
+    )
+  end
+
   desc "Select build 20 and submit NameSnap 2.0 for full App Store review"
   lane :submit_production do
     upload_to_app_store(

@@ -31,13 +31,21 @@ Upload the signed NameSnap build to App Store Connect
 
 Upload production listing metadata and final screenshots
 
+### ios upload_visual_assets
+
+```sh
+[bundle exec] fastlane ios upload_visual_assets
+```
+
+Replace NameSnap 2.0 screenshots and App Preview videos without changing metadata or submitting for review
+
 ### ios submit_production
 
 ```sh
 [bundle exec] fastlane ios submit_production
 ```
 
-Select build 17 and submit NameSnap 2.0 for full App Store review
+Select build 20 and submit NameSnap 2.0 for full App Store review
 
 ----
 

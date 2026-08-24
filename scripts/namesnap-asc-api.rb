@@ -251,6 +251,134 @@ when "submission-status"
       }
     end
   )
+when "visual-assets-status"
+  version_string = ARGV.fetch(1, "2.0")
+  locale = ARGV.fetch(2, "en-US")
+  version = app_store_versions(token).find do |candidate|
+    candidate.dig("attributes", "versionString") == version_string
+  end
+  abort("NameSnap version #{version_string} is not available in App Store Connect") unless version
+
+  localizations = request(
+    token,
+    :get,
+    "/v1/appStoreVersions/#{version.fetch("id")}/appStoreVersionLocalizations?limit=200"
+  ).fetch("data", [])
+  localization = localizations.find { |candidate| candidate.dig("attributes", "locale") == locale }
+  abort("NameSnap version #{version_string} has no #{locale} localization") unless localization
+
+  screenshot_response = request(
+    token,
+    :get,
+    "/v1/appStoreVersionLocalizations/#{localization.fetch("id")}/appScreenshotSets?include=appScreenshots&limit=200"
+  )
+  preview_response = request(
+    token,
+    :get,
+    "/v1/appStoreVersionLocalizations/#{localization.fetch("id")}/appPreviewSets?include=appPreviews&limit=200"
+  )
+
+  screenshot_names = screenshot_response.fetch("included", []).filter_map do |asset|
+    next unless asset["type"] == "appScreenshots"
+    {
+      id: asset["id"],
+      file_name: asset.dig("attributes", "fileName"),
+      delivery_state: asset.dig("attributes", "assetDeliveryState", "state")
+    }
+  end
+  preview_names = preview_response.fetch("included", []).filter_map do |asset|
+    next unless asset["type"] == "appPreviews"
+    {
+      file_name: asset.dig("attributes", "fileName"),
+      delivery_state: asset.dig("attributes", "videoDeliveryState", "state")
+    }
+  end
+
+  puts JSON.pretty_generate(
+    version: version_string,
+    version_state: version.dig("attributes", "appStoreState"),
+    locale: locale,
+    screenshot_sets: screenshot_response.fetch("data", []).map do |set|
+      {
+        display_type: set.dig("attributes", "screenshotDisplayType"),
+        screenshot_count: Array(set.dig("relationships", "appScreenshots", "data")).count
+      }
+    end,
+    screenshots: screenshot_names.sort_by { |asset| asset[:file_name].to_s },
+    preview_sets: preview_response.fetch("data", []).map do |set|
+      {
+        preview_type: set.dig("attributes", "previewType"),
+        preview_count: Array(set.dig("relationships", "appPreviews", "data")).count
+      }
+    end,
+    previews: preview_names.sort_by { |asset| asset[:file_name].to_s }
+  )
+when "dedupe-visual-assets"
+  version_string = ARGV.fetch(1, "2.0")
+  locale = ARGV.fetch(2, "en-US")
+  version = app_store_versions(token).find do |candidate|
+    candidate.dig("attributes", "versionString") == version_string
+  end
+  abort("NameSnap version #{version_string} is not available in App Store Connect") unless version
+
+  localizations = request(
+    token,
+    :get,
+    "/v1/appStoreVersions/#{version.fetch("id")}/appStoreVersionLocalizations?limit=200"
+  ).fetch("data", [])
+  localization = localizations.find { |candidate| candidate.dig("attributes", "locale") == locale }
+  abort("NameSnap version #{version_string} has no #{locale} localization") unless localization
+
+  screenshot_response = request(
+    token,
+    :get,
+    "/v1/appStoreVersionLocalizations/#{localization.fetch("id")}/appScreenshotSets?include=appScreenshots&limit=200"
+  )
+  assets_by_id = screenshot_response.fetch("included", []).each_with_object({}) do |asset, result|
+    result[asset["id"]] = asset if asset["type"] == "appScreenshots"
+  end
+
+  deleted = []
+  kept_sets = screenshot_response.fetch("data", []).map do |set|
+    assets = Array(set.dig("relationships", "appScreenshots", "data")).filter_map do |relationship|
+      assets_by_id[relationship["id"]]
+    end
+    kept = assets.group_by { |asset| asset.dig("attributes", "fileName") }.sort.flat_map do |_file_name, candidates|
+      ordered = candidates.sort_by do |asset|
+        asset.dig("attributes", "assetDeliveryState", "state") == "COMPLETE" ? 0 : 1
+      end
+      ordered.drop(1).each do |duplicate|
+        request(token, :delete, "/v1/appScreenshots/#{duplicate.fetch("id")}")
+        deleted << {
+          id: duplicate["id"],
+          file_name: duplicate.dig("attributes", "fileName")
+        }
+      end
+      ordered.first(1)
+    end
+
+    request(
+      token,
+      :patch,
+      "/v1/appScreenshotSets/#{set.fetch("id")}/relationships/appScreenshots",
+      body: {
+        data: kept.sort_by { |asset| asset.dig("attributes", "fileName").to_s }.map do |asset|
+          { type: "appScreenshots", id: asset.fetch("id") }
+        end
+      }
+    )
+    {
+      display_type: set.dig("attributes", "screenshotDisplayType"),
+      kept: kept.map { |asset| asset.dig("attributes", "fileName") }.sort
+    }
+  end
+
+  puts JSON.pretty_generate(
+    version: version_string,
+    locale: locale,
+    deleted_duplicates: deleted,
+    screenshot_sets: kept_sets
+  )
 when "cancel-submission"
   submission = review_submissions(token).find do |candidate|
     %w[WAITING_FOR_REVIEW IN_REVIEW].include?(candidate.dig("attributes", "state"))

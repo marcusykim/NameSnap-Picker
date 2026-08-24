@@ -138,7 +138,7 @@ record_fixture "$IPHONE_UDID" wheel "$WORK_DIR/iphone-wheel.mov" 3.3 wheel
 record_fixture "$IPHONE_UDID" history-preview "$WORK_DIR/iphone-history.mov" 5.1
 record_fixture "$IPHONE_UDID" reset-confirm "$WORK_DIR/iphone-reset.mov" 5.1
 
-IPHONE_OUTPUT="$OUTPUT_DIR/NameSnap-AppPreview-iPhone-6_9-886x1920.mp4"
+IPHONE_OUTPUT="$OUTPUT_DIR/NameSnap-AppPreview-IPHONE_67-886x1920.mp4"
 render_preview iphone 886 1920 "$IPHONE_OUTPUT"
 ffmpeg -y -ss 5 -i "$IPHONE_OUTPUT" -frames:v 1 -pix_fmt rgb24 "$OUTPUT_DIR/NameSnap-AppPreview-iPhone-Poster-5s.png" >/dev/null 2>&1
 
@@ -150,7 +150,7 @@ record_fixture "$IPAD_UDID" wheel "$WORK_DIR/ipad-wheel.mov" 3.3 wheel
 record_fixture "$IPAD_UDID" history-preview "$WORK_DIR/ipad-history.mov" 5.1
 record_fixture "$IPAD_UDID" reset-confirm "$WORK_DIR/ipad-reset.mov" 5.1
 
-IPAD_OUTPUT="$OUTPUT_DIR/NameSnap-AppPreview-iPad-13-1200x1600.mp4"
+IPAD_OUTPUT="$OUTPUT_DIR/NameSnap-AppPreview-IPAD_PRO_3GEN_129-1200x1600.mp4"
 render_preview ipad 1200 1600 "$IPAD_OUTPUT"
 ffmpeg -y -ss 5 -i "$IPAD_OUTPUT" -frames:v 1 -pix_fmt rgb24 "$OUTPUT_DIR/NameSnap-AppPreview-iPad-Poster-5s.png" >/dev/null 2>&1
 
