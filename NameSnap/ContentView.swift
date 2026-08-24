@@ -1146,6 +1146,14 @@ struct ContentView: View {
         #endif
     }
 
+    private var shouldHideSetupForScreenshotFixture: Bool {
+        #if DEBUG
+        screenshotFixtureStateForUITesting == "history-preview"
+        #else
+        false
+        #endif
+    }
+
     private var screenshotFixtureNamesForUITesting: [String] {
         #if DEBUG
         guard let rawNames = ProcessInfo.processInfo.environment["NAMESNAP_UI_SCREENSHOT_NAMES"]
@@ -1369,9 +1377,12 @@ struct ContentView: View {
             vm.visualMode = .wheel
         case "reset-confirm":
             _ = vm.addNames(names)
-            vm.visualMode = .wheel
+            // Keep the fixture on the non-spinning surface so the automated
+            // scroll cannot settle the wheel and reveal an unrelated winner
+            // behind the confirmation dialog.
+            vm.visualMode = .classic
             showResetPoolConfirm = true
-        case "winner":
+        case "winner", "winner-guitar", "winner-dancer":
             _ = vm.addNames(names)
             vm.visualMode = .wheel
             let winnerIndex = min(6, names.count - 1)
@@ -1379,8 +1390,14 @@ struct ContentView: View {
             suppressWheelSettle = true
             vm.selectedName = "\(winnerIndex + 1). \(names[winnerIndex])"
             vm.history = [WinnerRecord(drawNumber: winnerIndex + 1, name: names[winnerIndex])]
-            winnerCelebration = WinnerCelebration(displayText: vm.selectedName, variation: 11)
-        case "history":
+            let variation: Int
+            switch state {
+            case "winner-guitar": variation = 1
+            case "winner-dancer": variation = 0
+            default: variation = 11
+            }
+            winnerCelebration = WinnerCelebration(displayText: vm.selectedName, variation: variation)
+        case "history", "history-preview":
             _ = vm.addNames(names)
             vm.visualMode = .classic
             let winnerIndices = [16, 14, 11].filter { names.indices.contains($0) }
@@ -1671,8 +1688,9 @@ struct ContentView: View {
                         }
                         .padding(.horizontal, 2)
 
-                        card {
-                            VStack(alignment: .leading, spacing: 14) {
+                        if !shouldHideSetupForScreenshotFixture {
+                            card {
+                                VStack(alignment: .leading, spacing: 14) {
                                 HStack(alignment: .firstTextBaseline) {
                                     VStack(alignment: .leading, spacing: 3) {
                                         Text("CONTESTANT LIST")
@@ -1754,11 +1772,11 @@ struct ContentView: View {
                                     .font(titleFamilyFont(size: 9))
                                     .frame(maxWidth: .infinity)
                                 }
+                                }
                             }
-                        }
 
-                        card {
-                            VStack(alignment: .leading, spacing: 14) {
+                            card {
+                                VStack(alignment: .leading, spacing: 14) {
                                 Text("DRAW SETUP")
                                     .font(titleFamilyFont(size: 14))
                                     .foregroundStyle(NSTheme.ink)
@@ -1793,6 +1811,7 @@ struct ContentView: View {
                                         .buttonStyle(NameSnapModeButtonStyle(isSelected: vm.visualMode == mode))
                                         .accessibilityAddTraits(vm.visualMode == mode ? .isSelected : [])
                                     }
+                                }
                                 }
                             }
                         }

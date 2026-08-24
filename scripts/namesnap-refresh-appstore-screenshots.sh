@@ -69,18 +69,21 @@ capture_state "$IPHONE_UDID" input "$SCREENSHOT_DIR/01_iphone_69_add_16_names.pn
 capture_state "$IPHONE_UDID" added "$SCREENSHOT_DIR/02_iphone_69_names_added.png"
 capture_state "$IPHONE_UDID" classic "$SCREENSHOT_DIR/03_iphone_69_classic_ready.png" 1
 capture_state "$IPHONE_UDID" wheel "$SCREENSHOT_DIR/04_iphone_69_wheel_ready.png"
-capture_state "$IPHONE_UDID" winner "$SCREENSHOT_DIR/05_iphone_69_winner.png"
-capture_state "$IPHONE_UDID" history "$SCREENSHOT_DIR/06_iphone_69_history.png" 1 200
-capture_state "$IPHONE_UDID" upgrade "$SCREENSHOT_DIR/07_iphone_69_upgrade.png"
+capture_state "$IPHONE_UDID" winner-guitar "$SCREENSHOT_DIR/05_iphone_69_celebration.png"
+capture_state "$IPHONE_UDID" history-preview "$SCREENSHOT_DIR/06_iphone_69_history.png"
+capture_state "$IPHONE_UDID" reset-confirm "$SCREENSHOT_DIR/07_iphone_69_reset_confirm.png" 1 260
 
 echo "== iPad 13-inch screenshots =="
 boot_and_prepare "$IPAD_UDID"
 capture_state "$IPAD_UDID" input "$SCREENSHOT_DIR/08_ipad_13_add_16_names.png"
 capture_state "$IPAD_UDID" added "$SCREENSHOT_DIR/09_ipad_13_names_added.png"
 capture_state "$IPAD_UDID" classic "$SCREENSHOT_DIR/10_ipad_13_classic_ready.png"
-capture_state "$IPAD_UDID" upgrade "$SCREENSHOT_DIR/11_ipad_13_upgrade.png"
+capture_state "$IPAD_UDID" wheel "$SCREENSHOT_DIR/11_ipad_13_wheel_ready.png"
+capture_state "$IPAD_UDID" winner-guitar "$SCREENSHOT_DIR/12_ipad_13_celebration.png"
+capture_state "$IPAD_UDID" history-preview "$SCREENSHOT_DIR/13_ipad_13_history.png"
+capture_state "$IPAD_UDID" reset-confirm "$SCREENSHOT_DIR/14_ipad_13_reset_confirm.png" 1 260
 
 echo "== evidence copy =="
-cp "$SCREENSHOT_DIR/07_iphone_69_upgrade.png" "$EVIDENCE_DIR/07_iphone_69_upgrade.png"
+cp "$SCREENSHOT_DIR/05_iphone_69_celebration.png" "$EVIDENCE_DIR/05_iphone_69_celebration.png"
 
 echo "$SCREENSHOT_DIR"
