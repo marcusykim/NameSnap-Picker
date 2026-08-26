@@ -405,7 +405,9 @@ async function createStripeCheckoutSession(
   form.set("line_items[0][price_data][product_data][description]", plan === "monthly" ? "Unlimited contestants on NameSnap Web, billed monthly until canceled." : "Unlimited contestants on NameSnap Web, unlocked for life with one payment.");
   form.set("metadata[namesnap_plan]", plan);
   form.set("metadata[namesnap_identity]", context.accountHash);
-  form.set("payment_method_types[0]", "card");
+  // Keep Stripe's dynamic payment methods enabled. The suffix identifies this
+  // integration in Stripe without exposing a customer or browser identifier.
+  form.set("integration_identifier", "namesnap_web_checkout_qhtrpvks");
   if (customerId) {
     form.set("customer", customerId);
   } else {
