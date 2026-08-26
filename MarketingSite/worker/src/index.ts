@@ -341,7 +341,13 @@ async function startCheckout(request: Request, env: Env, context: RequestContext
     await deleteCheckoutAttempt(env, context.accountHash, plan);
   }
 
-  const session = await createStripeCheckoutSession(env, context, plan, current?.stripe_customer_id ?? null);
+  const session = await createStripeCheckoutSession(
+    env,
+    context,
+    plan,
+    current?.stripe_customer_id ?? null,
+    previousAttempt?.session_id ?? null,
+  );
   if (!session.url) throw new ApiError(503, "NameSnap checkout is temporarily unavailable.");
   await env.DB.prepare(`
     INSERT INTO checkout_attempts (account_hash, plan, session_id, checkout_url, expires_at, created_at, updated_at)
@@ -379,7 +385,13 @@ async function stripeCheckoutSession(env: Env, sessionId: string) {
   }
 }
 
-async function createStripeCheckoutSession(env: Env, context: RequestContext, plan: Plan, customerId: string | null) {
+async function createStripeCheckoutSession(
+  env: Env,
+  context: RequestContext,
+  plan: Plan,
+  customerId: string | null,
+  predecessorSessionId: string | null,
+) {
   if (!context.accountHash || !context.email) throw new ApiError(401, "Verify a purchase email before opening checkout.");
   const form = new URLSearchParams();
   form.set("mode", plan === "monthly" ? "subscription" : "payment");
@@ -411,7 +423,12 @@ async function createStripeCheckoutSession(env: Env, context: RequestContext, pl
 
   const response = await stripeRequest(env, "/v1/checkout/sessions", {
     method: "POST",
-    headers: { "Idempotency-Key": `namesnap-${plan}-${context.accountHash}` },
+    // The initial key is stable so a network retry cannot create two open
+    // sessions. A canceled or expired predecessor becomes the next key's
+    // suffix, allowing an immediate clean retry without reviving that session.
+    headers: {
+      "Idempotency-Key": `namesnap-${plan}-${context.accountHash}-${predecessorSessionId ?? "initial"}`,
+    },
     body: form.toString(),
   });
   return await response.json() as StripeCheckoutSession;
