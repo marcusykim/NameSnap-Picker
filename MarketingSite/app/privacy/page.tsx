@@ -32,7 +32,7 @@ export default function PrivacyPage() {
         <section><h2>Children</h2><p>NameSnap does not knowingly collect personal information from children. Contestant names stay local. Web checkout is intended for an adult, school employee, or other person authorized to make the purchase; children should not submit payment information.</p></section>
         <section><h2>Data deletion</h2><p>You can clear contestant names and winner history inside NameSnap. Clearing site data in your browser removes locally stored picker data and the random browser identifier, but may also disconnect that browser from a web purchase. For deletion of the corresponding web entitlement record or purchase-related support, email NameSnap support. Deleting the iOS app removes local app data subject to device backups managed by you or Apple.</p></section>
         <section><h2>Changes to this policy</h2><p>If NameSnap’s data practices change, this page will be updated before the change takes effect and the effective date above will be revised.</p></section>
-        <section><h2>Contact</h2><p>Questions about this policy can be sent to <a href="mailto:sidequestsoftware@proton.me?subject=NameSnap%20Privacy">sidequestsoftware@proton.me</a>.</p></section>
+        <section><h2>Contact</h2><p>Questions about this policy can be sent to <a aria-label="Email NameSnap about the privacy policy" href="mailto:sidequestsoftware@proton.me?subject=NameSnap%20Privacy">sidequestsoftware@proton.me</a>.</p></section>
       </article>
       <SiteFooter />
     </main>

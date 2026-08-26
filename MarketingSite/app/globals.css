@@ -367,9 +367,13 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
 .stage-status span { color: #9da1ad; font-size: 8px; font-weight: 900; letter-spacing: .12em; }
 .stage-status b { font-size: 13px; }
 .stage-status:disabled { cursor: default; opacity: .5; }
-.history-rail { position: relative; z-index: 4; min-height: 54px; display: flex; align-items: center; gap: 8px; margin-top: 12px; overflow: hidden; }
-.history-rail > span { margin-right: 3px; color: #878b95; font-size: 8px; font-weight: 900; letter-spacing: .15em; }
-.history-rail button { max-width: 180px; min-height: 34px; display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px 5px 5px; border: 1px solid rgba(255,255,255,.22); border-radius: 99px; background: rgba(255,255,255,.08); color: white; font-size: 10px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.history-rail { position: relative; z-index: 4; min-width: 0; min-height: 88px; display: grid; align-content: center; gap: 7px; margin-top: 8px; padding: 7px 0 13px; overflow: hidden; }
+.history-rail-label { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 14px; color: #878b95; font-size: 8px; font-weight: 900; letter-spacing: .15em; white-space: nowrap; }
+.history-rail-label small { font: inherit; letter-spacing: .09em; }
+.history-rail-label i { font-style: normal; }
+.history-pills { min-width: 0; display: flex; align-items: center; gap: 8px; padding: 0 4px 6px 0; overflow-x: auto; scrollbar-width: none; }
+.history-pills::-webkit-scrollbar { display: none; }
+.history-rail button { flex: 0 0 auto; max-width: 180px; min-height: 34px; display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px 5px 5px; border: 1px solid rgba(255,255,255,.22); border-radius: 99px; background: rgba(255,255,255,.08); color: white; font-size: 10px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
 .history-rail button i { flex: 0 0 23px; width: 23px; height: 23px; display: grid; place-items: center; border-radius: 50%; background: #b9f3cd; color: #11131a; font-size: 8px; font-style: normal; }
 .streamer-note { width: min(1500px, calc(100% - 48px)); margin: 76px auto 0; padding: 58px 0 66px; display: grid; grid-template-columns: 1.2fr .8fr auto; align-items: end; gap: 52px; border-top: 2px solid #11131a; }
 .streamer-note h2 { max-width: 700px; margin: 9px 0 0; font-size: clamp(38px,4.5vw,66px); line-height: .95; letter-spacing: -.06em; }
@@ -502,7 +506,7 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
   .spin-button { min-height: 56px; padding-left: 14px; font-size: 13px; }
   .stage-status { min-width: 0; padding-inline: 6px; }
   .stage-status span { font-size: 6px; }
-  .history-rail button:nth-of-type(n+3) { display: none; }
+  .history-rail-label { gap: 8px; font-size: 7px; letter-spacing: .1em; }
   .streamer-note h2 { font-size: 40px; }
   .web-footer { align-items: flex-start; gap: 20px; padding-block: 24px; }
   .web-footer nav { flex-direction: column; gap: 8px; text-align: right; }
@@ -652,7 +656,7 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
 .stage-status:hover:not(:disabled) { transform: translate(2px,2px); box-shadow: 1px 2px 0 var(--namesnap-indigo); }
 .stage-status:active:not(:disabled) { transform: translate(3px,3px); box-shadow: none; }
 .stage-status-toggle[aria-pressed="true"] { background: var(--ns-primary-gradient); }
-.stage-status span, .history-rail > span { color: var(--ns-text-secondary); }
+.stage-status span, .history-rail-label { color: var(--ns-text-secondary); }
 .history-rail button { border: 2px solid var(--ns-ink); background: var(--ns-field-gradient); color: var(--ns-ink); box-shadow: 2px 3px 0 rgba(88,86,214,.55); }
 .history-rail button i { border: 1px solid var(--ns-ink); background: var(--namesnap-yellow); }
 .streamer-note { border-color: var(--ns-ink); }
@@ -718,7 +722,7 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
   .app-bar .brand b { font-size: 20px; text-shadow: 2px 2px 0 var(--namesnap-sky); }
   .broadcast-shell { width: calc(100% - 28px); }
   .producer-panel { padding: 20px 17px; border-width: 2.5px; border-radius: 22px; box-shadow: 5px 6px 0 var(--namesnap-indigo), 0 14px 26px rgba(16,16,24,.13); }
-  .stage { min-height: 600px; padding-inline: 12px; border-width: 2.5px; border-radius: 22px; box-shadow: 5px 6px 0 var(--namesnap-indigo), 0 14px 26px rgba(16,16,24,.13); }
+  .stage { min-height: 600px; padding: 18px 12px 30px; border-width: 2.5px; border-radius: 22px; box-shadow: 5px 6px 0 var(--namesnap-indigo), 0 14px 26px rgba(16,16,24,.13); }
   .stage-controls { gap: 8px; }
   .spin-button { min-height: 58px; }
   .stage-status { border-width: 1.5px; box-shadow: 2px 3px 0 var(--namesnap-indigo); }
@@ -796,7 +800,7 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
     padding:
       max(12px, env(safe-area-inset-top))
       max(12px, env(safe-area-inset-right))
-      max(14px, env(safe-area-inset-bottom))
+      max(28px, calc(env(safe-area-inset-bottom) + 14px))
       max(12px, env(safe-area-inset-left));
   }
   .web-app.is-presenting .stage-topline { grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; }

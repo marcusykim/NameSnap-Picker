@@ -29,7 +29,7 @@ export default function SupportPage() {
         facts={["WEB", "IPHONE", "IPAD"]}
       />
       <section className="legal-layout support-layout shell">
-        <aside className="support-card"><span className="card-kicker">DIRECT LINE</span><h2>Need a hand?</h2><p>For customer service, complaints or feedback, bug reports, purchase questions, and feature requests:</p><a className="button button-primary" href="mailto:sidequestsoftware@proton.me?subject=NameSnap%20Support">Email NameSnap support</a><small>Tell us whether you used web, iPhone, or iPad and what you were trying to do. Never email payment-card details.</small></aside>
+        <aside className="support-card" id="contact"><span className="card-kicker">DIRECT LINE</span><h2>Need a hand?</h2><p>For customer service, complaints or feedback, bug reports, purchase questions, and feature requests, email <a href="mailto:sidequestsoftware@proton.me?subject=NameSnap%20Support">sidequestsoftware@proton.me</a>.</p><a className="button button-primary" href="mailto:sidequestsoftware@proton.me?subject=NameSnap%20Support">Open your email app</a><small>Tell us whether you used web, iPhone, or iPad and what you were trying to do. Never email payment-card details.</small></aside>
         <div className="faq-list"><div className="faq-heading"><span className="card-kicker">QUICK ANSWERS</span><h2>Frequently asked questions</h2></div>{faqs.map(([question, answer], index) => <details key={question} open={index === 0}><summary><span>{String(index + 1).padStart(2, "0")}</span>{question}<i aria-hidden="true">＋</i></summary><p>{answer}</p></details>)}</div>
       </section>
       <SiteFooter />

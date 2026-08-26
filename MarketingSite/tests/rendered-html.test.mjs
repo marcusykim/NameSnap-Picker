@@ -4,7 +4,6 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-const supportEmail = "sidequestsoftware@proton.me";
 const testDirectory = path.dirname(fileURLToPath(import.meta.url));
 const marketingDirectory = path.resolve(testDirectory, "..");
 
@@ -52,6 +51,7 @@ test("server-renders the NameSnap web picker with App Store routing", async () =
   assert.match(html, /Clear pool/);
   assert.match(html, /stage-status stage-status-toggle/);
   assert.match(html, /stage-status stage-status-recent/);
+  assert.match(html, /Open previous winners/);
   assert.match(html, /View full list/);
   assert.match(html, /Names in the draw/);
   assert.match(html, /Add contestants above/);
@@ -60,7 +60,7 @@ test("server-renders the NameSnap web picker with App Store routing", async () =
   assert.match(html, /One list\. One fair pick\./i);
   assert.match(html, /hundreds of celebration variations/i);
   assert.match(html, /Web for the room/i);
-  assert.match(html, new RegExp(`mailto:${supportEmail.replace(".", "\\.")}`));
+  assert.match(html, /href="\/support#contact"/);
   assert.doesNotMatch(html, /Mracuth@gmail\.com/i);
   assert.doesNotMatch(html, /Upgrade to Unlimited/);
   assert.doesNotMatch(html, /\$6\.99|\$0\.99/);

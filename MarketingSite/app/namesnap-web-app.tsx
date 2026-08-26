@@ -1012,10 +1012,10 @@ export function NameSnapWebApp() {
           <div className="stage-controls">
             <button className="spin-button" onClick={spin} disabled={!activeEntries.length || isSpinning}><span>{isSpinning ? "Picking…" : mode === "wheel" ? "Spin the wheel" : "Pick a winner"}</span><i aria-hidden="true">→</i></button>
             <button type="button" className="stage-status stage-status-toggle" aria-pressed={noRepeats} onClick={() => requestNoRepeatChange(!noRepeats)} disabled={isSpinning}><span>NO REPEATS</span><b>{noRepeats ? "ON" : "OFF"}</b></button>
-            <button type="button" className="stage-status stage-status-recent" aria-haspopup="dialog" onClick={() => setShowRecentPicks(true)} disabled={!history.length}><span>RECENT PICKS</span><b>{history.length}</b></button>
+            <button type="button" className="stage-status stage-status-recent" aria-haspopup="dialog" aria-label="Open previous winners" onClick={() => setShowRecentPicks(true)} disabled={!history.length}><span>RECENT PICKS</span><b>VIEW</b></button>
           </div>
 
-          {history.length > 0 && <div className="history-rail" aria-label="Recent winners"><span>RECENT</span>{history.slice(0, 4).map((item) => <button key={item.id} onClick={() => presentWinner(item)}><i>{item.number}</i>{item.name}</button>)}</div>}
+          {history.length > 0 && <div className="history-rail" aria-label="Previous winners, newest to oldest"><div className="history-rail-label"><span>PREVIOUS {Math.min(5, history.length)} WINNER{history.length === 1 ? "" : "S"}</span><small>NEWEST <i aria-hidden="true">→</i> OLDEST</small></div><div className="history-pills">{history.slice(0, 5).map((item) => <button key={item.id} onClick={() => presentWinner(item)}><i>{item.number}</i>{item.name}</button>)}</div></div>}
         </section>
       </div>
 
@@ -1063,7 +1063,7 @@ export function NameSnapWebApp() {
         </div>
       </section>
 
-      <footer className="web-footer"><span>© 2026 NameSnap · Fair picks, huge winner energy.</span><nav><a href="/privacy">Privacy</a><a href="/support">Support</a><a href="/terms">EULA</a><a href="mailto:sidequestsoftware@proton.me">Contact</a></nav></footer>
+      <footer className="web-footer"><span>© 2026 NameSnap · Fair picks, huge winner energy.</span><nav><a href="/privacy">Privacy</a><a href="/support">Support</a><a href="/terms">EULA</a><a href="/support#contact">Contact</a></nav></footer>
 
       {winner && celebration && (
         <div
