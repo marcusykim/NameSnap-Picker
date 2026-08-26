@@ -45,12 +45,21 @@ test("server-renders the NameSnap web picker with App Store routing", async () =
   assert.match(html, /Contestant 1/);
   assert.match(html, /class="name-editor-number"[^>]*>1(?:<!-- -->)?\.<\/span>/);
   assert.match(html, /Spin the wheel/);
-  assert.match(html, /IN POOL/);
+  assert.doesNotMatch(html, /IN POOL/);
+  assert.match(html, /Undo last add/);
+  assert.match(html, /Clear this list/);
+  assert.match(html, /Reset pool/);
+  assert.match(html, /Clear pool/);
+  assert.match(html, /stage-status stage-status-toggle/);
+  assert.match(html, /stage-status stage-status-recent/);
   assert.match(html, /View full list/);
   assert.match(html, /Names in the draw/);
   assert.match(html, /Add contestants above/);
   assert.match(html, /iPhone \+ iPad/);
   assert.match(html, /https:\/\/apps\.apple\.com\/app\/id6759588637/);
+  assert.match(html, /One list\. One fair pick\./i);
+  assert.match(html, /hundreds of celebration variations/i);
+  assert.match(html, /Web for the room/i);
   assert.match(html, new RegExp(`mailto:${supportEmail.replace(".", "\\.")}`));
   assert.doesNotMatch(html, /Mracuth@gmail\.com/i);
   assert.doesNotMatch(html, /Upgrade to Unlimited/);
@@ -81,10 +90,13 @@ test("publishes the privacy policy with the current contact", async () => {
   assert.doesNotMatch(html, /Mracuth@gmail\.com/i);
 });
 
-test("publishes web purchase terms and platform entitlement boundaries", async () => {
+test("publishes the app EULA, web terms, and platform entitlement boundaries", async () => {
   const html = await renderedHtml("/terms");
 
   assert.match(html, /Terms of Use/i);
+  assert.match(html, /Standard End User License Agreement/i);
+  assert.match(html, /apple\.com\/legal\/internet-services\/itunes\/dev\/stdeula/i);
+  assert.match(html, /Apple and its subsidiaries are third-party beneficiaries/i);
   assert.match(html, /Unlimited Monthly is a recurring Stripe subscription until canceled/i);
   assert.match(html, /request cancellation of future renewals/i);
   assert.match(html, /Web purchases unlock NameSnap Web only/i);
@@ -98,20 +110,20 @@ test("publishes the redesigned NameSnap icon across browser and installed-app su
     await readFile(path.join(marketingDirectory, "public/site.webmanifest"), "utf8"),
   );
 
-  assert.match(staticHtml, /namesnap-icon-32\.png/);
-  assert.match(staticHtml, /namesnap-icon-192\.png/);
-  assert.match(staticHtml, /namesnap-apple-touch-icon\.png/);
+  assert.match(staticHtml, /namesnap-app-icon-v2-32\.png/);
+  assert.match(staticHtml, /namesnap-app-icon-v2-192\.png/);
+  assert.match(staticHtml, /namesnap-app-icon-v2-180\.png/);
   assert.match(staticHtml, /site\.webmanifest/);
   assert.deepEqual(
     manifest.icons.map((icon) => icon.src),
-    ["/namesnap-icon-192.png", "/namesnap-icon-512.png"],
+    ["/namesnap-app-icon-v2-192.png", "/namesnap-app-icon-v2-512.png"],
   );
 
   await Promise.all([
-    "namesnap-icon-32.png",
-    "namesnap-icon-192.png",
-    "namesnap-icon-512.png",
-    "namesnap-apple-touch-icon.png",
+    "namesnap-app-icon-v2-32.png",
+    "namesnap-app-icon-v2-192.png",
+    "namesnap-app-icon-v2-512.png",
+    "namesnap-app-icon-v2-180.png",
     "namesnap-gravatar.png",
   ].map((filename) => access(path.join(marketingDirectory, "public", filename))));
 });
@@ -176,4 +188,16 @@ test("provides a stage-only web presentation fallback when browser fullscreen is
   assert.match(globalStyles, /\.web-app\.is-presenting \.stage \{/);
   assert.match(globalStyles, /height: 100dvh/);
   assert.match(globalStyles, /\.web-app\.is-presenting \.presentation-exit/);
+});
+
+test("retires the old Firebase hostname with path-preserving permanent redirects", async () => {
+  const retiredConfig = JSON.parse(
+    await readFile(path.join(marketingDirectory, "firebase.retired.json"), "utf8"),
+  );
+
+  assert.equal(retiredConfig.hosting.site, "namesnap-picker-6759588637");
+  assert.deepEqual(retiredConfig.hosting.redirects, [
+    { source: "/", destination: "https://getnamesnap.web.app/", type: 301 },
+    { source: "/:path*", destination: "https://getnamesnap.web.app/:path", type: 301 },
+  ]);
 });

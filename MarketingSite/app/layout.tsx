@@ -12,10 +12,10 @@ export const metadata: Metadata = {
   description: "A fast, playful random name picker for classrooms, giveaways, games, teams, and live streams.",
   icons: {
     icon: [
-      { url: "/namesnap-icon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/namesnap-icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/namesnap-app-icon-v2-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/namesnap-app-icon-v2-192.png", sizes: "192x192", type: "image/png" },
     ],
-    apple: [{ url: "/namesnap-apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    apple: [{ url: "/namesnap-app-icon-v2-180.png", sizes: "180x180", type: "image/png" }],
   },
   manifest: "/site.webmanifest",
   openGraph: {

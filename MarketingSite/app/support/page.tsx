@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SiteFooter, SiteHeader } from "../site-chrome";
+import { PublicHero, SiteFooter, SiteHeader } from "../site-chrome";
 
 export const metadata: Metadata = { title: "Support", description: "Help, FAQs, and contact information for NameSnap." };
 
@@ -17,11 +17,20 @@ const faqs = [
 
 export default function SupportPage() {
   return (
-    <main><SiteHeader />
-      <section className="legal-hero shell"><p className="eyebrow"><span /> NAME SNAP SUPPORT</p><h1>Help is<br /><em>right here.</em></h1><p>Quick answers for common questions, plus a direct line if something is not working.</p></section>
-      <section className="legal-layout shell">
-        <aside><h2>Contact</h2><p>For customer service, complaints or feedback, bug reports, purchase questions, and feature requests:</p><a className="button button-primary" href="mailto:sidequestsoftware@proton.me?subject=NameSnap%20Support">Email NameSnap support</a><small>Please include whether you used web, iPhone, or iPad and what you were trying to do. Never email payment-card details.</small></aside>
-        <div className="faq-list"><h2>Frequently asked questions</h2>{faqs.map(([question, answer]) => <article key={question}><h3>{question}</h3><p>{answer}</p></article>)}</div>
+    <main className="public-page"><SiteHeader />
+      <PublicHero
+        eyebrow="NAME SNAP SUPPORT"
+        title="Stuck? Let’s"
+        accent="get you spinning."
+        description="Fast answers for the picker, purchases, classrooms, livestreams, iPhone, iPad, and the web."
+        art="/celebrations/hype-mascot.png"
+        artAlt="The NameSnap hype mascot ready to help"
+        artLabel="REAL HUMAN SUPPORT"
+        facts={["WEB", "IPHONE", "IPAD"]}
+      />
+      <section className="legal-layout support-layout shell">
+        <aside className="support-card"><span className="card-kicker">DIRECT LINE</span><h2>Need a hand?</h2><p>For customer service, complaints or feedback, bug reports, purchase questions, and feature requests:</p><a className="button button-primary" href="mailto:sidequestsoftware@proton.me?subject=NameSnap%20Support">Email NameSnap support</a><small>Tell us whether you used web, iPhone, or iPad and what you were trying to do. Never email payment-card details.</small></aside>
+        <div className="faq-list"><div className="faq-heading"><span className="card-kicker">QUICK ANSWERS</span><h2>Frequently asked questions</h2></div>{faqs.map(([question, answer], index) => <details key={question} open={index === 0}><summary><span>{String(index + 1).padStart(2, "0")}</span>{question}<i aria-hidden="true">＋</i></summary><p>{answer}</p></details>)}</div>
       </section>
       <SiteFooter />
     </main>

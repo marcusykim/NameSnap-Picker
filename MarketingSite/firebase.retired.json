@@ -1,0 +1,22 @@
+{
+  "hosting": {
+    "site": "namesnap-picker-6759588637",
+    "public": "retired-host",
+    "ignore": [
+      "firebase.retired.json",
+      "**/.*"
+    ],
+    "redirects": [
+      {
+        "source": "/",
+        "destination": "https://getnamesnap.web.app/",
+        "type": 301
+      },
+      {
+        "source": "/:path*",
+        "destination": "https://getnamesnap.web.app/:path",
+        "type": 301
+      }
+    ]
+  }
+}

@@ -17,8 +17,8 @@ const routes = {
     element: <SupportPage />,
   },
   "/terms": {
-    title: "Terms of Use | NameSnap",
-    description: "NameSnap Web terms of use.",
+    title: "EULA + Terms of Use | NameSnap",
+    description: "NameSnap end-user license agreement and terms of use.",
     element: <TermsPage />,
   },
 } as const;

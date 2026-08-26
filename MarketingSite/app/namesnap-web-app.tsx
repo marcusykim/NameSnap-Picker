@@ -281,19 +281,6 @@ function renumberEntries(entries: Entry[]) {
   return entries.map((entry, index) => ({ ...entry, drawNumber: index + 1 }));
 }
 
-function appendNumberedEntries(entries: Entry[], names: string[]) {
-  const normalized = renumberEntries(entries);
-  return [
-    ...normalized,
-    ...names.map((name, index) => ({
-      id: makeId(),
-      drawNumber: normalized.length + index + 1,
-      name,
-      included: true,
-    })),
-  ];
-}
-
 function restoreStoredEntries(value: unknown): Entry[] {
   if (!Array.isArray(value)) return [];
   const valid = value.filter((entry): entry is Partial<Entry> & { name: string } => (
@@ -356,6 +343,7 @@ function apiFetch(path: string, init: RequestInit = {}) {
 export function NameSnapWebApp() {
   const [input, setInput] = useState("");
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [lastAddedIds, setLastAddedIds] = useState<string[]>([]);
   const [history, setHistory] = useState<Winner[]>([]);
   const [excludedIds, setExcludedIds] = useState<string[]>([]);
   const [mode, setMode] = useState<PickerMode>("wheel");
@@ -367,7 +355,9 @@ export function NameSnapWebApp() {
   const [winner, setWinner] = useState<Winner | null>(null);
   const [celebration, setCelebration] = useState<Celebration | null>(null);
   const [showPoolSheet, setShowPoolSheet] = useState(false);
+  const [showRecentPicks, setShowRecentPicks] = useState(false);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+  const [pendingDuplicateNames, setPendingDuplicateNames] = useState<string[]>([]);
   const [rotation, setRotation] = useState(0);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [pendingNames, setPendingNames] = useState<string[]>([]);
@@ -380,7 +370,9 @@ export function NameSnapWebApp() {
   const fullscreenSessionRef = useRef(false);
   const fullscreenRequestStartedAtRef = useRef(0);
   const poolSheetCloseRef = useRef<HTMLButtonElement>(null);
+  const recentPicksCloseRef = useRef<HTMLButtonElement>(null);
   const confirmationCancelRef = useRef<HTMLButtonElement>(null);
+  const duplicateCancelRef = useRef<HTMLButtonElement>(null);
   const winnerDoneRef = useRef<HTMLButtonElement>(null);
   const winnerAudioRef = useRef<HTMLAudioElement | null>(null);
   const timersRef = useRef<number[]>([]);
@@ -425,6 +417,17 @@ export function NameSnapWebApp() {
   }, [showPoolSheet]);
 
   useEffect(() => {
+    if (!showRecentPicks) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const focusFrame = window.requestAnimationFrame(() => recentPicksCloseRef.current?.focus());
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showRecentPicks]);
+
+  useEffect(() => {
     if (!confirmation) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -434,6 +437,17 @@ export function NameSnapWebApp() {
       document.body.style.overflow = previousOverflow;
     };
   }, [confirmation]);
+
+  useEffect(() => {
+    if (!pendingDuplicateNames.length) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const focusFrame = window.requestAnimationFrame(() => duplicateCancelRef.current?.focus());
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [pendingDuplicateNames]);
 
   useEffect(() => {
     if (!winner) return;
@@ -523,7 +537,9 @@ export function NameSnapWebApp() {
         if (unlocked && checkoutSucceeded) {
           const queued = parseNames(sessionStorage.getItem(PENDING_NAMES_KEY) ?? "");
           if (queued.length) {
-            setEntries((current) => appendNumberedEntries(current, queued));
+            const additions = queued.map((name) => ({ id: makeId(), drawNumber: 0, name, included: true }));
+            setEntries((current) => renumberEntries([...current, ...additions]));
+            setLastAddedIds(additions.map((entry) => entry.id));
             sessionStorage.removeItem(PENDING_NAMES_KEY);
           }
           setShowUpgrade(false);
@@ -706,6 +722,10 @@ export function NameSnapWebApp() {
         if (event.key === "Escape") setConfirmation(null);
         return;
       }
+      if (pendingDuplicateNames.length) {
+        if (event.key === "Escape") setPendingDuplicateNames([]);
+        return;
+      }
       if (event.code === "Space" && !(event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLInputElement)) {
         event.preventDefault();
         spin();
@@ -713,22 +733,34 @@ export function NameSnapWebApp() {
       if (event.key === "Escape") {
         dismissWinner();
         setShowPoolSheet(false);
+        setShowRecentPicks(false);
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [confirmation, dismissWinner, spin]);
+  }, [confirmation, dismissWinner, pendingDuplicateNames.length, spin]);
 
-  const addNames = () => {
-    const names = parseNames(input);
+  const appendNamesToPool = (names: string[]) => {
     if (!names.length) return;
     if (!isPremium && entries.length + names.length > FREE_LIMIT) {
       setPendingNames(names);
       setShowUpgrade(true);
       return;
     }
-    setEntries((current) => appendNumberedEntries(current, names));
-    setInput("");
+    const additions = names.map((name) => ({ id: makeId(), drawNumber: 0, name, included: true }));
+    setEntries((current) => renumberEntries([...current, ...additions]));
+    setLastAddedIds(additions.map((entry) => entry.id));
+  };
+
+  const addNames = () => {
+    const names = parseNames(input);
+    if (!names.length) return;
+    const existingNames = new Set(entries.map((entry) => entry.name.trim().toLocaleLowerCase()));
+    if (names.some((name) => existingNames.has(name.trim().toLocaleLowerCase()))) {
+      setPendingDuplicateNames(names);
+      return;
+    }
+    appendNamesToPool(names);
   };
 
   const startCheckout = async (plan: "monthly" | "lifetime") => {
@@ -776,9 +808,42 @@ export function NameSnapWebApp() {
   const removeEntry = (entryId: string) => {
     setEntries((current) => renumberEntries(current.filter((entry) => entry.id !== entryId)));
     setExcludedIds((current) => current.filter((id) => id !== entryId));
+    setLastAddedIds((current) => current.filter((id) => id !== entryId));
   };
 
-  const clearPool = () => { setEntries([]); resetPool(); };
+  const undoLastAdd = () => {
+    if (!lastAddedIds.length) return;
+    const ids = new Set(lastAddedIds);
+    setEntries((current) => renumberEntries(current.filter((entry) => !ids.has(entry.id))));
+    setExcludedIds((current) => current.filter((id) => !ids.has(id)));
+    setLastAddedIds([]);
+  };
+
+  const clearPool = () => {
+    setEntries([]);
+    setLastAddedIds([]);
+    resetPool();
+  };
+
+  const requestClearInput = () => setConfirmation({
+    kicker: "CLEAR DRAFT LIST",
+    message: `Remove all ${parseNames(input).length} names from the list waiting to be added? Names already in the pool will stay.`,
+    confirmLabel: "Clear list",
+    onConfirm: () => setInput(""),
+  });
+
+  const requestNoRepeatChange = (nextValue: boolean) => {
+    if (nextValue === noRepeats) return;
+    setConfirmation({
+      kicker: "CHANGE NO-REPEAT SETTING",
+      message: `Turn no repeats ${nextValue ? "on" : "off"}? This resets inclusion and recent-pick history while keeping every contestant.`,
+      confirmLabel: nextValue ? "Turn on" : "Turn off",
+      onConfirm: () => {
+        setNoRepeats(nextValue);
+        resetPool();
+      },
+    });
+  };
 
   const requestResetPool = (afterReset?: () => void) => setConfirmation({
     kicker: "RESET PICKS",
@@ -787,11 +852,11 @@ export function NameSnapWebApp() {
     onConfirm: () => { resetPool(); afterReset?.(); },
   });
 
-  const requestClearPool = () => setConfirmation({
+  const requestClearPool = (afterClear?: () => void) => setConfirmation({
     kicker: "CLEAR CONTESTANTS",
-    message: `Remove all ${entries.length} contestants and clear recent winners? This cannot be undone.`,
-    confirmLabel: "Clear all",
-    onConfirm: clearPool,
+    message: `Remove all ${entries.length} contestants and clear recent winners? Your draft list will stay. This cannot be undone.`,
+    confirmLabel: "Clear pool",
+    onConfirm: () => { clearPool(); afterClear?.(); },
   });
 
   const requestRemoveEntry = (entry: Entry) => setConfirmation({
@@ -831,7 +896,7 @@ export function NameSnapWebApp() {
     <main className={`web-app ${presentation ? "is-presenting" : ""}`}>
       <header className="app-bar">
         <a className="brand" href="/" aria-label="NameSnap Web home">
-          <img src="/namesnap-icon.png" alt="" width={46} height={46} />
+          <img src="/namesnap-app-icon-v2.png" alt="" width={46} height={46} />
           <span><b>NameSnap</b><small>WEB</small></span>
         </a>
         <div className="app-bar-center"><i /> FAIR PICKS · LIVE ON SCREEN</div>
@@ -847,7 +912,6 @@ export function NameSnapWebApp() {
         <aside className="producer-panel" aria-label="Picker controls">
           <div className="panel-heading">
             <div><span>PICKER SETUP</span><h1>Contestant list</h1></div>
-            <span className="count-badge">{entries.length}<small>IN POOL</small></span>
           </div>
 
           <label className="input-label" htmlFor="contestant-input">Contestants</label>
@@ -863,6 +927,10 @@ export function NameSnapWebApp() {
           />
           <div className="input-meta"><span>{parseNames(input).length} ready to add</span><span>Names stay in this browser</span></div>
           <button className="add-button" onClick={addNames} disabled={!parseNames(input).length}>Add names <span aria-hidden="true">＋</span></button>
+          <div className="draft-tools">
+            <button type="button" onClick={undoLastAdd} disabled={!lastAddedIds.length}>Undo last add</button>
+            <button type="button" onClick={requestClearInput} disabled={!parseNames(input).length}>Clear this list</button>
+          </div>
 
           <div className="control-block">
             <span className="block-label">Reveal style</span>
@@ -874,13 +942,13 @@ export function NameSnapWebApp() {
 
           <label className="switch-row" htmlFor="no-repeats">
             <span><b><img src="/brand/repeat_emoji.png" alt="" />No repeats</b><small>Winners sit out until reset</small></span>
-            <input id="no-repeats" type="checkbox" checked={noRepeats} onChange={(event) => { setNoRepeats(event.target.checked); resetPool(); }} />
+            <input id="no-repeats" type="checkbox" checked={noRepeats} onChange={(event) => requestNoRepeatChange(event.target.checked)} />
             <i aria-hidden="true" />
           </label>
 
           <div className="pool-tools">
-            <button onClick={() => requestResetPool()} disabled={!history.length && !excludedIds.length}>Reset picks</button>
-            <button onClick={requestClearPool} disabled={!entries.length}>Clear all</button>
+            <button onClick={() => requestResetPool()} disabled={!history.length && !excludedIds.length}>Reset pool</button>
+            <button onClick={requestClearPool} disabled={!entries.length}>Clear pool</button>
           </div>
 
           <div className={`pool-preview ${entries.length ? "is-clickable" : ""}`}>
@@ -943,21 +1011,59 @@ export function NameSnapWebApp() {
 
           <div className="stage-controls">
             <button className="spin-button" onClick={spin} disabled={!activeEntries.length || isSpinning}><span>{isSpinning ? "Picking…" : mode === "wheel" ? "Spin the wheel" : "Pick a winner"}</span><i aria-hidden="true">→</i></button>
-            <div className="stage-status"><span>NO REPEATS</span><b>{noRepeats ? "ON" : "OFF"}</b></div>
-            <div className="stage-status"><span>RECENT PICKS</span><b>{history.length}</b></div>
+            <button type="button" className="stage-status stage-status-toggle" aria-pressed={noRepeats} onClick={() => requestNoRepeatChange(!noRepeats)} disabled={isSpinning}><span>NO REPEATS</span><b>{noRepeats ? "ON" : "OFF"}</b></button>
+            <button type="button" className="stage-status stage-status-recent" aria-haspopup="dialog" onClick={() => setShowRecentPicks(true)} disabled={!history.length}><span>RECENT PICKS</span><b>{history.length}</b></button>
           </div>
 
           {history.length > 0 && <div className="history-rail" aria-label="Recent winners"><span>RECENT</span>{history.slice(0, 4).map((item) => <button key={item.id} onClick={() => presentWinner(item)}><i>{item.number}</i>{item.name}</button>)}</div>}
         </section>
       </div>
 
-      <section className="streamer-note">
-        <div><span>MADE FOR THE BIG SCREEN</span><h2>One link. One list. One unmistakable winner.</h2></div>
-        <p>Share this tab, capture it in OBS, or tap Present for a clean full-screen draw. Contestant names and winner history stay in this browser.</p>
-        <a href={APP_STORE_URL} target="_blank" rel="noreferrer">Get the iPhone + iPad app <span aria-hidden="true">↗</span></a>
+      <section className="marketing-showcase" aria-labelledby="namesnap-story-title">
+        <div className="marketing-intro">
+          <div>
+            <span className="marketing-kicker">MADE FOR THE WHOLE ROOM</span>
+            <h2 id="namesnap-story-title">One list. One fair pick. <em>A ridiculous celebration.</em></h2>
+          </div>
+          <div className="marketing-intro-copy">
+            <p>Share this tab, capture it in OBS, or tap Present for a clean full-screen draw. NameSnap turns an ordinary random pick into the moment everyone watches.</p>
+            <a href={APP_STORE_URL} target="_blank" rel="noreferrer">Get the iPhone + iPad app <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+
+        <div className="marketing-feature-grid">
+          <article className="marketing-feature marketing-feature-local">
+            <span>01 · PRIVATE BY DESIGN</span>
+            <h3>Names stay right here.</h3>
+            <p>No account. No audience database. Contestant lists and recent picks stay in this browser.</p>
+            <img src="/celebrations/robot.png" alt="A cheerful NameSnap robot protecting a winner card" />
+          </article>
+          <article className="marketing-feature marketing-feature-screen">
+            <span>02 · BUILT TO PRESENT</span>
+            <h3>Big-screen energy.</h3>
+            <p>Use the web picker on a classroom display, a stream, a projector, or anywhere a group needs one clear result.</p>
+            <img src="/celebrations/hype-mascot.png" alt="The NameSnap hype mascot celebrating" />
+          </article>
+          <article className="marketing-feature marketing-feature-winner">
+            <span>03 · WINNER MOMENT</span>
+            <h3>Never a quiet win.</h3>
+            <p>Confetti, music, crowds, characters, and hundreds of celebration variations make every name feel like the main event.</p>
+            <img src="/celebrations/guitarist.png" alt="A NameSnap guitarist playing a victory solo" />
+          </article>
+        </div>
+
+        <div className="marketing-use-strip" aria-label="Ways to use NameSnap">
+          <span>CLASSROOMS</span><i>★</i><span>GIVEAWAYS</span><i>★</i><span>LIVESTREAMS</span><i>★</i><span>TEAMS</span><i>★</i><span>FAMILY GAMES</span>
+        </div>
+
+        <div className="marketing-cta">
+          <div className="marketing-cta-art" aria-hidden="true"><img src="/celebrations/dancer.png" alt="" /><img src="/namesnap-app-icon-v2.png" alt="" /></div>
+          <div><span className="marketing-kicker">PICK ANYWHERE</span><h2>Web for the room.<br /><em>App for your pocket.</em></h2><p>Keep NameSnap close on iPhone and iPad—ready for substitute teachers, club meetings, family nights, and the next giveaway.</p></div>
+          <a href={APP_STORE_URL} target="_blank" rel="noreferrer">Open in the App Store <span aria-hidden="true">↗</span></a>
+        </div>
       </section>
 
-      <footer className="web-footer"><span>© 2026 NameSnap</span><nav><a href="/privacy">Privacy</a><a href="/support">Support</a><a href="/terms">Terms</a><a href="mailto:sidequestsoftware@proton.me">Contact</a></nav></footer>
+      <footer className="web-footer"><span>© 2026 NameSnap · Fair picks, huge winner energy.</span><nav><a href="/privacy">Privacy</a><a href="/support">Support</a><a href="/terms">EULA</a><a href="mailto:sidequestsoftware@proton.me">Contact</a></nav></footer>
 
       {winner && celebration && (
         <div
@@ -1022,7 +1128,39 @@ export function NameSnapWebApp() {
             </ul>
             <footer>
               <button type="button" onClick={() => requestResetPool()} disabled={!history.length && !excludedIds.length}>Reset picks</button>
+              <button type="button" className="pool-sheet-clear" onClick={() => requestClearPool(() => setShowPoolSheet(false))}>Clear pool</button>
               <button type="button" className="pool-sheet-done" onClick={() => setShowPoolSheet(false)}>Done</button>
+            </footer>
+          </section>
+        </div>
+      )}
+
+      {showRecentPicks && (
+        <div className="modal-backdrop pool-sheet-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowRecentPicks(false); }}>
+          <section className="pool-sheet history-sheet" role="dialog" aria-modal="true" aria-labelledby="recent-picks-title">
+            <div className="pool-sheet-handle" aria-hidden="true" />
+            <header>
+              <div>
+                <span>DRAW HISTORY</span>
+                <h2 id="recent-picks-title">Recent picks</h2>
+                <p>{history.length} winner{history.length === 1 ? "" : "s"} from this pool</p>
+              </div>
+              <button ref={recentPicksCloseRef} type="button" className="pool-sheet-close" aria-label="Close recent picks" onClick={() => setShowRecentPicks(false)}>×</button>
+            </header>
+            <ol className="history-sheet-list">
+              {history.map((item, index) => (
+                <li key={item.id}>
+                  <button type="button" onClick={() => { setShowRecentPicks(false); presentWinner(item); }}>
+                    <i>{item.number}</i>
+                    <span><b>{item.name}</b><small>Pick {history.length - index} · contestant #{item.number}</small></span>
+                    <span aria-hidden="true">↗</span>
+                  </button>
+                </li>
+              ))}
+            </ol>
+            <footer>
+              <button type="button" onClick={() => requestResetPool(() => setShowRecentPicks(false))}>Reset picks</button>
+              <button type="button" className="pool-sheet-done" onClick={() => setShowRecentPicks(false)}>Done</button>
             </footer>
           </section>
         </div>
@@ -1038,6 +1176,31 @@ export function NameSnapWebApp() {
             <div className="confirmation-actions">
               <button ref={confirmationCancelRef} type="button" className="confirmation-cancel" onClick={() => setConfirmation(null)}>Cancel</button>
               <button type="button" className="confirmation-confirm" onClick={confirmAction}>{confirmation.confirmLabel}</button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {pendingDuplicateNames.length > 0 && (
+        <div className="modal-backdrop confirmation-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setPendingDuplicateNames([]); }}>
+          <section className="confirmation-modal duplicate-modal" role="dialog" aria-modal="true" aria-labelledby="duplicate-title" aria-describedby="duplicate-message">
+            <span className="confirmation-kicker">DUPLICATES FOUND</span>
+            <span className="confirmation-mark" aria-hidden="true">?</span>
+            <h2 id="duplicate-title">Add them again?</h2>
+            <p id="duplicate-message">Some names are already in this pool. Skip those names or add every name again.</p>
+            <div className="duplicate-actions">
+              <button ref={duplicateCancelRef} type="button" className="confirmation-cancel" onClick={() => setPendingDuplicateNames([])}>Cancel</button>
+              <button type="button" className="confirmation-cancel" onClick={() => {
+                const existingNames = new Set(entries.map((entry) => entry.name.trim().toLocaleLowerCase()));
+                const uniqueNames = pendingDuplicateNames.filter((name) => !existingNames.has(name.trim().toLocaleLowerCase()));
+                setPendingDuplicateNames([]);
+                appendNamesToPool(uniqueNames);
+              }}>Skip duplicates</button>
+              <button type="button" className="confirmation-confirm" onClick={() => {
+                const names = pendingDuplicateNames;
+                setPendingDuplicateNames([]);
+                appendNamesToPool(names);
+              }}>Add all again</button>
             </div>
           </section>
         </div>

@@ -1659,33 +1659,20 @@ struct ContentView: View {
 
                 ScrollView {
                     VStack(spacing: 20) {
-                        HStack(alignment: .center, spacing: 12) {
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text("NAMESNAP")
-                                    .font(titleFont)
-                                    .foregroundStyle(NSTheme.ink)
-                                    .shadow(color: NSTheme.skyBlue, radius: 0, x: 3, y: 3)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.5)
-
-                                Text("RANDOM PICKER")
-                                    .font(titleFamilyFont(size: 9))
-                                    .foregroundStyle(NSTheme.violet)
-                                    .tracking(2.2)
-                            }
-
-                            Spacer(minLength: 6)
-
-                            Text(vm.entries.isEmpty ? "READY TO BUILD" : "\(vm.availableEntries.count) ELIGIBLE")
-                                .font(titleFamilyFont(size: 8))
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("NAMESNAP")
+                                .font(titleFont)
                                 .foregroundStyle(NSTheme.ink)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 9)
-                                .background(NSTheme.yellow)
-                                .clipShape(Capsule())
-                                .overlay(Capsule().stroke(NSTheme.ink, lineWidth: 2))
-                                .shadow(color: NSTheme.violet, radius: 0, x: 3, y: 4)
+                                .shadow(color: NSTheme.skyBlue, radius: 0, x: 3, y: 3)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.5)
+
+                            Text("RANDOM PICKER")
+                                .font(titleFamilyFont(size: 9))
+                                .foregroundStyle(NSTheme.violet)
+                                .tracking(2.2)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 2)
 
                         if !shouldHideSetupForScreenshotFixture {

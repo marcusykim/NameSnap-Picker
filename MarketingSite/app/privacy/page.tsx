@@ -1,13 +1,28 @@
 import type { Metadata } from "next";
-import { SiteFooter, SiteHeader } from "../site-chrome";
+import { PublicHero, SiteFooter, SiteHeader } from "../site-chrome";
 
 export const metadata: Metadata = { title: "Privacy Policy", description: "NameSnap privacy policy." };
 
 export default function PrivacyPage() {
   return (
-    <main><SiteHeader />
-      <section className="legal-hero shell"><p className="eyebrow"><span /> PRIVACY POLICY</p><h1>Simple picker.<br /><em>Simple policy.</em></h1><p>Effective August 22, 2026</p></section>
-      <article className="policy shell">
+    <main className="public-page"><SiteHeader />
+      <PublicHero
+        eyebrow="PRIVACY POLICY"
+        title="Pick names at random."
+        accent="Party while you do it."
+        description="Paste or type your list, tap once, and let NameSnap turn a fair random pick into the loudest moment in the room."
+        art="/celebrations/robot.png"
+        artAlt="A cheerful NameSnap robot holding a winner card"
+        artLabel="LOCAL BY DEFAULT"
+        facts={["NO ACCOUNT", "NO ADS", "NAMES STAY LOCAL"]}
+        actions
+      />
+      <div className="public-summary shell">
+        <span>THE SHORT VERSION</span>
+        <p>Your contestants and recent picks stay on the device in front of you. Payment providers only receive what they need to process an optional purchase.</p>
+        <time dateTime="2026-08-22">Effective August 22, 2026</time>
+      </div>
+      <article className="policy policy-grid shell">
         <section><h2>Overview</h2><p>NameSnap is designed to make random picks without requiring an account or sign-in. This policy covers the NameSnap iPhone and iPad app and NameSnap Web at getnamesnap.web.app.</p></section>
         <section><h2>Contestant data stays local</h2><p>Contestant names, recent winner history, and picker preferences are stored locally on your device or browser. NameSnap Web does not send contestant names or winner history to Firebase, Stripe, Marcus Kim, or another NameSnap server.</p></section>
         <section><h2>Analytics, tracking, and advertising</h2><p>NameSnap does not use third-party analytics, advertising SDKs, cross-app tracking, or third-party ads.</p></section>
