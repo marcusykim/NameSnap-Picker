@@ -37,7 +37,7 @@
           { "key": "X-Content-Type-Options", "value": "nosniff" },
           { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
           { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
-          { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; connect-src 'self' https://namesnap-web-payments.royal-fog-6bed.workers.dev; frame-src https://*.stripe.com; form-action 'self' https://*.stripe.com; base-uri 'self'; object-src 'none'; frame-ancestors 'self' https://*.twitch.tv https://*.streamlabs.com" }
+          { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; connect-src 'self' https://namesnap-web-payments.royal-fog-6bed.workers.dev https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://namesnap-picker-6759588637.firebaseapp.com; frame-src https://*.stripe.com https://namesnap-picker-6759588637.firebaseapp.com; form-action 'self' https://*.stripe.com; base-uri 'self'; object-src 'none'; frame-ancestors 'self' https://*.twitch.tv https://*.streamlabs.com" }
         ]
       },
       {

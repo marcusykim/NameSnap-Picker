@@ -939,6 +939,7 @@ final class NameSnapPurchaseManager: ObservableObject {
     }
 
     @Published var isUnlimitedUnlocked = false
+    @Published private(set) var entitlementPlan: Plan?
     @Published var lifetimeProduct: Product?
     @Published var monthlyProduct: Product?
     @Published private(set) var storeEnvironment: AppStore.Environment?
@@ -967,8 +968,8 @@ final class NameSnapPurchaseManager: ObservableObject {
 
     init() {
         Task {
-            await refreshEntitlements()
             await loadProducts()
+            await refreshEntitlements()
         }
     }
 
@@ -986,27 +987,48 @@ final class NameSnapPurchaseManager: ObservableObject {
         #if DEBUG
         if ProcessInfo.processInfo.environment["NAMESNAP_UI_TEST_PRODUCTION_ENTITLEMENT"] == "1" {
             isUnlimitedUnlocked = true
+            entitlementPlan = .lifetime
             storeEnvironment = .production
+            return
+        } else if ProcessInfo.processInfo.environment["NAMESNAP_UI_TEST_MONTHLY_ENTITLEMENT"] == "1" {
+            isUnlimitedUnlocked = true
+            entitlementPlan = .monthly
+            storeEnvironment = .sandbox
             return
         } else if ProcessInfo.processInfo.environment["NAMESNAP_UI_TEST_ENTITLEMENT"] == "1" {
             isUnlimitedUnlocked = true
+            entitlementPlan = .lifetime
             storeEnvironment = .sandbox
             return
         }
         #endif
 
         isUnlimitedUnlocked = false
+        entitlementPlan = nil
+        var foundMonthlyEntitlement = false
         for await result in Transaction.currentEntitlements {
             guard case .verified(let transaction) = result else { continue }
             storeEnvironment = transaction.environment
-            if lifetimeProductIds.contains(transaction.productID) || monthlyProductIds.contains(transaction.productID) {
+            if lifetimeProductIds.contains(transaction.productID) {
                 isUnlimitedUnlocked = true
+                entitlementPlan = .lifetime
                 return
             }
+            if monthlyProductIds.contains(transaction.productID) {
+                foundMonthlyEntitlement = true
+            }
+        }
+        if foundMonthlyEntitlement {
+            isUnlimitedUnlocked = true
+            entitlementPlan = .monthly
         }
     }
 
     func purchase(plan: Plan) async -> Bool {
+        await refreshEntitlements()
+        if entitlementPlan == .lifetime || entitlementPlan == plan {
+            return true
+        }
         if lifetimeProduct == nil && monthlyProduct == nil {
             await loadProducts()
         }
@@ -1027,6 +1049,7 @@ final class NameSnapPurchaseManager: ObservableObject {
                 guard case .verified(let transaction) = verification else { return false }
                 storeEnvironment = transaction.environment
                 isUnlimitedUnlocked = true
+                entitlementPlan = plan
                 await transaction.finish()
                 return true
             default:
@@ -1065,6 +1088,7 @@ struct ContentView: View {
     @State private var showDuplicateConfirm = false
     @State private var purchasingPlan: NameSnapPurchaseManager.Plan? = nil
     @State private var upgradeErrorText: String?
+    @State private var showSubscriptionCancellationReminder = false
     @State private var showSoundOnHint = false
     @State private var didRunLaunchSilentCheck = false
     @State private var didShowWinnerForCurrentSpin = false
@@ -1122,6 +1146,15 @@ struct ContentView: View {
     private var shouldSimulateProductionEntitlementForUITesting: Bool {
         #if DEBUG
         ProcessInfo.processInfo.environment["NAMESNAP_UI_TEST_PRODUCTION_ENTITLEMENT"] == "1"
+        #else
+        false
+        #endif
+    }
+
+    private var shouldShowLifetimeReminderForUITesting: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-ui-lifetime-reminder") ||
+            ProcessInfo.processInfo.environment["NAMESNAP_UI_LIFETIME_REMINDER"] == "1"
         #else
         false
         #endif
@@ -1191,23 +1224,7 @@ struct ContentView: View {
 
     private var lifetimePurchaseButton: some View {
         Button(purchasingPlan == .lifetime ? "Purchasing…" : "Unlock Lifetime \(lifetimePriceText)") {
-            dismissKeyboard()
-            guard purchasingPlan == nil else { return }
-            purchasingPlan = .lifetime
-            upgradeErrorText = nil
-            Task {
-                let success = await purchases.purchase(plan: .lifetime)
-                purchasingPlan = nil
-                if success {
-                    withAnimation { showUpgradeConfirm = false }
-                    showBigAlert("✅ Unlimited Unlocked")
-                    let namesToAdd = pendingNamesForAddition
-                    pendingNamesForAddition.removeAll()
-                    addNamesToPoolNow(namesToAdd)
-                } else {
-                    upgradeErrorText = "Couldn’t complete purchase. Check connection and try again."
-                }
-            }
+            startLifetimePurchase()
         }
         .buttonStyle(NameSnapButtonStyle(tone: .primary))
         .font(titleFamilyFont(size: 13))
@@ -1215,6 +1232,30 @@ struct ContentView: View {
         .lineLimit(2)
         .minimumScaleFactor(0.7)
         .disabled(purchasingPlan != nil)
+    }
+
+    private func startLifetimePurchase() {
+        dismissKeyboard()
+        guard purchasingPlan == nil else { return }
+        purchasingPlan = .lifetime
+        upgradeErrorText = nil
+        Task {
+            let wasMonthlySubscriber = purchases.entitlementPlan == .monthly
+            let success = await purchases.purchase(plan: .lifetime)
+            purchasingPlan = nil
+            if success {
+                withAnimation {
+                    showUpgradeConfirm = false
+                    showSubscriptionCancellationReminder = wasMonthlySubscriber
+                }
+                showBigAlert("✅ Unlimited Unlocked")
+                let namesToAdd = pendingNamesForAddition
+                pendingNamesForAddition.removeAll()
+                addNamesToPoolNow(namesToAdd)
+            } else {
+                upgradeErrorText = "Couldn’t complete purchase. Check connection and try again."
+            }
+        }
     }
 
     private var titleFont: Font {
@@ -1442,6 +1483,11 @@ struct ContentView: View {
             }
         } else if shouldShowUpgradeForUITesting {
             showUpgradeConfirm = true
+        }
+
+        if shouldShowLifetimeReminderForUITesting {
+            showUpgradeConfirm = false
+            showSubscriptionCancellationReminder = true
         }
     }
 
@@ -1800,6 +1846,18 @@ struct ContentView: View {
                                     }
                                 }
                                 }
+                            }
+
+                            if purchases.entitlementPlan == .monthly {
+                                Button("UPGRADE MONTHLY TO LIFETIME \(lifetimePriceText)") {
+                                    dismissKeyboard()
+                                    upgradeErrorText = nil
+                                    withAnimation { showUpgradeConfirm = true }
+                                }
+                                .buttonStyle(NameSnapButtonStyle(tone: .warm))
+                                .font(titleFamilyFont(size: 11))
+                                .frame(maxWidth: .infinity)
+                                .accessibilityHint("Opens the one-time lifetime purchase option")
                             }
                         }
 
@@ -2193,9 +2251,17 @@ struct ContentView: View {
                         VStack(spacing: 0) {
                             ScrollView {
                                 VStack(spacing: 12) {
-                            symbolTitleLabel("✨ Upgrade to Unlimited?", textSize: 22, symbolSize: 24)
+                            symbolTitleLabel(
+                                purchases.entitlementPlan == .monthly ? "✨ Make it Lifetime?" : "✨ Upgrade to Unlimited?",
+                                textSize: 22,
+                                symbolSize: 24
+                            )
 
-                            Text("Free supports up to \(freeContestantLimit) contestants.")
+                            Text(
+                                purchases.entitlementPlan == .monthly
+                                    ? "You already have Unlimited Monthly. Lifetime is a one-time purchase that does not expire."
+                                    : "Free supports up to \(freeContestantLimit) contestants."
+                            )
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(.black.opacity(0.78))
                                 .multilineTextAlignment(.center)
@@ -2209,7 +2275,11 @@ struct ContentView: View {
                             .foregroundStyle(.black.opacity(0.76))
                             .fixedSize(horizontal: false, vertical: true)
 
-                            Text("Unlimited Monthly renews every month until canceled. Unlimited Lifetime is a one-time purchase.")
+                            Text(
+                                purchases.entitlementPlan == .monthly
+                                    ? "Tap once to unlock Lifetime now. Apple keeps Monthly active until you cancel it, so NameSnap will show the subscription-management step immediately afterward."
+                                    : "Unlimited Monthly renews every month until canceled. Unlimited Lifetime is a one-time purchase."
+                            )
                                 .font(.caption)
                                 .foregroundStyle(.black.opacity(0.72))
                                 .multilineTextAlignment(.center)
@@ -2241,31 +2311,33 @@ struct ContentView: View {
                                 }
                             }
 
-                            Button(purchasingPlan == .monthly ? "Purchasing…" : "Or Monthly \(monthlyPriceText)") {
-                                dismissKeyboard()
-                                guard purchasingPlan == nil else { return }
-                                purchasingPlan = .monthly
-                                upgradeErrorText = nil
-                                Task {
-                                    let success = await purchases.purchase(plan: .monthly)
-                                    purchasingPlan = nil
-                                    if success {
-                                        withAnimation { showUpgradeConfirm = false }
-                                        showBigAlert("✅ Unlimited Unlocked")
-                                        let namesToAdd = pendingNamesForAddition
-                                        pendingNamesForAddition.removeAll()
-                                        addNamesToPoolNow(namesToAdd)
-                                    } else {
-                                        upgradeErrorText = "Monthly plan unavailable or purchase cancelled."
+                            if purchases.entitlementPlan != .monthly {
+                                Button(purchasingPlan == .monthly ? "Purchasing…" : "Or Monthly \(monthlyPriceText)") {
+                                    dismissKeyboard()
+                                    guard purchasingPlan == nil else { return }
+                                    purchasingPlan = .monthly
+                                    upgradeErrorText = nil
+                                    Task {
+                                        let success = await purchases.purchase(plan: .monthly)
+                                        purchasingPlan = nil
+                                        if success {
+                                            withAnimation { showUpgradeConfirm = false }
+                                            showBigAlert("✅ Unlimited Unlocked")
+                                            let namesToAdd = pendingNamesForAddition
+                                            pendingNamesForAddition.removeAll()
+                                            addNamesToPoolNow(namesToAdd)
+                                        } else {
+                                            upgradeErrorText = "Monthly plan unavailable or purchase cancelled."
+                                        }
                                     }
                                 }
+                                .buttonStyle(NameSnapButtonStyle(tone: .secondary))
+                                .font(titleFamilyFont(size: 12))
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.7)
+                                .disabled(purchasingPlan != nil)
                             }
-                            .buttonStyle(NameSnapButtonStyle(tone: .secondary))
-                            .font(titleFamilyFont(size: 12))
-                            .multilineTextAlignment(.center)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.7)
-                            .disabled(purchasingPlan != nil)
 
                             Button("Restore Purchases") {
                                 dismissKeyboard()
@@ -2323,6 +2395,39 @@ struct ContentView: View {
                         .nameSnapActionModalSurface()
                         .padding(.horizontal, 22)
                         .padding(.vertical, 20)
+                    }
+                    .transition(.scale(scale: 0.94).combined(with: .opacity))
+                }
+            }
+            .overlay {
+                if showSubscriptionCancellationReminder {
+                    ZStack {
+                        Color.black.opacity(0.25)
+                            .ignoresSafeArea()
+
+                        VStack(spacing: 12) {
+                            symbolTitleLabel("✨ Lifetime is unlocked", textSize: 22, symbolSize: 24)
+
+                            Text("Your one-time Lifetime purchase is complete. Apple does not let NameSnap cancel an App Store subscription for you, so cancel Unlimited Monthly now to prevent another renewal. Lifetime access will remain unlocked.")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(NSTheme.ink.opacity(0.72))
+                                .multilineTextAlignment(.center)
+
+                            Link("MANAGE APPLE SUBSCRIPTION", destination: URL(string: "https://apps.apple.com/account/subscriptions")!)
+                                .buttonStyle(NameSnapButtonStyle(tone: .warm))
+                                .font(titleFamilyFont(size: 11))
+
+                            Button("DONE") {
+                                withAnimation { showSubscriptionCancellationReminder = false }
+                            }
+                            .buttonStyle(NameSnapButtonStyle(tone: .secondary))
+                            .font(titleFamilyFont(size: 10))
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 20)
+                        .frame(maxWidth: 560)
+                        .nameSnapActionModalSurface()
+                        .padding(.horizontal, 22)
                     }
                     .transition(.scale(scale: 0.94).combined(with: .opacity))
                 }

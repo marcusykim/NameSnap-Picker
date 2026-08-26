@@ -5,8 +5,7 @@ workers_dev = true
 
 [vars]
 SITE_URL = "https://getnamesnap.web.app"
-STRIPE_MONTHLY_PAYMENT_LINK = "https://buy.stripe.com/aFa5kw8Jlfn84ehe6p9Zm00"
-STRIPE_LIFETIME_PAYMENT_LINK = "https://buy.stripe.com/dRm9AMe3Ffn8fWZe6p9Zm01"
+FIREBASE_PROJECT_ID = "namesnap-picker-6759588637"
 
 [[d1_databases]]
 binding = "DB"

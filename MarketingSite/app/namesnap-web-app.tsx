@@ -3,6 +3,8 @@
 /* eslint-disable @next/next/no-html-link-for-pages, @next/next/no-img-element, react-hooks/set-state-in-effect, jsx-a11y/label-has-associated-control */
 
 import { type ClipboardEvent as ReactClipboardEvent, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isSignInWithEmailLink, onAuthStateChanged, sendSignInLinkToEmail, signInWithEmailLink, signOut } from "firebase/auth";
+import { namesnapAuth } from "./firebase-auth";
 
 type Entry = { id: string; drawNumber: number; name: string; included: boolean };
 type Winner = { id: string; name: string; number: number; pickedAt: string };
@@ -34,6 +36,7 @@ const POOL_PREVIEW_LIMIT = 20;
 const STORAGE_KEY = "namesnap.web.session.v1";
 const PENDING_NAMES_KEY = "namesnap.web.pending-upgrade.v1";
 const IDENTITY_KEY = "namesnap.web.identity.v1";
+const AUTH_EMAIL_KEY = "namesnap.web.purchase-email.v1";
 const API_URL = "https://namesnap-web-payments.royal-fog-6bed.workers.dev";
 const APP_STORE_URL = "https://apps.apple.com/app/id6759588637";
 const WHEEL_COLORS = [
@@ -334,9 +337,11 @@ function browserIdentity() {
   return token;
 }
 
-function apiFetch(path: string, init: RequestInit = {}) {
+async function apiFetch(path: string, init: RequestInit = {}) {
   const headers = new Headers(init.headers);
   headers.set("X-NameSnap-Identity", browserIdentity());
+  const user = namesnapAuth.currentUser;
+  if (user) headers.set("Authorization", `Bearer ${await user.getIdToken()}`);
   return fetch(`${API_URL}${path}`, { ...init, headers, cache: "no-store" });
 }
 
@@ -362,8 +367,15 @@ export function NameSnapWebApp() {
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [pendingNames, setPendingNames] = useState<string[]>([]);
   const [entitlementPlan, setEntitlementPlan] = useState<"monthly" | "lifetime" | null>(null);
+  const [subscriptionCancellationRequired, setSubscriptionCancellationRequired] = useState(false);
   const [checkoutBusy, setCheckoutBusy] = useState<"monthly" | "lifetime" | "restore" | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [accountEmail, setAccountEmail] = useState<string | null>(null);
+  const [authEmail, setAuthEmail] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authNotice, setAuthNotice] = useState<string | null>(null);
+  const [emailLinkNeedsAddress, setEmailLinkNeedsAddress] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -392,6 +404,42 @@ export function NameSnapWebApp() {
       localStorage.removeItem(STORAGE_KEY);
     }
     setHydrated(true);
+  }, []);
+
+  useEffect(() => onAuthStateChanged(namesnapAuth, (user) => {
+    setAccountEmail(user?.email ?? null);
+    setAuthEmail(user?.email ?? localStorage.getItem(AUTH_EMAIL_KEY) ?? "");
+    setAuthReady(true);
+  }), []);
+
+  useEffect(() => {
+    if (!isSignInWithEmailLink(namesnapAuth, window.location.href)) return;
+    setShowUpgrade(true);
+    const storedEmail = localStorage.getItem(AUTH_EMAIL_KEY);
+    if (!storedEmail) {
+      setEmailLinkNeedsAddress(true);
+      setAuthNotice("Enter the same email address that received the secure sign-in link.");
+      return;
+    }
+
+    let cancelled = false;
+    const complete = async () => {
+      setAuthBusy(true);
+      setCheckoutError(null);
+      try {
+        await signInWithEmailLink(namesnapAuth, storedEmail, window.location.href);
+        if (cancelled) return;
+        localStorage.removeItem(AUTH_EMAIL_KEY);
+        setAuthNotice("Purchase account verified. You can buy once and restore on another browser.");
+        window.history.replaceState({}, "", window.location.pathname);
+      } catch {
+        if (!cancelled) setCheckoutError("That sign-in link is invalid or expired. Request a new link below.");
+      } finally {
+        if (!cancelled) setAuthBusy(false);
+      }
+    };
+    void complete();
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
@@ -501,7 +549,8 @@ export function NameSnapWebApp() {
   );
   const isPremium = entitlementPlan !== null;
 
-  const applyEntitlement = useCallback((data: { active?: boolean; plan?: string | null }) => {
+  const applyEntitlement = useCallback((data: { active?: boolean; plan?: string | null; subscriptionStatus?: string | null }) => {
+    setSubscriptionCancellationRequired(data.plan === "lifetime" && data.subscriptionStatus === "cancellation_required");
     if (data.active && (data.plan === "monthly" || data.plan === "lifetime")) {
       setEntitlementPlan(data.plan);
       return true;
@@ -511,6 +560,7 @@ export function NameSnapWebApp() {
   }, []);
 
   useEffect(() => {
+    if (!authReady) return;
     let cancelled = false;
     const refresh = async () => {
       const query = new URLSearchParams(window.location.search);
@@ -522,12 +572,14 @@ export function NameSnapWebApp() {
       }
       try {
         let unlocked = false;
+        let cancellationRequired = false;
         const attempts = checkoutSucceeded ? 16 : 1;
         for (let attempt = 0; attempt < attempts && !cancelled; attempt += 1) {
           const response = await apiFetch("/api/status");
           const data = await apiJson(response);
           if (!response.ok) throw new Error(data.error ?? "Could not check web purchase status.");
           unlocked = applyEntitlement(data);
+          cancellationRequired = data.plan === "lifetime" && data.subscriptionStatus === "cancellation_required";
           if (!unlocked && checkoutSucceeded && attempt < attempts - 1) {
             await new Promise((resolve) => window.setTimeout(resolve, 750));
           }
@@ -542,7 +594,7 @@ export function NameSnapWebApp() {
             setLastAddedIds(additions.map((entry) => entry.id));
             sessionStorage.removeItem(PENDING_NAMES_KEY);
           }
-          setShowUpgrade(false);
+          if (!cancellationRequired) setShowUpgrade(false);
         }
         if (query.has("checkout")) window.history.replaceState({}, "", window.location.pathname);
       } catch (error) {
@@ -553,7 +605,7 @@ export function NameSnapWebApp() {
     };
     void refresh();
     return () => { cancelled = true; };
-  }, [applyEntitlement]);
+  }, [accountEmail, applyEntitlement, authReady]);
 
   const drawWheel = useCallback(() => {
     const canvas = canvasRef.current;
@@ -763,7 +815,56 @@ export function NameSnapWebApp() {
     appendNamesToPool(names);
   };
 
+  const sendPurchaseAccountLink = async () => {
+    const email = authEmail.trim().toLocaleLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      setCheckoutError("Enter a valid email address.");
+      return;
+    }
+    setAuthBusy(true);
+    setCheckoutError(null);
+    setAuthNotice(null);
+    try {
+      await sendSignInLinkToEmail(namesnapAuth, email, {
+        url: `${window.location.origin}/?purchaseAccount=complete`,
+        handleCodeInApp: true,
+        linkDomain: "getnamesnap.web.app",
+      });
+      localStorage.setItem(AUTH_EMAIL_KEY, email);
+      setAuthNotice(`Secure sign-in link sent to ${email}. Open it to continue.`);
+    } catch {
+      setCheckoutError("Could not send the secure sign-in link. Check the address and try again.");
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const completePurchaseAccountLink = async () => {
+    const email = authEmail.trim().toLocaleLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      setCheckoutError("Enter the email address that received this link.");
+      return;
+    }
+    setAuthBusy(true);
+    setCheckoutError(null);
+    try {
+      await signInWithEmailLink(namesnapAuth, email, window.location.href);
+      localStorage.removeItem(AUTH_EMAIL_KEY);
+      setEmailLinkNeedsAddress(false);
+      setAuthNotice("Purchase account verified. Your web purchase can now follow you to another browser.");
+      window.history.replaceState({}, "", window.location.pathname);
+    } catch {
+      setCheckoutError("That email does not match this sign-in link, or the link has expired.");
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
   const startCheckout = async (plan: "monthly" | "lifetime") => {
+    if (!namesnapAuth.currentUser?.emailVerified) {
+      setCheckoutError("Verify your purchase email before opening checkout.");
+      return;
+    }
     setCheckoutBusy(plan);
     setCheckoutError(null);
     sessionStorage.setItem(PENDING_NAMES_KEY, pendingNames.join("\n"));
@@ -774,6 +875,12 @@ export function NameSnapWebApp() {
         body: JSON.stringify({ plan }),
       });
       const data = await apiJson(response);
+      if (response.status === 409 && data.active) {
+        applyEntitlement(data);
+        setShowUpgrade(false);
+        setCheckoutBusy(null);
+        return;
+      }
       if (!response.ok || !data.url) throw new Error(data.error ?? "Checkout could not be started.");
       window.location.assign(data.url);
     } catch (error) {
@@ -783,6 +890,10 @@ export function NameSnapWebApp() {
   };
 
   const restorePurchase = async () => {
+    if (!namesnapAuth.currentUser?.emailVerified) {
+      setCheckoutError("Use the secure email link first, then restore your purchase.");
+      return;
+    }
     setCheckoutBusy("restore");
     setCheckoutError(null);
     try {
@@ -902,7 +1013,7 @@ export function NameSnapWebApp() {
         <div className="app-bar-center"><i /> FAIR PICKS · LIVE ON SCREEN</div>
         <nav aria-label="NameSnap controls">
           <button className="quiet-control sound-control" onClick={() => setSoundOn((current) => { if (current) stopWinnerAudio(); return !current; })} aria-pressed={soundOn}><img src="/brand/sound_emoji.png" alt="" />{soundOn ? "Sound on" : "Sound off"}</button>
-          {isPremium && entitlementPlan === "monthly" ? <a className="quiet-control" href="mailto:sidequestsoftware@proton.me?subject=NameSnap%20Web%20billing">Billing help</a> : null}
+          {isPremium && entitlementPlan === "monthly" ? <button className="quiet-control" onClick={() => { setCheckoutError(null); setShowUpgrade(true); }}>Go lifetime</button> : null}
           <a className="app-store-button" href={APP_STORE_URL} target="_blank" rel="noreferrer">iPhone + iPad <span aria-hidden="true">↗</span></a>
           <button className="present-button" onClick={togglePresentation} aria-pressed={presentation}>Present <span aria-hidden="true">↗</span></button>
         </nav>
@@ -1211,13 +1322,36 @@ export function NameSnapWebApp() {
           <section className="upgrade-modal" role="dialog" aria-modal="true" aria-labelledby="upgrade-title">
             <button className="modal-close" aria-label="Close upgrade" onClick={() => { setPendingNames([]); setShowUpgrade(false); }}>×</button>
             <span className="upgrade-spark" aria-hidden="true"><img src="/brand/sparkle_emoji.png" alt="" /></span><span className="upgrade-kicker">BIG DRAW ENERGY</span>
-            <h2 id="upgrade-title">Upgrade to Unlimited?</h2><p>Free supports up to {FREE_LIMIT} contestants.</p>
-            <ul><li>Unlimited contestants</li><li>Use presentation mode on stream</li><li>Restore access in this browser</li></ul>
-            <p className="renewal-copy">Unlimited Monthly renews every month until canceled. Unlimited Lifetime is a one-time purchase.</p>
-            <div className="plan-grid">
-              <button className="lifetime-plan" onClick={() => startCheckout("lifetime")} disabled={checkoutBusy !== null}><span>BEST VALUE</span><b>{checkoutBusy === "lifetime" ? "Opening checkout…" : "Unlock Lifetime"}</b><strong>$6.99</strong><small>one time on web</small></button>
-              <button className="monthly-plan" onClick={() => startCheckout("monthly")} disabled={checkoutBusy !== null}><span>FLEXIBLE</span><b>{checkoutBusy === "monthly" ? "Opening checkout…" : "Go Monthly"}</b><strong>$0.99</strong><small>per month on web</small></button>
-            </div>
+            <h2 id="upgrade-title">{entitlementPlan === "monthly" ? "Make it Lifetime?" : "Upgrade to Unlimited?"}</h2>
+            <p>{entitlementPlan === "monthly" ? "Your Monthly plan is active. Switch to a one-time Lifetime unlock whenever you want." : `Free supports up to ${FREE_LIMIT} contestants.`}</p>
+            <ul><li>Unlimited contestants</li><li>Use presentation mode on stream</li><li>Restore on another browser with your verified email</li></ul>
+            <p className="renewal-copy">{entitlementPlan === "monthly" ? "When Lifetime payment completes, NameSnap automatically stops the existing Stripe monthly renewal. If Stripe cannot complete that step, NameSnap flags it here and gives you a direct billing-support action." : "Unlimited Monthly renews every month until canceled. Unlimited Lifetime is a one-time purchase."}</p>
+            {!accountEmail ? (
+              <div className="purchase-account">
+                <span className="upgrade-kicker">PROTECT YOUR PURCHASE</span>
+                <h3>Use a secure email link</h3>
+                <p>No password and no account needed for free use. This verified email is only for buying once and restoring access later.</p>
+                <label htmlFor="purchase-email">Purchase email</label>
+                <input id="purchase-email" type="email" autoComplete="email" inputMode="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@example.com" />
+                <button type="button" className="purchase-account-button" onClick={emailLinkNeedsAddress ? completePurchaseAccountLink : sendPurchaseAccountLink} disabled={authBusy}>
+                  {authBusy ? "Checking…" : emailLinkNeedsAddress ? "Verify this email" : "Send secure sign-in link"}
+                </button>
+                {authNotice ? <p className="auth-notice" role="status">{authNotice}</p> : null}
+              </div>
+            ) : (
+              <div className="purchase-account signed-in">
+                <span>Purchase protected for <b>{accountEmail}</b></span>
+                <button type="button" onClick={() => { void signOut(namesnapAuth); setEntitlementPlan(null); setAuthNotice(null); }}>Use another email</button>
+              </div>
+            )}
+            {accountEmail && entitlementPlan !== "lifetime" ? (
+              <div className={`plan-grid ${entitlementPlan === "monthly" ? "lifetime-only" : ""}`}>
+                <button className="lifetime-plan" onClick={() => startCheckout("lifetime")} disabled={checkoutBusy !== null}><span>BEST VALUE</span><b>{checkoutBusy === "lifetime" ? "Opening checkout…" : entitlementPlan === "monthly" ? "Upgrade to Lifetime" : "Unlock Lifetime"}</b><strong>$6.99</strong><small>one time on web</small></button>
+                {entitlementPlan !== "monthly" ? <button className="monthly-plan" onClick={() => startCheckout("monthly")} disabled={checkoutBusy !== null}><span>FLEXIBLE</span><b>{checkoutBusy === "monthly" ? "Opening checkout…" : "Go Monthly"}</b><strong>$0.99</strong><small>per month on web</small></button> : null}
+              </div>
+            ) : null}
+            {accountEmail && entitlementPlan === "lifetime" ? <p className="lifetime-owned">Lifetime is already owned by this purchase account. No checkout is needed.</p> : null}
+            {subscriptionCancellationRequired ? <p className="billing-warning" role="alert">Lifetime is unlocked, but Stripe could not stop the previous Monthly renewal automatically. Email <a href="mailto:sidequestsoftware@proton.me?subject=NameSnap%20Web%20monthly%20cancellation">NameSnap billing support</a> now so it can be canceled before another charge.</p> : null}
             <p className="platform-note">Web purchases unlock NameSnap Web. App Store purchases unlock the iPhone and iPad app.</p>
             <button className="restore-button" onClick={restorePurchase} disabled={checkoutBusy !== null}>{checkoutBusy === "restore" ? "Checking…" : "Restore web purchase"}</button>
             {checkoutError ? <p className="checkout-error" role="alert">{checkoutError}</p> : null}
