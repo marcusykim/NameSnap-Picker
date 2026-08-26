@@ -155,7 +155,7 @@ when "testflight-status"
     end
   )
 when "public-beta-status"
-  build_number = ARGV.fetch(1, "20")
+  build_number = ARGV.fetch(1, "24")
   build = build_for(token, build_number)
   abort("Build #{build_number} is not available in App Store Connect") unless build
   review_submission = request(
@@ -196,7 +196,7 @@ when "public-beta-status"
     end
   )
 when "enable-public-beta"
-  build_number = ARGV.fetch(1, "20")
+  build_number = ARGV.fetch(1, "24")
   build = build_for(token, build_number)
   abort("Build #{build_number} is not available in App Store Connect") unless build
   abort("Build #{build_number} is not valid") unless build.dig("attributes", "processingState") == "VALID"

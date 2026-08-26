@@ -45,7 +45,7 @@ Replace NameSnap 2.0 screenshots and App Preview videos without changing metadat
 [bundle exec] fastlane ios submit_production
 ```
 
-Select build 20 and submit NameSnap 2.0 for full App Store review
+Select build 24 and submit NameSnap 2.0 for full App Store review
 
 ----
 

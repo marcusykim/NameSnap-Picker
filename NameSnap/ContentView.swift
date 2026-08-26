@@ -1114,6 +1114,8 @@ struct ContentView: View {
 
     private let flashColors: [Color] = [.pink, .yellow, .cyan, .green, .orange, .purple]
     private let freeContestantLimit = 16
+    private let websiteURL = URL(string: "https://getnamesnap.web.app")!
+    private let supportEmailURL = URL(string: "mailto:sidequestsoftware@proton.me?subject=NameSnap%20Support")!
     private let privacyPolicyURL = URL(string: "https://getnamesnap.web.app/privacy")!
     private let standardEULAURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
 
@@ -2026,6 +2028,46 @@ struct ContentView: View {
                                         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(NSTheme.ink.opacity(0.72), lineWidth: 1.5))
                                     }
                                 }
+                            }
+                        }
+
+                        card {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("HELP & SUPPORT")
+                                    .font(titleFamilyFont(size: 14))
+                                    .foregroundStyle(NSTheme.ink)
+
+                                Text("Questions, feedback, or purchase help? Reach us directly.")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(NSTheme.ink.opacity(0.68))
+
+                                Link(destination: websiteURL) {
+                                    HStack(spacing: 10) {
+                                        Image(systemName: "globe")
+                                        Text("getnamesnap.web.app")
+                                        Spacer()
+                                        Image(systemName: "arrow.up.right")
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(NameSnapButtonStyle(tone: .secondary))
+                                .font(.subheadline.weight(.bold))
+                                .accessibilityLabel("Open the NameSnap website")
+
+                                Link(destination: supportEmailURL) {
+                                    HStack(spacing: 10) {
+                                        Image(systemName: "envelope.fill")
+                                        Text("sidequestsoftware@proton.me")
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.7)
+                                        Spacer()
+                                        Image(systemName: "arrow.up.right")
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(NameSnapButtonStyle(tone: .warm))
+                                .font(.subheadline.weight(.bold))
+                                .accessibilityLabel("Send NameSnap support an email")
                             }
                         }
 
