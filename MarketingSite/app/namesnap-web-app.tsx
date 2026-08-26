@@ -341,7 +341,7 @@ async function apiFetch(path: string, init: RequestInit = {}) {
   const headers = new Headers(init.headers);
   headers.set("X-NameSnap-Identity", browserIdentity());
   const user = namesnapAuth.currentUser;
-  if (user) headers.set("Authorization", `Bearer ${await user.getIdToken()}`);
+  if (user?.emailVerified) headers.set("Authorization", `Bearer ${await user.getIdToken()}`);
   return fetch(`${API_URL}${path}`, { ...init, headers, cache: "no-store" });
 }
 
@@ -407,7 +407,7 @@ export function NameSnapWebApp() {
   }, []);
 
   useEffect(() => onAuthStateChanged(namesnapAuth, (user) => {
-    setAccountEmail(user?.email ?? null);
+    setAccountEmail(user?.emailVerified ? user.email : null);
     setAuthEmail(user?.email ?? localStorage.getItem(AUTH_EMAIL_KEY) ?? "");
     setAuthReady(true);
   }), []);
@@ -862,6 +862,7 @@ export function NameSnapWebApp() {
 
   const startCheckout = async (plan: "monthly" | "lifetime") => {
     if (!namesnapAuth.currentUser?.emailVerified) {
+      setAccountEmail(null);
       setCheckoutError("Verify your purchase email before opening checkout.");
       return;
     }
