@@ -50,11 +50,10 @@ const WHEEL_COLORS = [
 const WHEEL_INK = "#15151B";
 const WHEEL_CARD = "#F2F4FA";
 const WHEEL_LABEL_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif';
-const AUDIO_TRACKS = [
-  "/sounds/techno_upbeat_alt_01.mp3", "/sounds/techno_upbeat_alt_06.mp3",
-  "/sounds/hype_dance_128.mp3", "/sounds/hype_house_128.mp3",
-  "/sounds/hype_happy_130.mp3", "/sounds/hype_metal_160.mp3",
-];
+const AUDIO_TRACKS = Array.from(
+  { length: 100 },
+  (_, index) => `/sounds/winner_music_${String(index + 1).padStart(3, "0")}.mp3`,
+);
 const CELEBRATION_HEROES: CelebrationHero[] = [
   "dancer", "guitarist", "dynamite", "hype-mascot", "pixel-bomb",
   "breakdancer", "dj", "drummer", "skater", "trumpet",

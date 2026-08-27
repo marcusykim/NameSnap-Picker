@@ -98,10 +98,7 @@ private enum WinnerCelebrationHero: String, CaseIterable {
 
 private struct WinnerCelebration: Identifiable {
     static let variationCount = 300
-    static let audioNames = [
-        "techno_upbeat_alt_01", "techno_upbeat_alt_06",
-        "hype_dance_128", "hype_house_128", "hype_happy_130", "hype_metal_160"
-    ]
+    static let audioNames = (1...100).map { String(format: "winner_music_%03d", $0) }
     static let headlines = ["THE PICK IS IN", "ABSOLUTE LEGEND", "WINNER ENERGY", "MAKE SOME NOISE", "MAIN CHARACTER MOMENT"]
 
     let id = UUID()

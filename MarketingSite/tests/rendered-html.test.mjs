@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -184,21 +184,23 @@ test("offers three duplicate-name outcomes and uses only 120+ BPM winner music",
     path.join(marketingDirectory, "app/namesnap-web-app.tsx"),
     "utf8",
   );
-  const musicFiles = [
-    "techno_upbeat_alt_01.mp3",
-    "techno_upbeat_alt_06.mp3",
-    "hype_dance_128.mp3",
-    "hype_house_128.mp3",
-    "hype_happy_130.mp3",
-    "hype_metal_160.mp3",
-  ];
+  const musicFiles = Array.from(
+    { length: 100 },
+    (_, index) => `winner_music_${String(index + 1).padStart(3, "0")}.mp3`,
+  );
 
   assert.match(webAppSource, />Cancel<\/button>/);
   assert.match(webAppSource, />Skip duplicates<\/button>/);
   assert.match(webAppSource, />Add all anyway<\/button>/);
   assert.match(webAppSource, /namesExcludingDuplicates\(names, entries\.map/);
+  assert.match(webAppSource, /\{ length: 100 \}/);
   assert.doesNotMatch(webAppSource, /celebration_(?:airhorn|crowd|explosion|fanfare|fireworks)\.mp3/);
   await Promise.all(musicFiles.map((filename) => access(path.join(marketingDirectory, "public/sounds", filename))));
+
+  const shippedMusic = (await readdir(path.join(marketingDirectory, "public/sounds")))
+    .filter((filename) => filename.endsWith(".mp3"));
+  assert.equal(shippedMusic.length, 100);
+  assert.deepEqual(shippedMusic.sort(), musicFiles);
 });
 
 test("provides a stage-only web presentation fallback when browser fullscreen is unavailable", async () => {
