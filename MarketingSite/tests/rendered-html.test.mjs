@@ -80,6 +80,8 @@ test("publishes a complete support contact for customer requests", async () => {
   assert.match(html, /mail\.google\.com\/mail\/\?view=cm/i);
   assert.match(html, /outlook\.office\.com\/mail\/deeplink\/compose/i);
   assert.match(html, /compose\.mail\.yahoo\.com/i);
+  assert.match(html, />Copy email<\/button>/i);
+  assert.match(html, /aria-live="polite"/i);
 });
 
 test("publishes the privacy policy with the current contact", async () => {

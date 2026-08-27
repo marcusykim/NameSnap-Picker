@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
 const address = "sidequestsoftware@proton.me";
 const subject = "NameSnap Support";
 const encodedAddress = encodeURIComponent(address);
@@ -23,6 +27,36 @@ const providers = [
 ];
 
 export function EmailComposeLink() {
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">("idle");
+  const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (resetTimer.current) clearTimeout(resetTimer.current);
+  }, []);
+
+  const copyEmail = async () => {
+    let copied = false;
+
+    try {
+      await navigator.clipboard.writeText(address);
+      copied = true;
+    } catch {
+      const fallback = document.createElement("textarea");
+      fallback.value = address;
+      fallback.setAttribute("readonly", "");
+      fallback.style.position = "fixed";
+      fallback.style.opacity = "0";
+      document.body.appendChild(fallback);
+      fallback.select();
+      copied = document.execCommand("copy");
+      fallback.remove();
+    }
+
+    setCopyStatus(copied ? "copied" : "failed");
+    if (resetTimer.current) clearTimeout(resetTimer.current);
+    resetTimer.current = setTimeout(() => setCopyStatus("idle"), 2200);
+  };
+
   return (
     <details className="email-compose">
       <summary aria-label="Choose an email app to contact NameSnap support" className="button button-primary">
@@ -37,7 +71,17 @@ export function EmailComposeLink() {
               {provider.label}
             </a>
           ))}
+          <button
+            className={`email-copy-button${copyStatus === "copied" ? " is-copied" : ""}`}
+            type="button"
+            onClick={copyEmail}
+          >
+            {copyStatus === "copied" ? "Copied!" : copyStatus === "failed" ? "Copy failed" : "Copy email"}
+          </button>
         </div>
+        <span className="email-copy-status" aria-live="polite">
+          {copyStatus === "copied" ? "Email address copied to clipboard." : copyStatus === "failed" ? `Copy failed. Email us at ${address}.` : ""}
+        </span>
       </div>
     </details>
   );

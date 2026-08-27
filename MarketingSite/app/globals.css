@@ -1377,7 +1377,8 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
 }
 .email-fallback strong { color: var(--ns-ink); font-family: var(--ns-font-display); font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
 .email-provider-links { display: flex; flex-wrap: wrap; gap: 7px; }
-.email-provider-links a {
+.email-provider-links a,
+.email-copy-button {
   padding: 7px 9px;
   border: 2px solid var(--ns-ink);
   border-radius: var(--ns-radius-pill);
@@ -1390,6 +1391,13 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
   text-decoration: none;
   text-transform: uppercase;
 }
+.email-copy-button {
+  cursor: pointer;
+  background: var(--ns-warm-gradient);
+  box-shadow: 2px 3px 0 var(--ns-purple);
+}
+.email-copy-button.is-copied { background: linear-gradient(135deg, rgba(224,244,171,.98), rgba(52,199,89,.58)); }
+.email-copy-status { min-height: 15px; color: var(--ns-text-secondary); font-size: 11px; font-weight: 750; }
 .faq-heading { margin-bottom: 20px; }
 .faq-heading h2 { margin: 12px 0 0; font-size: 36px; }
 .faq-list details {
