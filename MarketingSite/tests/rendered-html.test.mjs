@@ -76,7 +76,10 @@ test("publishes a complete support contact for customer requests", async () => {
   assert.match(html, /feature requests/i);
   assert.match(html, /cancel Unlimited Monthly/i);
   assert.match(html, /mailto:sidequestsoftware@proton\.me\?subject=NameSnap%20Support/i);
-  assert.match(html, />Send us an email<\/a>/i);
+  assert.match(html, />Send us an email<\/summary>/i);
+  assert.match(html, /mail\.google\.com\/mail\/\?view=cm/i);
+  assert.match(html, /outlook\.office\.com\/mail\/deeplink\/compose/i);
+  assert.match(html, /compose\.mail\.yahoo\.com/i);
 });
 
 test("publishes the privacy policy with the current contact", async () => {

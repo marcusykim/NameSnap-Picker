@@ -1,19 +1,44 @@
-"use client";
+const address = "sidequestsoftware@proton.me";
+const subject = "NameSnap Support";
+const encodedAddress = encodeURIComponent(address);
+const encodedSubject = encodeURIComponent(subject);
 
-const supportEmailUrl = "mailto:sidequestsoftware@proton.me?subject=NameSnap%20Support";
+const providers = [
+  {
+    label: "Email app",
+    href: `mailto:${address}?subject=${encodedSubject}`,
+  },
+  {
+    label: "Gmail",
+    href: `https://mail.google.com/mail/?view=cm&fs=1&to=${encodedAddress}&su=${encodedSubject}`,
+  },
+  {
+    label: "Outlook",
+    href: `https://outlook.office.com/mail/deeplink/compose?to=${encodedAddress}&subject=${encodedSubject}`,
+  },
+  {
+    label: "Yahoo Mail",
+    href: `https://compose.mail.yahoo.com/?to=${encodedAddress}&subject=${encodedSubject}`,
+  },
+];
 
 export function EmailComposeLink() {
   return (
-    <a
-      aria-label="Send NameSnap support an email"
-      className="button button-primary"
-      href={supportEmailUrl}
-      onClick={(event) => {
-        event.preventDefault();
-        window.location.assign(supportEmailUrl);
-      }}
-    >
-      Send us an email
-    </a>
+    <details className="email-compose">
+      <summary aria-label="Choose an email app to contact NameSnap support" className="button button-primary">
+        Send us an email
+      </summary>
+      <div className="email-fallback">
+        <strong>Choose your email</strong>
+        <span>We’ll address a new message to NameSnap support.</span>
+        <div className="email-provider-links">
+          {providers.map((provider) => (
+            <a key={provider.label} href={provider.href} target="_blank" rel="noreferrer">
+              {provider.label}
+            </a>
+          ))}
+        </div>
+      </div>
+    </details>
   );
 }
