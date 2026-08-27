@@ -1106,10 +1106,11 @@ struct ContentView: View {
     @State private var pendingDuplicateInputNames: [String] = []
     @State private var didRunThresholdPaywallCheck = false
     @State private var didConfigureScreenshotFixture = false
+    @State private var showSupportMenu = false
 
     private let flashColors: [Color] = [.pink, .yellow, .cyan, .green, .orange, .purple]
     private let freeContestantLimit = 16
-    private let websiteURL = URL(string: "https://getnamesnap.web.app")!
+    private let supportPageURL = URL(string: "https://getnamesnap.web.app/support")!
     private let supportEmailURL = URL(string: "mailto:sidequestsoftware@proton.me?subject=NameSnap%20Support")!
     private let privacyPolicyURL = URL(string: "https://getnamesnap.web.app/privacy")!
     private let standardEULAURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
@@ -1152,6 +1153,15 @@ struct ContentView: View {
         #if DEBUG
         ProcessInfo.processInfo.arguments.contains("-ui-lifetime-reminder") ||
             ProcessInfo.processInfo.environment["NAMESNAP_UI_LIFETIME_REMINDER"] == "1"
+        #else
+        false
+        #endif
+    }
+
+    private var shouldShowSupportMenuForUITesting: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-ui-support-menu") ||
+            ProcessInfo.processInfo.environment["NAMESNAP_UI_SUPPORT_MENU"] == "1"
         #else
         false
         #endif
@@ -1486,6 +1496,10 @@ struct ContentView: View {
             showUpgradeConfirm = false
             showSubscriptionCancellationReminder = true
         }
+
+        if shouldShowSupportMenuForUITesting {
+            showSupportMenu = true
+        }
     }
 
     private func shouldPresentPaywall(currentCount: Int, incomingCount: Int) -> Bool {
@@ -1707,18 +1721,44 @@ struct ContentView: View {
 
                 ScrollView {
                     VStack(spacing: 20) {
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text("NAMESNAP")
-                                .font(titleFont)
-                                .foregroundStyle(NSTheme.ink)
-                                .shadow(color: NSTheme.skyBlue, radius: 0, x: 3, y: 3)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.5)
+                        HStack(alignment: .top, spacing: 14) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("NAMESNAP")
+                                    .font(titleFont)
+                                    .foregroundStyle(NSTheme.ink)
+                                    .shadow(color: NSTheme.skyBlue, radius: 0, x: 3, y: 3)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.5)
 
-                            Text("RANDOM PICKER")
-                                .font(titleFamilyFont(size: 9))
-                                .foregroundStyle(NSTheme.violet)
-                                .tracking(2.2)
+                                Text("RANDOM PICKER")
+                                    .font(titleFamilyFont(size: 9))
+                                    .foregroundStyle(NSTheme.violet)
+                                    .tracking(2.2)
+                            }
+
+                            Spacer(minLength: 8)
+
+                            Button {
+                                dismissKeyboard()
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.78)) {
+                                    showSupportMenu = true
+                                }
+                            } label: {
+                                Image(systemName: "line.3.horizontal")
+                                    .font(.system(size: 21, weight: .black, design: .rounded))
+                                    .foregroundStyle(NSTheme.ink)
+                                    .frame(width: 48, height: 42)
+                                    .background(NameSnapButtonTone.warm.fill)
+                                    .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 15, style: .continuous)
+                                            .stroke(NSTheme.ink, lineWidth: 2.5)
+                                    )
+                                    .shadow(color: NSTheme.violet, radius: 0, x: 5, y: 6)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Open help and support menu")
+                            .accessibilityValue(showSupportMenu ? "Expanded" : "Collapsed")
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 2)
@@ -2031,46 +2071,6 @@ struct ContentView: View {
                             }
                         }
 
-                        card {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("HELP & SUPPORT")
-                                    .font(titleFamilyFont(size: 14))
-                                    .foregroundStyle(NSTheme.ink)
-
-                                Text("Questions, feedback, or purchase help? Reach us directly.")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(NSTheme.ink.opacity(0.68))
-
-                                Link(destination: websiteURL) {
-                                    HStack(spacing: 10) {
-                                        Image(systemName: "globe")
-                                        Text("getnamesnap.web.app")
-                                        Spacer()
-                                        Image(systemName: "arrow.up.right")
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                }
-                                .buttonStyle(NameSnapButtonStyle(tone: .secondary))
-                                .font(.subheadline.weight(.bold))
-                                .accessibilityLabel("Open the NameSnap website")
-
-                                Link(destination: supportEmailURL) {
-                                    HStack(spacing: 10) {
-                                        Image(systemName: "envelope.fill")
-                                        Text("sidequestsoftware@proton.me")
-                                            .lineLimit(1)
-                                            .minimumScaleFactor(0.7)
-                                        Spacer()
-                                        Image(systemName: "arrow.up.right")
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                }
-                                .buttonStyle(NameSnapButtonStyle(tone: .warm))
-                                .font(.subheadline.weight(.bold))
-                                .accessibilityLabel("Send NameSnap support an email")
-                            }
-                        }
-
                         Spacer(minLength: 12)
                     }
                     .padding()
@@ -2080,6 +2080,116 @@ struct ContentView: View {
                 }
                 .onTapGesture {
                     dismissKeyboard()
+                }
+            }
+            .overlay(alignment: .topTrailing) {
+                if showSupportMenu {
+                    ZStack(alignment: .topTrailing) {
+                        Color.black.opacity(0.25)
+                            .ignoresSafeArea()
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                withAnimation(.easeOut(duration: 0.2)) {
+                                    showSupportMenu = false
+                                }
+                            }
+
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack(spacing: 12) {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("HELP & SUPPORT")
+                                        .font(titleFamilyFont(size: 16))
+                                        .foregroundStyle(NSTheme.ink)
+
+                                    Text("Questions, feedback, or purchase help?")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(NSTheme.ink.opacity(0.68))
+                                }
+
+                                Spacer(minLength: 8)
+
+                                Button {
+                                    withAnimation(.easeOut(duration: 0.2)) {
+                                        showSupportMenu = false
+                                    }
+                                } label: {
+                                    Image(systemName: "xmark")
+                                        .font(.system(size: 16, weight: .black))
+                                        .foregroundStyle(NSTheme.ink)
+                                        .frame(width: 40, height: 40)
+                                        .background(NameSnapButtonTone.secondary.fill)
+                                        .clipShape(Circle())
+                                        .overlay(Circle().stroke(NSTheme.ink, lineWidth: 2.5))
+                                        .shadow(color: NSTheme.violet, radius: 0, x: 4, y: 4)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("Close help and support menu")
+                            }
+
+                            Link(destination: supportPageURL) {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "lifepreserver.fill")
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("SUPPORT WEBSITE")
+                                            .font(titleFamilyFont(size: 10))
+                                        Text("getnamesnap.web.app/support")
+                                            .font(.caption2.weight(.semibold))
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.72)
+                                    }
+                                    Spacer(minLength: 4)
+                                    Image(systemName: "arrow.up.right")
+                                }
+                                .frame(maxWidth: .infinity)
+                                .foregroundStyle(NSTheme.ink)
+                            }
+                            .buttonStyle(NameSnapButtonStyle(tone: .primary))
+                            .tint(NSTheme.ink)
+                            .accessibilityLabel("Open the NameSnap support page")
+
+                            Link(destination: supportEmailURL) {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "envelope.fill")
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("SEND US AN EMAIL")
+                                            .font(titleFamilyFont(size: 10))
+                                        Text("sidequestsoftware@proton.me")
+                                            .font(.caption2.weight(.semibold))
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.72)
+                                    }
+                                    Spacer(minLength: 4)
+                                    Image(systemName: "arrow.up.right")
+                                }
+                                .frame(maxWidth: .infinity)
+                                .foregroundStyle(NSTheme.ink)
+                            }
+                            .buttonStyle(NameSnapButtonStyle(tone: .warm))
+                            .tint(NSTheme.ink)
+                            .accessibilityLabel("Send NameSnap support an email")
+
+                            HStack(spacing: 10) {
+                                Link("PRIVACY", destination: privacyPolicyURL)
+                                    .buttonStyle(NameSnapButtonStyle(tone: .secondary))
+                                    .font(titleFamilyFont(size: 9))
+                                    .accessibilityLabel("Open the NameSnap privacy policy")
+
+                                Link("TERMS", destination: standardEULAURL)
+                                    .buttonStyle(NameSnapButtonStyle(tone: .secondary))
+                                    .font(titleFamilyFont(size: 9))
+                                    .accessibilityLabel("Open the NameSnap terms of use")
+                            }
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 18)
+                        .frame(maxWidth: 390)
+                        .nameSnapActionModalSurface()
+                        .padding(.top, 74)
+                        .padding(.horizontal, 16)
+                        .accessibilityElement(children: .contain)
+                    }
+                    .transition(.opacity)
+                    .zIndex(18)
                 }
             }
             .overlay {
