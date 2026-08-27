@@ -180,10 +180,10 @@ test("ships all 30 celebration heroes and exposes 300 visual variations", async 
 });
 
 test("offers three duplicate-name outcomes and uses only 120+ BPM winner music", async () => {
-  const webAppSource = await readFile(
-    path.join(marketingDirectory, "app/namesnap-web-app.tsx"),
-    "utf8",
-  );
+  const [webAppSource, mobileAppSource] = await Promise.all([
+    readFile(path.join(marketingDirectory, "app/namesnap-web-app.tsx"), "utf8"),
+    readFile(path.resolve(marketingDirectory, "../NameSnap/ContentView.swift"), "utf8"),
+  ]);
   const musicFiles = Array.from(
     { length: 100 },
     (_, index) => `winner_music_${String(index + 1).padStart(3, "0")}.mp3`,
@@ -194,6 +194,13 @@ test("offers three duplicate-name outcomes and uses only 120+ BPM winner music",
   assert.match(webAppSource, />Add all anyway<\/button>/);
   assert.match(webAppSource, /namesExcludingDuplicates\(names, entries\.map/);
   assert.match(webAppSource, /\{ length: 100 \}/);
+  assert.match(webAppSource, /winnerAutoDismissTimerRef/);
+  assert.match(webAppSource, /setTimeout\(dismissWinner, 10_000\)/);
+  assert.match(webAppSource, /audio\.loop = true/);
+  assert.doesNotMatch(webAppSource, /5800/);
+  assert.match(mobileAppSource, /winnerCelebrationDismissWorkItem/);
+  assert.match(mobileAppSource, /deadline: \.now\(\) \+ 10/);
+  assert.match(mobileAppSource, /player\.numberOfLoops = -1/);
   assert.doesNotMatch(webAppSource, /celebration_(?:airhorn|crowd|explosion|fanfare|fireworks)\.mp3/);
   await Promise.all(musicFiles.map((filename) => access(path.join(marketingDirectory, "public/sounds", filename))));
 

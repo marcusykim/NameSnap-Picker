@@ -399,6 +399,7 @@ export function NameSnapWebApp() {
   const duplicateCancelRef = useRef<HTMLButtonElement>(null);
   const winnerDoneRef = useRef<HTMLButtonElement>(null);
   const winnerAudioRef = useRef<HTMLAudioElement | null>(null);
+  const winnerAutoDismissTimerRef = useRef<number | null>(null);
   const timersRef = useRef<number[]>([]);
 
   useEffect(() => {
@@ -461,6 +462,9 @@ export function NameSnapWebApp() {
 
   useEffect(() => () => {
     timersRef.current.forEach((timer) => window.clearTimeout(timer));
+    if (winnerAutoDismissTimerRef.current !== null) {
+      window.clearTimeout(winnerAutoDismissTimerRef.current);
+    }
     winnerAudioRef.current?.pause();
     winnerAudioRef.current = null;
   }, []);
@@ -717,26 +721,29 @@ export function NameSnapWebApp() {
     winnerAudioRef.current = audio;
     audio.volume = 0.76;
     // Every eligible file is verified music at 120+ BPM and at least five
-    // seconds long. Looping keeps the soundtrack continuous for the full modal.
+    // seconds long. Loop until the winner screen closes, manually or at 10s.
     audio.loop = true;
     void audio.play().catch(() => undefined);
-    const timer = window.setTimeout(() => {
-      if (winnerAudioRef.current === audio) stopWinnerAudio();
-    }, 5800);
-    timersRef.current.push(timer);
   }, [soundOn, stopWinnerAudio]);
 
+  const dismissWinner = useCallback(() => {
+    if (winnerAutoDismissTimerRef.current !== null) {
+      window.clearTimeout(winnerAutoDismissTimerRef.current);
+      winnerAutoDismissTimerRef.current = null;
+    }
+    stopWinnerAudio();
+    setWinner(null);
+    setCelebration(null);
+  }, [stopWinnerAudio]);
+
   const presentWinner = useCallback((result: Winner, playSound = true) => {
+    dismissWinner();
     const nextCelebration = createCelebration();
     setWinner(result);
     setCelebration(nextCelebration);
     if (playSound) playWinnerAudio(nextCelebration.audio);
-  }, [playWinnerAudio]);
-
-  const dismissWinner = useCallback(() => {
-    stopWinnerAudio();
-    setWinner(null);
-  }, [stopWinnerAudio]);
+    winnerAutoDismissTimerRef.current = window.setTimeout(dismissWinner, 10_000);
+  }, [dismissWinner, playWinnerAudio]);
 
   const finishPick = useCallback((selected: Entry) => {
     const number = selected.drawNumber;

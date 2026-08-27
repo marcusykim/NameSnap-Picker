@@ -1091,7 +1091,7 @@ struct ContentView: View {
     @State private var showWinnerFlash = false
     @State private var winnerCelebration: WinnerCelebration?
     @State private var winnerAudioPlayer: AVAudioPlayer?
-    @State private var winnerAudioStopWorkItem: DispatchWorkItem?
+    @State private var winnerCelebrationDismissWorkItem: DispatchWorkItem?
     @State private var wheelSettleWorkItem: DispatchWorkItem?
     @State private var isWheelSwipeSession = false
     @State private var suppressWheelSettle = false
@@ -1583,6 +1583,14 @@ struct ContentView: View {
     private func triggerWinnerEffects(name: String) {
         let nextCelebration = WinnerCelebration(displayText: name)
         winnerCelebration = nextCelebration
+        winnerCelebrationDismissWorkItem?.cancel()
+        let celebrationID = nextCelebration.id
+        let dismissWorkItem = DispatchWorkItem {
+            guard winnerCelebration?.id == celebrationID else { return }
+            dismissWinnerCelebration()
+        }
+        winnerCelebrationDismissWorkItem = dismissWorkItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10, execute: dismissWorkItem)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         playCelebrationSoundReliably(audioName: nextCelebration.audioName)
         if !reduceMotion {
@@ -1593,6 +1601,7 @@ struct ContentView: View {
             // The 0.55-second cadence stays well below rapid-strobe territory.
             for step in 0..<10 {
                 DispatchQueue.main.asyncAfter(deadline: .now() + (Double(step) * 0.55)) {
+                    guard winnerCelebration?.id == celebrationID else { return }
                     withAnimation(.easeInOut(duration: 0.22)) {
                         flashIndex = step % flashColors.count
                     }
@@ -1600,6 +1609,7 @@ struct ContentView: View {
             }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 5.65) {
+                guard winnerCelebration?.id == celebrationID else { return }
                 withAnimation(.easeOut(duration: 0.2)) {
                     showWinnerFlash = false
                 }
@@ -1608,10 +1618,13 @@ struct ContentView: View {
     }
 
     private func dismissWinnerCelebration() {
-        winnerAudioStopWorkItem?.cancel()
+        winnerCelebrationDismissWorkItem?.cancel()
+        winnerCelebrationDismissWorkItem = nil
         winnerAudioPlayer?.stop()
+        winnerAudioPlayer?.currentTime = 0
         winnerAudioPlayer = nil
         withAnimation(.easeOut(duration: 0.2)) {
+            showWinnerFlash = false
             winnerCelebration = nil
         }
     }
@@ -1631,7 +1644,6 @@ struct ContentView: View {
         let customNames = WinnerCelebration.audioNames
         let extensions = ["mp3", "wav", "m4a", "aiff"]
 
-        winnerAudioStopWorkItem?.cancel()
         winnerAudioPlayer?.stop()
         winnerAudioPlayer = nil
 
@@ -1665,7 +1677,7 @@ struct ContentView: View {
                 let player = try AVAudioPlayer(contentsOf: url)
                 player.prepareToPlay()
                 player.currentTime = 0
-                player.numberOfLoops = player.duration < 5.8 ? -1 : 0
+                player.numberOfLoops = -1
                 player.volume = 0.76
 
                 guard player.play() else {
@@ -1674,16 +1686,6 @@ struct ContentView: View {
                 }
 
                 winnerAudioPlayer = player
-
-                let stopItem = DispatchWorkItem {
-                    player.stop()
-                    player.currentTime = 0
-                    if winnerAudioPlayer === player {
-                        winnerAudioPlayer = nil
-                    }
-                }
-                winnerAudioStopWorkItem = stopItem
-                DispatchQueue.main.asyncAfter(deadline: .now() + 5.8, execute: stopItem)
                 return
             } catch {
                 print("Failed to play winner music \(url.lastPathComponent): \(error.localizedDescription)")
