@@ -99,10 +99,8 @@ private enum WinnerCelebrationHero: String, CaseIterable {
 private struct WinnerCelebration: Identifiable {
     static let variationCount = 300
     static let audioNames = [
-        "techno_upbeat_01", "techno_upbeat_02", "techno_upbeat_03", "techno_upbeat_04",
-        "techno_upbeat_alt_01", "techno_upbeat_alt_02", "techno_upbeat_alt_03", "techno_upbeat_alt_04",
-        "techno_upbeat_alt_05", "techno_upbeat_alt_06", "celebration_airhorn", "celebration_metal",
-        "celebration_crowd", "celebration_fanfare", "celebration_fireworks", "celebration_explosion"
+        "techno_upbeat_alt_01", "techno_upbeat_alt_06",
+        "hype_dance_128", "hype_house_128", "hype_happy_130", "hype_metal_160"
     ]
     static let headlines = ["THE PICK IS IN", "ABSOLUTE LEGEND", "WINNER ENERGY", "MAKE SOME NOISE", "MAIN CHARACTER MOMENT"]
 
@@ -1506,18 +1504,21 @@ struct ContentView: View {
     }
 
     private func hasPoolDuplicates(in names: [String]) -> Bool {
-        let existingNames = Set(vm.entries.map { normalizedName($0.name) })
-        return names.contains { existingNames.contains(normalizedName($0)) }
+        poolDuplicateCount(in: names) > 0
     }
 
     private func poolDuplicateCount(in names: [String]) -> Int {
-        let existingNames = Set(vm.entries.map { normalizedName($0.name) })
-        return names.filter { existingNames.contains(normalizedName($0)) }.count
+        var seenNames = Set(vm.entries.map { normalizedName($0.name) })
+        return names.reduce(into: 0) { duplicateCount, name in
+            if !seenNames.insert(normalizedName(name)).inserted {
+                duplicateCount += 1
+            }
+        }
     }
 
     private func namesExcludingPoolDuplicates(_ names: [String]) -> [String] {
-        let existingNames = Set(vm.entries.map { normalizedName($0.name) })
-        return names.filter { !existingNames.contains(normalizedName($0)) }
+        var seenNames = Set(vm.entries.map { normalizedName($0.name) })
+        return names.filter { seenNames.insert(normalizedName($0)).inserted }
     }
 
     private func beginAddingNames(_ names: [String]) {
@@ -1688,11 +1689,11 @@ struct ContentView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5.8, execute: stopItem)
                 return
             } catch {
-                print("Failed to play custom SFX \(url.lastPathComponent): \(error.localizedDescription)")
+                print("Failed to play winner music \(url.lastPathComponent): \(error.localizedDescription)")
             }
         }
 
-        print("Winner audio failed for all bundled candidates.")
+        print("Winner music failed for all bundled candidates.")
     }
 
     var body: some View {
@@ -2255,7 +2256,15 @@ struct ContentView: View {
                                 .foregroundStyle(NSTheme.ink.opacity(0.68))
                                 .multilineTextAlignment(.center)
 
-                            HStack(spacing: 10) {
+                            VStack(spacing: 10) {
+                                Button("Cancel") {
+                                    pendingDuplicateInputNames.removeAll()
+                                    withAnimation { showDuplicateConfirm = false }
+                                }
+                                .buttonStyle(NameSnapButtonStyle(tone: .secondary))
+                                .font(titleFamilyFont(size: 13))
+                                .frame(maxWidth: .infinity)
+
                                 Button("Skip duplicates") {
                                     let namesToAdd = namesExcludingPoolDuplicates(pendingDuplicateInputNames)
                                     pendingDuplicateInputNames.removeAll()
@@ -2264,6 +2273,7 @@ struct ContentView: View {
                                 }
                                 .buttonStyle(NameSnapButtonStyle(tone: .secondary))
                                 .font(titleFamilyFont(size: 13))
+                                .frame(maxWidth: .infinity)
 
                                 Button("Add all anyway") {
                                     let namesToAdd = pendingDuplicateInputNames
@@ -2273,6 +2283,7 @@ struct ContentView: View {
                                 }
                                 .buttonStyle(NameSnapButtonStyle(tone: .primary))
                                 .font(titleFamilyFont(size: 13))
+                                .frame(maxWidth: .infinity)
                             }
                         }
                         .padding(.horizontal, 18)

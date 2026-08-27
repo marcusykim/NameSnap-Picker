@@ -51,14 +51,9 @@ const WHEEL_INK = "#15151B";
 const WHEEL_CARD = "#F2F4FA";
 const WHEEL_LABEL_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif';
 const AUDIO_TRACKS = [
-  "/sounds/techno_upbeat_01.mp3", "/sounds/techno_upbeat_02.mp3",
-  "/sounds/techno_upbeat_03.mp3", "/sounds/techno_upbeat_04.mp3",
-  "/sounds/techno_upbeat_alt_01.mp3", "/sounds/techno_upbeat_alt_02.mp3",
-  "/sounds/techno_upbeat_alt_03.mp3", "/sounds/techno_upbeat_alt_04.mp3",
-  "/sounds/techno_upbeat_alt_05.mp3", "/sounds/techno_upbeat_alt_06.mp3",
-  "/sounds/celebration_airhorn.mp3", "/sounds/celebration_metal.mp3",
-  "/sounds/celebration_crowd.mp3", "/sounds/celebration_fanfare.mp3",
-  "/sounds/celebration_fireworks.mp3", "/sounds/celebration_explosion.mp3",
+  "/sounds/techno_upbeat_alt_01.mp3", "/sounds/techno_upbeat_alt_06.mp3",
+  "/sounds/hype_dance_128.mp3", "/sounds/hype_house_128.mp3",
+  "/sounds/hype_happy_130.mp3", "/sounds/hype_metal_160.mp3",
 ];
 const CELEBRATION_HEROES: CelebrationHero[] = [
   "dancer", "guitarist", "dynamite", "hype-mascot", "pixel-bomb",
@@ -156,6 +151,24 @@ function parseNames(input: string) {
     .split(/[\n,]+/)
     .map((name) => name.replace(/^\s*\d+[.)-]?\s*/, "").trim())
     .filter(Boolean);
+}
+
+function normalizedName(name: string) {
+  return name
+    .trim()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase();
+}
+
+function namesExcludingDuplicates(names: string[], poolNames: string[]) {
+  const seenNames = new Set(poolNames.map(normalizedName));
+  return names.filter((name) => {
+    const key = normalizedName(name);
+    if (seenNames.has(key)) return false;
+    seenNames.add(key);
+    return true;
+  });
 }
 
 function stagedInputRows(input: string) {
@@ -704,8 +717,8 @@ export function NameSnapWebApp() {
     const audio = new Audio(track);
     winnerAudioRef.current = audio;
     audio.volume = 0.76;
-    // Short one-shot effects loop under the celebration so every winner gets
-    // a continuous soundtrack for the full 5.8-second celebration window.
+    // Every eligible file is verified music at 120+ BPM and at least five
+    // seconds long. Looping keeps the soundtrack continuous for the full modal.
     audio.loop = true;
     void audio.play().catch(() => undefined);
     const timer = window.setTimeout(() => {
@@ -807,8 +820,8 @@ export function NameSnapWebApp() {
   const addNames = () => {
     const names = parseNames(input);
     if (!names.length) return;
-    const existingNames = new Set(entries.map((entry) => entry.name.trim().toLocaleLowerCase()));
-    if (names.some((name) => existingNames.has(name.trim().toLocaleLowerCase()))) {
+    const uniqueNames = namesExcludingDuplicates(names, entries.map((entry) => entry.name));
+    if (uniqueNames.length !== names.length) {
       setPendingDuplicateNames(names);
       return;
     }
@@ -1004,6 +1017,9 @@ export function NameSnapWebApp() {
     }
   };
 
+  const pendingDuplicateCount = pendingDuplicateNames.length
+    - namesExcludingDuplicates(pendingDuplicateNames, entries.map((entry) => entry.name)).length;
+
   return (
     <main className={`web-app ${presentation ? "is-presenting" : ""}`}>
       <header className="app-bar">
@@ -1159,7 +1175,7 @@ export function NameSnapWebApp() {
           <article className="marketing-feature marketing-feature-winner">
             <span>03 · WINNER MOMENT</span>
             <h3>Never a quiet win.</h3>
-            <p>Confetti, music, crowds, characters, and hundreds of celebration variations make every name feel like the main event.</p>
+            <p>Confetti, high-energy music, characters, and hundreds of celebration variations make every name feel like the main event.</p>
             <img src="/celebrations/guitarist.png" alt="A NameSnap guitarist playing a victory solo" />
           </article>
         </div>
@@ -1299,12 +1315,11 @@ export function NameSnapWebApp() {
             <span className="confirmation-kicker">DUPLICATES FOUND</span>
             <span className="confirmation-mark" aria-hidden="true">?</span>
             <h2 id="duplicate-title">Add them again?</h2>
-            <p id="duplicate-message">Some names are already in this pool. Skip those names or add every name again.</p>
+            <p id="duplicate-message">{pendingDuplicateCount} duplicate {pendingDuplicateCount === 1 ? "name was" : "names were"} found in this list or pool. What should NameSnap do?</p>
             <div className="duplicate-actions">
               <button ref={duplicateCancelRef} type="button" className="confirmation-cancel" onClick={() => setPendingDuplicateNames([])}>Cancel</button>
               <button type="button" className="confirmation-cancel" onClick={() => {
-                const existingNames = new Set(entries.map((entry) => entry.name.trim().toLocaleLowerCase()));
-                const uniqueNames = pendingDuplicateNames.filter((name) => !existingNames.has(name.trim().toLocaleLowerCase()));
+                const uniqueNames = namesExcludingDuplicates(pendingDuplicateNames, entries.map((entry) => entry.name));
                 setPendingDuplicateNames([]);
                 appendNamesToPool(uniqueNames);
               }}>Skip duplicates</button>
@@ -1312,7 +1327,7 @@ export function NameSnapWebApp() {
                 const names = pendingDuplicateNames;
                 setPendingDuplicateNames([]);
                 appendNamesToPool(names);
-              }}>Add all again</button>
+              }}>Add all anyway</button>
             </div>
           </section>
         </div>

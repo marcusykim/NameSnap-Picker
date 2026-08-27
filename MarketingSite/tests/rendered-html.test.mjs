@@ -179,6 +179,28 @@ test("ships all 30 celebration heroes and exposes 300 visual variations", async 
   }));
 });
 
+test("offers three duplicate-name outcomes and uses only 120+ BPM winner music", async () => {
+  const webAppSource = await readFile(
+    path.join(marketingDirectory, "app/namesnap-web-app.tsx"),
+    "utf8",
+  );
+  const musicFiles = [
+    "techno_upbeat_alt_01.mp3",
+    "techno_upbeat_alt_06.mp3",
+    "hype_dance_128.mp3",
+    "hype_house_128.mp3",
+    "hype_happy_130.mp3",
+    "hype_metal_160.mp3",
+  ];
+
+  assert.match(webAppSource, />Cancel<\/button>/);
+  assert.match(webAppSource, />Skip duplicates<\/button>/);
+  assert.match(webAppSource, />Add all anyway<\/button>/);
+  assert.match(webAppSource, /namesExcludingDuplicates\(names, entries\.map/);
+  assert.doesNotMatch(webAppSource, /celebration_(?:airhorn|crowd|explosion|fanfare|fireworks)\.mp3/);
+  await Promise.all(musicFiles.map((filename) => access(path.join(marketingDirectory, "public/sounds", filename))));
+});
+
 test("provides a stage-only web presentation fallback when browser fullscreen is unavailable", async () => {
   const [webAppSource, globalStyles] = await Promise.all([
     readFile(path.join(marketingDirectory, "app/namesnap-web-app.tsx"), "utf8"),

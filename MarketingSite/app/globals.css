@@ -421,8 +421,8 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
 .confirmation-modal p { max-width: 350px; margin: 14px auto 26px; color: var(--ns-text-secondary); font-size: 14px; font-weight: 700; line-height: 1.55; }
 .confirmation-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .confirmation-actions button { min-height: 50px; border: 0; border-radius: var(--ns-radius-pill); font-family: "Rubik Mono One", sans-serif; font-size: 10px; cursor: pointer; }
-.duplicate-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-.duplicate-actions button { min-height: 50px; border-radius: var(--ns-radius-pill); font-family: "Rubik Mono One", sans-serif; font-size: 8px; cursor: pointer; }
+.duplicate-actions { display: grid; grid-template-columns: .8fr 1.1fr 1.1fr; gap: 10px; }
+.duplicate-actions button { min-height: 50px; border-radius: var(--ns-radius-pill); font-family: "Rubik Mono One", sans-serif; font-size: 9px; cursor: pointer; }
 .confirmation-cancel { background: var(--ns-white); color: var(--ns-text-secondary); box-shadow: inset 0 0 0 1px rgba(69,93,115,.22); }
 .confirmation-confirm { background: var(--ns-red); color: var(--ns-white); box-shadow: 0 8px 16px rgba(255,59,48,.22); }
 .winner-modal, .upgrade-modal { position: relative; width: min(620px,100%); border: 3px solid #11131a; border-radius: 24px; background: #f7f3e8; color: #11131a; text-align: center; box-shadow: 12px 14px 0 #6788ff; overflow: hidden; }
@@ -745,7 +745,9 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
   .confirmation-modal { padding: 28px 20px 22px; border-radius: 24px; }
   .confirmation-actions { grid-template-columns: 1fr; }
   .duplicate-actions { grid-template-columns: 1fr; }
+  .duplicate-actions button { font-size: 10px; }
   .confirmation-confirm { grid-row: 1; }
+  .duplicate-actions .confirmation-confirm { grid-row: auto; }
   .pool-sheet:not(.history-sheet) > footer { grid-template-columns: 1fr 1fr; }
   .pool-sheet:not(.history-sheet) > footer .pool-sheet-done { grid-column: 1 / -1; }
   .upgrade-modal { border-radius: 24px; }
