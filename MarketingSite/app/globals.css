@@ -757,10 +757,13 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
 @media (min-width: 821px) {
   .web-app:not(.is-presenting) .stage {
     grid-template-rows: auto minmax(0,1fr) auto auto;
-    row-gap: 10px;
+    row-gap: 14px;
   }
-  .web-app:not(.is-presenting) .picker-display { min-height: 0; }
-  .web-app:not(.is-presenting) .wheel-wrap { width: min(48vh, 520px, 100%); }
+  .web-app:not(.is-presenting) .picker-display {
+    min-height: 0;
+    padding-block: 18px;
+  }
+  .web-app:not(.is-presenting) .wheel-wrap { width: min(44dvh, 480px, 100%); }
   .web-app:not(.is-presenting) .stage-controls { margin-top: 2px; }
   .web-app:not(.is-presenting) .history-rail { margin-top: 0; }
 }
@@ -820,8 +823,17 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
   cursor: pointer;
 }
 .web-app.is-presenting .presentation-exit span { font: 900 20px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; }
-.web-app.is-presenting .picker-display { min-height: 0; }
-.web-app.is-presenting .wheel-wrap { width: min(56dvh, 80vw, 720px); }
+@media (min-width: 821px) {
+  .web-app.is-presenting .stage { row-gap: 12px; }
+  .web-app.is-presenting .picker-display {
+    min-height: 0;
+    padding-block: clamp(18px, 3dvh, 34px);
+  }
+  .web-app.is-presenting .wheel-wrap {
+    width: min(52dvh, calc(100dvh - 300px), 74vw, 640px);
+    max-width: 100%;
+  }
+}
 
 @media (max-width: 560px) {
   .web-app.is-presenting .stage {

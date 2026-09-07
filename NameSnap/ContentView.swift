@@ -1111,7 +1111,7 @@ struct ContentView: View {
     private let flashColors: [Color] = [.pink, .yellow, .cyan, .green, .orange, .purple]
     private let freeContestantLimit = 16
     private let supportPageURL = URL(string: "https://getnamesnap.web.app/support")!
-    private let supportEmailURL = URL(string: "mailto:sidequestsoftware@proton.me?subject=NameSnap%20Support")!
+    private let supportEmailURL = URL(string: "mailto:sidequest@ik.me?subject=NameSnap%20Support")!
     private let privacyPolicyURL = URL(string: "https://getnamesnap.web.app/privacy")!
     private let standardEULAURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
 
@@ -2153,7 +2153,7 @@ struct ContentView: View {
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text("SEND US AN EMAIL")
                                             .font(titleFamilyFont(size: 10))
-                                        Text("sidequestsoftware@proton.me")
+                                        Text("sidequest@ik.me")
                                             .font(.caption2.weight(.semibold))
                                             .lineLimit(1)
                                             .minimumScaleFactor(0.72)

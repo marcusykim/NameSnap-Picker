@@ -30,7 +30,7 @@ Paste names, tap Spin, and get a winner instantly.
 If you need help, found a bug, or want to suggest a feature, contact:
 
 **Marcus Kim**  
-Email: **sidequestsoftware@proton.me**
+Email: **sidequest@ik.me**
 
 ---
 
@@ -84,7 +84,7 @@ If this policy changes in a future release, the updated version will be posted o
 For support or privacy questions, contact:
 
 **Marcus Kim**  
-Email: **sidequestsoftware@proton.me**
+Email: **sidequest@ik.me**
 
 ---
 

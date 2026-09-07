@@ -1026,6 +1026,43 @@ export function NameSnapWebApp() {
   const pendingDuplicateCount = pendingDuplicateNames.length
     - namesExcludingDuplicates(pendingDuplicateNames, entries.map((entry) => entry.name)).length;
 
+  const winnerCelebrationOverlay = winner && celebration ? (
+    <div
+      key={`${winner.id}-${celebration.variation}`}
+      className={`modal-backdrop winner-celebration-backdrop celebration-palette-${celebration.palette} celebration-${celebration.direction}`}
+      role="presentation"
+      data-celebration-variation={celebration.variation + 1}
+    >
+      <div className="celebration-world" aria-hidden="true">
+        <img className="celebration-confetti-gif celebration-confetti-gif-a" src="/celebrations/confetti-burst.gif" alt="" />
+        <img className="celebration-confetti-gif celebration-confetti-gif-b" src="/celebrations/confetti-burst.gif" alt="" />
+        <div className="celebration-particles">
+          {celebrationPieces.map((piece) => <i key={piece.index} style={piece.style} />)}
+        </div>
+      </div>
+
+      <img
+        className={`celebration-hero celebration-hero-${celebration.hero}`}
+        src={celebration.hero === "pixel-bomb" ? "/celebrations/pixel-bomb.gif" : `/celebrations/${celebration.hero}.png`}
+        alt=""
+        aria-hidden="true"
+      />
+
+      <section className="winner-modal winner-celebration" role="dialog" aria-modal="true" aria-live="assertive" aria-labelledby="winner-title" aria-describedby="winner-message">
+        <button type="button" className="winner-close" aria-label="Close winner celebration" onClick={dismissWinner}>×</button>
+        <span className="winner-kicker">{CELEBRATION_HEADLINES[celebration.palette]}</span>
+        <span className="winner-variation">CELEBRATION {celebration.variation + 1} / {CELEBRATION_VARIATION_COUNT} · {HERO_LABELS[celebration.hero]}</span>
+        <div className="winner-number" aria-hidden="true">{winner.number}</div>
+        <h2 id="winner-title">{winner.name}</h2>
+        <p id="winner-message">Winner #{winner.number} from the numbered pool. Make some noise!</p>
+        <div className="winner-actions">
+          <button ref={winnerDoneRef} className="winner-done" onClick={dismissWinner}>Keep going</button>
+          <button className="winner-reset" onClick={() => { dismissWinner(); requestResetPool(); }}>Reset picks</button>
+        </div>
+      </section>
+    </div>
+  ) : null;
+
   return (
     <main className={`web-app ${presentation ? "is-presenting" : ""}`}>
       <header className="app-bar">
@@ -1150,6 +1187,7 @@ export function NameSnapWebApp() {
           </div>
 
           {history.length > 0 && <div className="history-rail" aria-label="Previous winners, newest to oldest"><div className="history-rail-label"><span>PREVIOUS {Math.min(5, history.length)} WINNER{history.length === 1 ? "" : "S"}</span><small>NEWEST <i aria-hidden="true">→</i> OLDEST</small></div><div className="history-pills">{history.slice(0, 5).map((item) => <button key={item.id} onClick={() => presentWinner(item)}><i>{item.number}</i>{item.name}</button>)}</div></div>}
+          {presentation ? winnerCelebrationOverlay : null}
         </section>
       </div>
 
@@ -1199,42 +1237,7 @@ export function NameSnapWebApp() {
 
       <footer className="web-footer"><span>© 2026 NameSnap · Fair picks, huge winner energy.</span><nav><a href="/privacy">Privacy</a><a href="/support">Support</a><a href="/terms">EULA</a><a href="/support#contact">Contact</a></nav></footer>
 
-      {winner && celebration && (
-        <div
-          key={`${winner.id}-${celebration.variation}`}
-          className={`modal-backdrop winner-celebration-backdrop celebration-palette-${celebration.palette} celebration-${celebration.direction}`}
-          role="presentation"
-          data-celebration-variation={celebration.variation + 1}
-        >
-          <div className="celebration-world" aria-hidden="true">
-            <img className="celebration-confetti-gif celebration-confetti-gif-a" src="/celebrations/confetti-burst.gif" alt="" />
-            <img className="celebration-confetti-gif celebration-confetti-gif-b" src="/celebrations/confetti-burst.gif" alt="" />
-            <div className="celebration-particles">
-              {celebrationPieces.map((piece) => <i key={piece.index} style={piece.style} />)}
-            </div>
-          </div>
-
-          <img
-            className={`celebration-hero celebration-hero-${celebration.hero}`}
-            src={celebration.hero === "pixel-bomb" ? "/celebrations/pixel-bomb.gif" : `/celebrations/${celebration.hero}.png`}
-            alt=""
-            aria-hidden="true"
-          />
-
-          <section className="winner-modal winner-celebration" role="dialog" aria-modal="true" aria-live="assertive" aria-labelledby="winner-title" aria-describedby="winner-message">
-            <button type="button" className="winner-close" aria-label="Close winner celebration" onClick={dismissWinner}>×</button>
-            <span className="winner-kicker">{CELEBRATION_HEADLINES[celebration.palette]}</span>
-            <span className="winner-variation">CELEBRATION {celebration.variation + 1} / {CELEBRATION_VARIATION_COUNT} · {HERO_LABELS[celebration.hero]}</span>
-            <div className="winner-number" aria-hidden="true">{winner.number}</div>
-            <h2 id="winner-title">{winner.name}</h2>
-            <p id="winner-message">Winner #{winner.number} from the numbered pool. Make some noise!</p>
-            <div className="winner-actions">
-              <button ref={winnerDoneRef} className="winner-done" onClick={dismissWinner}>Keep going</button>
-              <button className="winner-reset" onClick={() => { dismissWinner(); requestResetPool(); }}>Reset picks</button>
-            </div>
-          </section>
-        </div>
-      )}
+      {!presentation ? winnerCelebrationOverlay : null}
 
       {showPoolSheet && (
         <div className="modal-backdrop pool-sheet-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowPoolSheet(false); }}>
@@ -1373,7 +1376,7 @@ export function NameSnapWebApp() {
               </div>
             ) : null}
             {accountEmail && entitlementPlan === "lifetime" ? <p className="lifetime-owned">Lifetime is already owned by this purchase account. No checkout is needed.</p> : null}
-            {subscriptionCancellationRequired ? <p className="billing-warning" role="alert">Lifetime is unlocked, but Stripe could not stop the previous Monthly renewal automatically. Email <a href="mailto:sidequestsoftware@proton.me?subject=NameSnap%20Web%20monthly%20cancellation">NameSnap billing support</a> now so it can be canceled before another charge.</p> : null}
+            {subscriptionCancellationRequired ? <p className="billing-warning" role="alert">Lifetime is unlocked, but Stripe could not stop the previous Monthly renewal automatically. Email <a href="mailto:sidequest@ik.me?subject=NameSnap%20Web%20monthly%20cancellation">NameSnap billing support</a> now so it can be canceled before another charge.</p> : null}
             <p className="platform-note">Web purchases unlock NameSnap Web. App Store purchases unlock the iPhone and iPad app.</p>
             <button className="restore-button" onClick={restorePurchase} disabled={checkoutBusy !== null}>{checkoutBusy === "restore" ? "Checking…" : "Restore web purchase"}</button>
             {checkoutError ? <p className="checkout-error" role="alert">{checkoutError}</p> : null}

@@ -16,7 +16,7 @@
 - Marketing URL: https://getnamesnap.web.app
 - Privacy Policy URL: https://getnamesnap.web.app/privacy
 - Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-- Support Email: sidequestsoftware@proton.me
+- Support Email: sidequest@ik.me
 
 ## Notes
 - App uses local-only data.

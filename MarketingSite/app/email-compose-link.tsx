@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const address = "sidequestsoftware@proton.me";
+const address = "sidequest@ik.me";
 const subject = "NameSnap Support";
 const encodedAddress = encodeURIComponent(address);
 const encodedSubject = encodeURIComponent(subject);

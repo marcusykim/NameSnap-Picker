@@ -139,7 +139,7 @@ Canonical source copy:
 - Support URL: `https://getnamesnap.web.app/support`
 - Marketing URL: `https://getnamesnap.web.app`
 - Privacy Policy URL: `https://getnamesnap.web.app/privacy`
-- Support Email: `sidequestsoftware@proton.me`
+- Support Email: `sidequest@ik.me`
 - Contact name: `Marcus Kim`
 
 ## 5) Support + Privacy Policy (paste-ready text)
@@ -150,7 +150,7 @@ _Last updated: 2026-02-23_
 If you need help, found a bug, or want to suggest a feature, contact:
 
 Marcus Kim
-Email: sidequestsoftware@proton.me
+Email: sidequest@ik.me
 
 ### Privacy Policy
 NameSnap is designed to be privacy-first.
@@ -182,7 +182,7 @@ If this policy changes in future releases, the updated version will be posted wi
 
 Privacy contact:
 Marcus Kim
-Email: sidequestsoftware@proton.me
+Email: sidequest@ik.me
 
 ## 7) Reviewer Notes Template (binary submission)
 

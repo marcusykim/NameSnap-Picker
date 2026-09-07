@@ -75,7 +75,7 @@ test("publishes a complete support contact for customer requests", async () => {
   assert.match(html, /bug reports/i);
   assert.match(html, /feature requests/i);
   assert.match(html, /cancel Unlimited Monthly/i);
-  assert.match(html, /mailto:sidequestsoftware@proton\.me\?subject=NameSnap%20Support/i);
+  assert.match(html, /mailto:sidequest@ik\.me\?subject=NameSnap%20Support/i);
   assert.match(html, />Send us an email<\/summary>/i);
   assert.match(html, /mail\.google\.com\/mail\/\?view=cm/i);
   assert.match(html, /outlook\.office\.com\/mail\/deeplink\/compose/i);
@@ -92,7 +92,7 @@ test("publishes the privacy policy with the current contact", async () => {
   assert.match(html, /does not send contestant names or winner history/i);
   assert.match(html, /Cloudflare stores only one-way hashes/i);
   assert.match(html, /Firebase provides website hosting/i);
-  assert.match(html, /mailto:sidequestsoftware@proton\.me\?subject=NameSnap%20Privacy/i);
+  assert.match(html, /mailto:sidequest@ik\.me\?subject=NameSnap%20Privacy/i);
   assert.doesNotMatch(html, /Mracuth@gmail\.com/i);
 });
 
@@ -107,7 +107,7 @@ test("publishes the app EULA, web terms, and platform entitlement boundaries", a
   assert.match(html, /request cancellation of future renewals/i);
   assert.match(html, /Web purchases unlock NameSnap Web only/i);
   assert.match(html, /iPhone and iPad app only/i);
-  assert.match(html, /mailto:sidequestsoftware@proton\.me\?subject=NameSnap%20Terms/i);
+  assert.match(html, /mailto:sidequest@ik\.me\?subject=NameSnap%20Terms/i);
 });
 
 test("publishes the redesigned NameSnap icon across browser and installed-app surfaces", async () => {
@@ -225,6 +225,14 @@ test("provides a stage-only web presentation fallback when browser fullscreen is
   assert.match(globalStyles, /\.web-app\.is-presenting \.stage \{/);
   assert.match(globalStyles, /height: 100dvh/);
   assert.match(globalStyles, /\.web-app\.is-presenting \.presentation-exit/);
+
+  const stageStart = webAppSource.indexOf('<section className="stage"');
+  const stageEnd = webAppSource.indexOf("</section>", stageStart);
+  const presentationCelebration = webAppSource.indexOf("{presentation ? winnerCelebrationOverlay : null}", stageStart);
+  const standardCelebration = webAppSource.indexOf("{!presentation ? winnerCelebrationOverlay : null}");
+  assert.match(webAppSource, /const winnerCelebrationOverlay = winner && celebration/);
+  assert.ok(presentationCelebration > stageStart && presentationCelebration < stageEnd);
+  assert.ok(standardCelebration > stageEnd);
 });
 
 test("retires the old Firebase hostname with path-preserving permanent redirects", async () => {

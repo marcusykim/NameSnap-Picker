@@ -55,7 +55,7 @@ platform :ios do
       app_review_information: {
         first_name: "Marcus",
         last_name: "Kim",
-        email_address: "sidequestsoftware@proton.me",
+        email_address: "sidequest@ik.me",
         demo_user: "",
         demo_password: "",
         notes: "NameSnap is a random name picker for classrooms, giveaways, games, and live streams. No account is required. The free tier allows up to 16 contestants per session. Unlimited Monthly provides ongoing access to unlimited recurring classroom, livestream, giveaway, and event sessions. Unlimited Lifetime provides that access as a one-time purchase. Restore Purchases is on the same Unlimited screen. The paywall clearly shows the monthly duration, localized StoreKit price, renewal disclosure, Privacy Policy link, and Apple Standard EULA link. The App Store description also includes the Standard EULA URL. Participant names and winner history stay on device."

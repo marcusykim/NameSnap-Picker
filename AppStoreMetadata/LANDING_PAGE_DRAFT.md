@@ -52,7 +52,7 @@ NameSnap is privacy-first.
 ## Support draft
 For support, bug reports, or feature requests:
 - Marcus Kim
-- sidequestsoftware@proton.me
+- sidequest@ik.me
 
 ## Short marketing copy options
 ### Option A

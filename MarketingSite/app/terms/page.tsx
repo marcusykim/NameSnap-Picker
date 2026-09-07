@@ -37,7 +37,7 @@ export default function TermsPage() {
         <section><h2>Legal and export compliance</h2><p>You may use NameSnap only where permitted by law and must comply with applicable U.S. export and sanctions rules. You represent that you are not located in a U.S.-embargoed country and are not on a U.S. Government prohibited or restricted party list.</p></section>
         <section><h2>Apple beneficiary</h2><p>For the iPhone and iPad app, Apple and its subsidiaries are third-party beneficiaries of the applicable app-license terms and may enforce those terms as provided by Apple’s Standard EULA.</p></section>
         <section><h2>Changes</h2><p>NameSnap may update these terms as the product changes. Material changes will be posted here with a revised effective date.</p></section>
-        <section><h2>Contact</h2><p>Questions can be sent to <a href="mailto:sidequestsoftware@proton.me?subject=NameSnap%20Terms">sidequestsoftware@proton.me</a>.</p></section>
+        <section><h2>Contact</h2><p>Questions can be sent to <a href="mailto:sidequest@ik.me?subject=NameSnap%20Terms">sidequest@ik.me</a>.</p></section>
       </article>
       <SiteFooter />
     </main>

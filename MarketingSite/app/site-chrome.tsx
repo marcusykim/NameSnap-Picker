@@ -61,7 +61,7 @@ export function SiteFooter() {
     <footer className="site-footer shell">
       <div className="brand"><img src="/namesnap-app-icon-v2.png" alt="" width={44} height={44} /><span>NameSnap</span></div>
       <p>Fair picks. Huge winner energy.</p>
-      <nav aria-label="Footer navigation"><a href="/">Open picker</a><a href="/privacy">Privacy</a><a href="/support">Support</a><a href="/terms">EULA</a><a href="mailto:sidequestsoftware@proton.me">Email</a></nav>
+      <nav aria-label="Footer navigation"><a href="/">Open picker</a><a href="/privacy">Privacy</a><a href="/support">Support</a><a href="/terms">EULA</a><a href="mailto:sidequest@ik.me">Email</a></nav>
       <small>© 2026 Marcus Kim. Apple and App Store are trademarks of Apple Inc.</small>
     </footer>
   );
