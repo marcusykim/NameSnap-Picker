@@ -1670,3 +1670,128 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
   .marketing-cta h2 { font-size: 36px; }
   .marketing-cta > a { grid-column: 1; justify-self: stretch; }
 }
+
+/*
+ * Native NameSnap buttons render a second stroked silhouette over the fill,
+ * shifted down from the primary stroke. A box-shadow alone reads as depth in
+ * browsers, so keep the hard underlay and draw the overlapping stroke too.
+ */
+:is(
+  .button,
+  .app-store-button,
+  .present-button,
+  .add-button,
+  .draft-tools button,
+  .pool-tools button,
+  .spin-button,
+  .pool-preview-cta,
+  .stage-status,
+  .history-rail button,
+  .session-choice,
+  .session-restore,
+  .pool-sheet > footer button,
+  .confirmation-actions button,
+  .duplicate-actions button,
+  .plan-grid button,
+  .purchase-account-button,
+  .streamer-note a,
+  .public-page .nav-cta,
+  .public-hero-actions a,
+  .email-provider-links a,
+  .email-copy-button,
+  .marketing-intro-copy a,
+  .marketing-cta > a
+) {
+  --ns-overlap-x: 0px;
+  --ns-overlap-y: 5px;
+  --ns-overlap-stroke: var(--ns-ink);
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+}
+
+:is(
+  .button,
+  .app-store-button,
+  .present-button,
+  .add-button,
+  .draft-tools button,
+  .pool-tools button,
+  .spin-button,
+  .pool-preview-cta,
+  .stage-status,
+  .history-rail button,
+  .session-choice,
+  .session-restore,
+  .pool-sheet > footer button,
+  .confirmation-actions button,
+  .duplicate-actions button,
+  .plan-grid button,
+  .purchase-account-button,
+  .streamer-note a,
+  .public-page .nav-cta,
+  .public-hero-actions a,
+  .email-provider-links a,
+  .email-copy-button,
+  .marketing-intro-copy a,
+  .marketing-cta > a
+)::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border: 2.5px solid var(--ns-overlap-stroke);
+  border-radius: inherit;
+  transform: translate(var(--ns-overlap-x), var(--ns-overlap-y));
+  pointer-events: none;
+  transition: transform .15s ease, border-color .15s ease;
+}
+
+:is(
+  .app-store-button,
+  .pool-preview-cta,
+  .stage-status,
+  .history-rail button,
+  .session-restore,
+  .pool-sheet > footer .pool-sheet-done,
+  .confirmation-cancel,
+  .email-provider-links a
+) {
+  --ns-overlap-y: 4px;
+  --ns-overlap-stroke: var(--ns-indigo);
+}
+
+.segmented button.active {
+  --ns-overlap-y: 4px;
+  --ns-overlap-stroke: var(--ns-indigo);
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+}
+
+.segmented button.active::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border: 2px solid var(--ns-overlap-stroke);
+  border-radius: inherit;
+  transform: translateY(var(--ns-overlap-y));
+  pointer-events: none;
+}
+
+:is(
+  .add-button,
+  .draft-tools button,
+  .pool-tools button,
+  .spin-button,
+  .stage-status,
+  .session-choice,
+  .pool-sheet > footer button,
+  .confirmation-actions button,
+  .duplicate-actions button,
+  .plan-grid button,
+  .purchase-account-button
+):disabled {
+  --ns-overlap-stroke: var(--ns-disabled-line);
+}

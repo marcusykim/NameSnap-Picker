@@ -86,6 +86,9 @@ test("separates fresh picker sessions from restorable web purchases", async () =
   assert.match(globalStyles, /--ns-shadow-action: 0 5px 0 var\(--ns-ink\)/);
   assert.match(globalStyles, /--ns-shadow-field: 4px 5px 0 var\(--ns-sky\)/);
   assert.match(globalStyles, /\.name-editor[\s\S]*var\(--ns-shadow-field\)/);
+  assert.match(globalStyles, /--ns-overlap-y: 5px/);
+  assert.match(globalStyles, /border: 2\.5px solid var\(--ns-overlap-stroke\)/);
+  assert.match(globalStyles, /transform: translate\(var\(--ns-overlap-x\), var\(--ns-overlap-y\)\)/);
   assert.match(globalStyles, /\.session-start-modal[\s\S]*box-shadow: var\(--ns-shadow-modal\)/);
 });
 
