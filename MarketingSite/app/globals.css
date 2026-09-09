@@ -1374,6 +1374,7 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
 .support-card h2 { margin: 13px 0 18px !important; font-size: 30px !important; }
 .support-card .button { width: 100%; min-height: 58px; border: 2.5px solid var(--ns-ink) !important; background: var(--ns-primary-gradient) !important; color: var(--ns-ink) !important; box-shadow: 5px 6px 0 var(--ns-ink) !important; }
 .support-card small { color: var(--ns-text-secondary); font-size: 12px; font-weight: 650; }
+.email-compose-mobile { display: none !important; text-decoration: none; }
 .email-compose { display: grid; gap: 14px; }
 .email-compose summary { cursor: pointer; list-style: none; }
 .email-compose summary::-webkit-details-marker { display: none; }
@@ -1564,6 +1565,8 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
   .policy.policy-grid { grid-template-columns: 1fr; }
   .support-layout { grid-template-columns: 1fr; gap: 52px; }
   .support-card { position: static !important; }
+  .email-compose-desktop { display: none; }
+  .email-compose-mobile { display: inline-flex !important; }
   .marketing-intro { grid-template-columns: 1fr; gap: 30px; }
   .marketing-feature-grid { grid-template-columns: 1fr; }
   .marketing-feature { min-height: 410px; }

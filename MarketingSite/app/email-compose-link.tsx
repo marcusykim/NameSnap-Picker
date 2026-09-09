@@ -6,11 +6,12 @@ const address = "sidequest@ik.me";
 const subject = "NameSnap Support";
 const encodedAddress = encodeURIComponent(address);
 const encodedSubject = encodeURIComponent(subject);
+const defaultEmailHref = `mailto:${address}?subject=${encodedSubject}`;
 
 const providers = [
   {
     label: "Email app",
-    href: `mailto:${address}?subject=${encodedSubject}`,
+    href: defaultEmailHref,
   },
   {
     label: "Gmail",
@@ -58,31 +59,40 @@ export function EmailComposeLink() {
   };
 
   return (
-    <details className="email-compose">
-      <summary aria-label="Choose an email app to contact NameSnap support" className="button button-primary">
+    <>
+      <a
+        className="email-compose-mobile button button-primary"
+        href={defaultEmailHref}
+        aria-label="Send NameSnap support an email with your default email app"
+      >
         Send us an email
-      </summary>
-      <div className="email-fallback">
-        <strong>Choose your email</strong>
-        <span>We’ll address a new message to NameSnap support.</span>
-        <div className="email-provider-links">
-          {providers.map((provider) => (
-            <a key={provider.label} href={provider.href} target="_blank" rel="noreferrer">
-              {provider.label}
-            </a>
-          ))}
-          <button
-            className={`email-copy-button${copyStatus === "copied" ? " is-copied" : ""}`}
-            type="button"
-            onClick={copyEmail}
-          >
-            {copyStatus === "copied" ? "Copied!" : copyStatus === "failed" ? "Copy failed" : "Copy email"}
-          </button>
+      </a>
+      <details className="email-compose email-compose-desktop">
+        <summary aria-label="Choose an email app to contact NameSnap support" className="button button-primary">
+          Send us an email
+        </summary>
+        <div className="email-fallback">
+          <strong>Choose your email</strong>
+          <span>We’ll address a new message to NameSnap support.</span>
+          <div className="email-provider-links">
+            {providers.map((provider) => (
+              <a key={provider.label} href={provider.href} target="_blank" rel="noreferrer">
+                {provider.label}
+              </a>
+            ))}
+            <button
+              className={`email-copy-button${copyStatus === "copied" ? " is-copied" : ""}`}
+              type="button"
+              onClick={copyEmail}
+            >
+              {copyStatus === "copied" ? "Copied!" : copyStatus === "failed" ? "Copy failed" : "Copy email"}
+            </button>
+          </div>
+          <span className="email-copy-status" aria-live="polite">
+            {copyStatus === "copied" ? "Email address copied to clipboard." : copyStatus === "failed" ? `Copy failed. Email us at ${address}.` : ""}
+          </span>
         </div>
-        <span className="email-copy-status" aria-live="polite">
-          {copyStatus === "copied" ? "Email address copied to clipboard." : copyStatus === "failed" ? `Copy failed. Email us at ${address}.` : ""}
-        </span>
-      </div>
-    </details>
+      </details>
+    </>
   );
 }

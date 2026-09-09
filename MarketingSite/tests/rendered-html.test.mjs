@@ -67,7 +67,10 @@ test("server-renders the NameSnap web picker with App Store routing", async () =
 });
 
 test("publishes a complete support contact for customer requests", async () => {
-  const html = await renderedHtml("/support");
+  const [html, globalStyles] = await Promise.all([
+    renderedHtml("/support"),
+    readFile(path.join(marketingDirectory, "app/globals.css"), "utf8"),
+  ]);
 
   assert.match(html, /NAME SNAP SUPPORT/i);
   assert.match(html, /customer service/i);
@@ -76,12 +79,17 @@ test("publishes a complete support contact for customer requests", async () => {
   assert.match(html, /feature requests/i);
   assert.match(html, /cancel Unlimited Monthly/i);
   assert.match(html, /mailto:sidequest@ik\.me\?subject=NameSnap%20Support/i);
+  assert.match(html, /email-compose-mobile button button-primary/i);
+  assert.match(html, /default email app/i);
+  assert.match(html, /email-compose email-compose-desktop/i);
   assert.match(html, />Send us an email<\/summary>/i);
   assert.match(html, /mail\.google\.com\/mail\/\?view=cm/i);
   assert.match(html, /outlook\.office\.com\/mail\/deeplink\/compose/i);
   assert.match(html, /compose\.mail\.yahoo\.com/i);
   assert.match(html, />Copy email<\/button>/i);
   assert.match(html, /aria-live="polite"/i);
+  assert.match(globalStyles, /\.email-compose-mobile \{ display: none !important/);
+  assert.match(globalStyles, /@media \(max-width: 820px\)[\s\S]*\.email-compose-desktop \{ display: none; \}[\s\S]*\.email-compose-mobile \{ display: inline-flex !important; \}/);
 });
 
 test("publishes the privacy policy with the current contact", async () => {
