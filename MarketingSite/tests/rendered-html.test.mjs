@@ -96,6 +96,9 @@ test("publishes the privacy policy with the current contact", async () => {
   const html = await renderedHtml("/privacy");
 
   assert.match(html, /Privacy Policy/);
+  assert.match(html, /Pick names quick/i);
+  assert.match(html, /We don.t pick your data/i);
+  assert.doesNotMatch(html, /Party while you do it/i);
   assert.match(html, /Contestant data stays local/i);
   assert.match(html, /does not send contestant names or winner history/i);
   assert.match(html, /Cloudflare stores only one-way hashes/i);

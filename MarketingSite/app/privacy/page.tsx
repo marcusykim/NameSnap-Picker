@@ -8,9 +8,9 @@ export default function PrivacyPage() {
     <main className="public-page"><SiteHeader />
       <PublicHero
         eyebrow="PRIVACY POLICY"
-        title="Pick names at random."
-        accent="Party while you do it."
-        description="Paste or type your list, tap once, and let NameSnap turn a fair random pick into the loudest moment in the room."
+        title="Pick names quick."
+        accent="We don’t pick your data."
+        description="Your contestant names and recent picks stay on your device. No ads, no third-party analytics, and no account required for free use."
         art="/celebrations/robot.png"
         artAlt="A cheerful NameSnap robot holding a winner card"
         artLabel="LOCAL BY DEFAULT"
