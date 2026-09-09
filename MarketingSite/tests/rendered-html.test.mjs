@@ -84,6 +84,8 @@ test("separates fresh picker sessions from restorable web purchases", async () =
   assert.match(workerSource, /Lifetime is already owned by this purchase account/);
   assert.match(workerSource, /Monthly is already active for this purchase account/);
   assert.match(globalStyles, /--ns-shadow-action: 0 5px 0 var\(--ns-ink\)/);
+  assert.match(globalStyles, /--ns-shadow-field: 4px 5px 0 var\(--ns-sky\)/);
+  assert.match(globalStyles, /\.name-editor[\s\S]*var\(--ns-shadow-field\)/);
   assert.match(globalStyles, /\.session-start-modal[\s\S]*box-shadow: var\(--ns-shadow-modal\)/);
 });
 
