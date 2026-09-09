@@ -66,6 +66,27 @@ test("server-renders the NameSnap web picker with App Store routing", async () =
   assert.doesNotMatch(html, /\$6\.99|\$0\.99/);
 });
 
+test("separates fresh picker sessions from restorable web purchases", async () => {
+  const [webAppSource, workerSource, globalStyles] = await Promise.all([
+    readFile(path.join(marketingDirectory, "app/namesnap-web-app.tsx"), "utf8"),
+    readFile(path.join(marketingDirectory, "worker/src/index.ts"), "utf8"),
+    readFile(path.join(marketingDirectory, "app/globals.css"), "utf8"),
+  ]);
+  const freshSessionSource = webAppSource.match(/const startFreshSession = \(\) => \{[\s\S]*?\n[ ]{2}\};/)?.[0] ?? "";
+
+  assert.match(webAppSource, /Continue previous state/);
+  assert.match(webAppSource, /Start a fresh session/);
+  assert.match(webAppSource, /Restore web purchase/);
+  assert.match(webAppSource, /JSON\.stringify\(\{ input, entries, lastAddedIds, history, excludedIds, mode, noRepeats, soundOn \}\)/);
+  assert.match(freshSessionSource, /localStorage\.removeItem\(STORAGE_KEY\)/);
+  assert.doesNotMatch(freshSessionSource, /IDENTITY_KEY|AUTH_EMAIL_KEY|signOut|localStorage\.clear/);
+  assert.match(webAppSource, /Neither session choice deletes a subscription, lifetime purchase, purchase identity, or verified email/);
+  assert.match(workerSource, /Lifetime is already owned by this purchase account/);
+  assert.match(workerSource, /Monthly is already active for this purchase account/);
+  assert.match(globalStyles, /--ns-shadow-action: 0 5px 0 var\(--ns-ink\)/);
+  assert.match(globalStyles, /\.session-start-modal[\s\S]*box-shadow: var\(--ns-shadow-modal\)/);
+});
+
 test("publishes a complete support contact for customer requests", async () => {
   const [html, globalStyles] = await Promise.all([
     renderedHtml("/support"),

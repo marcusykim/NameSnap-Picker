@@ -30,6 +30,11 @@ type Confirmation = {
   confirmLabel: string;
   onConfirm: () => void;
 };
+type SavedSessionSummary = {
+  draftCount: number;
+  poolCount: number;
+  recentCount: number;
+};
 
 const FREE_LIMIT = 16;
 const POOL_PREVIEW_LIMIT = 20;
@@ -39,6 +44,7 @@ const IDENTITY_KEY = "namesnap.web.identity.v1";
 const AUTH_EMAIL_KEY = "namesnap.web.purchase-email.v1";
 const API_URL = "https://namesnap-web-payments.royal-fog-6bed.workers.dev";
 const APP_STORE_URL = "https://apps.apple.com/app/id6759588637";
+const EMPTY_SESSION_SUMMARY: SavedSessionSummary = { draftCount: 0, poolCount: 0, recentCount: 0 };
 const WHEEL_COLORS = [
   "#F7DC60",
   "#6BA3CC",
@@ -389,6 +395,9 @@ export function NameSnapWebApp() {
   const [authNotice, setAuthNotice] = useState<string | null>(null);
   const [emailLinkNeedsAddress, setEmailLinkNeedsAddress] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [sessionDecisionMade, setSessionDecisionMade] = useState(false);
+  const [showSessionStart, setShowSessionStart] = useState(false);
+  const [savedSessionSummary, setSavedSessionSummary] = useState<SavedSessionSummary>(EMPTY_SESSION_SUMMARY);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const fullscreenSessionRef = useRef(false);
@@ -397,25 +406,46 @@ export function NameSnapWebApp() {
   const recentPicksCloseRef = useRef<HTMLButtonElement>(null);
   const confirmationCancelRef = useRef<HTMLButtonElement>(null);
   const duplicateCancelRef = useRef<HTMLButtonElement>(null);
+  const sessionContinueRef = useRef<HTMLButtonElement>(null);
+  const sessionFreshRef = useRef<HTMLButtonElement>(null);
   const winnerDoneRef = useRef<HTMLButtonElement>(null);
   const winnerAudioRef = useRef<HTMLAudioElement | null>(null);
   const winnerAutoDismissTimerRef = useRef<number | null>(null);
   const timersRef = useRef<number[]>([]);
 
   useEffect(() => {
+    let restoredSummary = EMPTY_SESSION_SUMMARY;
     try {
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
       if (stored) {
-        setEntries(restoreStoredEntries(stored.entries));
-        setHistory(Array.isArray(stored.history) ? stored.history : []);
+        const restoredInput = typeof stored.input === "string" ? stored.input : "";
+        const restoredEntries = restoreStoredEntries(stored.entries);
+        const restoredHistory = Array.isArray(stored.history) ? stored.history : [];
+        const restoredLastAddedIds = Array.isArray(stored.lastAddedIds)
+          ? stored.lastAddedIds.filter((id: unknown): id is string => typeof id === "string" && restoredEntries.some((entry) => entry.id === id))
+          : [];
+        setInput(restoredInput);
+        setEntries(restoredEntries);
+        setLastAddedIds(restoredLastAddedIds);
+        setHistory(restoredHistory);
         setExcludedIds(Array.isArray(stored.excludedIds) ? stored.excludedIds : []);
         setMode(stored.mode === "classic" ? "classic" : "wheel");
         setNoRepeats(stored.noRepeats !== false);
         setSoundOn(stored.soundOn !== false);
+        restoredSummary = {
+          draftCount: parseNames(restoredInput).length,
+          poolCount: restoredEntries.length,
+          recentCount: restoredHistory.length,
+        };
       }
     } catch {
       localStorage.removeItem(STORAGE_KEY);
     }
+    const query = new URLSearchParams(window.location.search);
+    const isPurchaseReturn = query.has("checkout") || query.has("purchaseAccount") || isSignInWithEmailLink(namesnapAuth, window.location.href);
+    setSavedSessionSummary(restoredSummary);
+    setSessionDecisionMade(isPurchaseReturn);
+    setShowSessionStart(!isPurchaseReturn);
     setHydrated(true);
   }, []);
 
@@ -456,9 +486,23 @@ export function NameSnapWebApp() {
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ entries, history, excludedIds, mode, noRepeats, soundOn }));
-  }, [entries, excludedIds, history, hydrated, mode, noRepeats, soundOn]);
+    if (!hydrated || !sessionDecisionMade) return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ input, entries, lastAddedIds, history, excludedIds, mode, noRepeats, soundOn }));
+  }, [entries, excludedIds, history, hydrated, input, lastAddedIds, mode, noRepeats, sessionDecisionMade, soundOn]);
+
+  useEffect(() => {
+    if (!showSessionStart) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const hasSavedState = savedSessionSummary.draftCount + savedSessionSummary.poolCount + savedSessionSummary.recentCount > 0;
+    const focusFrame = window.requestAnimationFrame(() => {
+      (hasSavedState ? sessionContinueRef.current : sessionFreshRef.current)?.focus();
+    });
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [savedSessionSummary, showSessionStart]);
 
   useEffect(() => () => {
     timersRef.current.forEach((timer) => window.clearTimeout(timer));
@@ -563,6 +607,9 @@ export function NameSnapWebApp() {
     () => celebrationParticles(celebration?.variation ?? 0),
     [celebration?.variation],
   );
+  const hasSavedPickerSession = savedSessionSummary.draftCount
+    + savedSessionSummary.poolCount
+    + savedSessionSummary.recentCount > 0;
   const isPremium = entitlementPlan !== null;
 
   const applyEntitlement = useCallback((data: { active?: boolean; plan?: string | null; subscriptionStatus?: string | null }) => {
@@ -736,6 +783,44 @@ export function NameSnapWebApp() {
     setCelebration(null);
   }, [stopWinnerAudio]);
 
+  const continuePreviousSession = () => {
+    setSessionDecisionMade(true);
+    setShowSessionStart(false);
+  };
+
+  const startFreshSession = () => {
+    // Picker state has its own key. Purchase identity, verified email, Firebase
+    // authentication, and server-side entitlement records remain untouched.
+    localStorage.removeItem(STORAGE_KEY);
+    setInput("");
+    setEntries([]);
+    setLastAddedIds([]);
+    setHistory([]);
+    setExcludedIds([]);
+    setMode("wheel");
+    setNoRepeats(true);
+    setSoundOn(true);
+    setIsSpinning(false);
+    setLiveName("Ready when you are");
+    setRotation(0);
+    setPendingDuplicateNames([]);
+    setPendingNames([]);
+    setConfirmation(null);
+    setShowPoolSheet(false);
+    setShowRecentPicks(false);
+    dismissWinner();
+    setSavedSessionSummary(EMPTY_SESSION_SUMMARY);
+    setSessionDecisionMade(true);
+    setShowSessionStart(false);
+  };
+
+  const openPurchaseRestore = () => {
+    setCheckoutError(null);
+    setSessionDecisionMade(true);
+    setShowSessionStart(false);
+    setShowUpgrade(true);
+  };
+
   const presentWinner = useCallback((result: Winner, playSound = true) => {
     dismissWinner();
     const nextCelebration = createCelebration();
@@ -789,6 +874,7 @@ export function NameSnapWebApp() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (showSessionStart) return;
       if (confirmation) {
         if (event.key === "Escape") setConfirmation(null);
         return;
@@ -809,7 +895,7 @@ export function NameSnapWebApp() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [confirmation, dismissWinner, pendingDuplicateNames.length, spin]);
+  }, [confirmation, dismissWinner, pendingDuplicateNames.length, showSessionStart, spin]);
 
   const appendNamesToPool = (names: string[]) => {
     if (!names.length) return;
@@ -1238,6 +1324,49 @@ export function NameSnapWebApp() {
       <footer className="web-footer"><span>© 2026 NameSnap · Fair picks, huge winner energy.</span><nav><a href="/privacy">Privacy</a><a href="/support">Support</a><a href="/terms">EULA</a><a href="/support#contact">Contact</a></nav></footer>
 
       {!presentation ? winnerCelebrationOverlay : null}
+
+      {showSessionStart && (
+        <div className="modal-backdrop session-start-backdrop" role="presentation">
+          <section className="session-start-modal" role="dialog" aria-modal="true" aria-labelledby="session-start-title" aria-describedby="session-start-description">
+            <header className="session-start-header">
+              <img src="/namesnap-app-icon-v2.png" alt="" width={74} height={74} />
+              <div>
+                <span className="session-start-kicker">YOUR PICKER IS READY</span>
+                <h2 id="session-start-title">How do you want to start?</h2>
+              </div>
+            </header>
+            <p id="session-start-description">Bring back the list on this browser, or clear the picker for a new draw.</p>
+
+            <div className="session-snapshot" aria-label="Saved picker state">
+              <span><b>{savedSessionSummary.draftCount}</b><small>waiting to add</small></span>
+              <span><b>{savedSessionSummary.poolCount}</b><small>in the pool</small></span>
+              <span><b>{savedSessionSummary.recentCount}</b><small>recent picks</small></span>
+            </div>
+
+            <div className="session-start-actions">
+              <button
+                ref={sessionContinueRef}
+                type="button"
+                className="session-choice session-continue"
+                onClick={continuePreviousSession}
+                disabled={!hasSavedPickerSession}
+              >
+                <span>Continue previous state</span>
+                <small>{hasSavedPickerSession ? "Keep the saved draft, pool, settings, and recent picks." : "There isn’t a saved picker session on this browser yet."}</small>
+              </button>
+              <button ref={sessionFreshRef} type="button" className="session-choice session-fresh" onClick={startFreshSession}>
+                <span>Start a fresh session</span>
+                <small>Clear the draft, pool, settings, and recent picks on this browser.</small>
+              </button>
+            </div>
+
+            <div className="session-purchase-safety">
+              <p><b>{entitlementPlan === "lifetime" ? "Lifetime access is active." : entitlementPlan === "monthly" ? "Monthly access is active." : "Paid access stays separate."}</b> Neither session choice deletes a subscription, lifetime purchase, purchase identity, or verified email.</p>
+              <button type="button" className="session-restore" onClick={openPurchaseRestore}>Restore web purchase</button>
+            </div>
+          </section>
+        </div>
+      )}
 
       {showPoolSheet && (
         <div className="modal-backdrop pool-sheet-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowPoolSheet(false); }}>
