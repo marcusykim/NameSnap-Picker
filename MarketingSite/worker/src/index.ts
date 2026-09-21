@@ -95,6 +95,8 @@ class ApiError extends Error {
   }
 }
 
+const CHECKOUT_CHANGED = Symbol("checkout changed");
+
 function allowedOrigin(request: Request, env: Env) {
   const origin = request.headers.get("Origin");
   if (origin === env.SITE_URL || (origin && LOCAL_ORIGINS.has(origin))) return origin;
@@ -335,6 +337,34 @@ function alreadyOwned(current: EntitlementRow) {
 }
 
 async function startCheckout(request: Request, env: Env, context: RequestContext) {
+  // A replacement may race another tab. Re-read the winning reservation instead
+  // of making the customer wait for a browser-owned checkout to expire.
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    try {
+      return await startCheckoutAttempt(request.clone(), env, context);
+    } catch (error) {
+      if (error !== CHECKOUT_CHANGED) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 100 + Math.random() * 100));
+    }
+  }
+  throw new ApiError(503, "Checkout is being updated. Please try again in a moment.");
+}
+
+async function expireUnpaidCheckout(env: Env, session: StripeCheckoutSession) {
+  if (session.status !== "open") return session;
+  try {
+    const response = await stripeRequest(env, `/v1/checkout/sessions/${encodeURIComponent(session.id)}/expire`, { method: "POST" });
+    return await response.json() as StripeCheckoutSession;
+  } catch (error) {
+    // Payment or another tab can win the race with expiration. Only an expired
+    // session is safe to replace; a completed payment must be reconciled first.
+    const latest = await stripeCheckoutSession(env, session.id);
+    if (latest?.status === "expired" || latest?.status === "complete") return latest;
+    throw error;
+  }
+}
+
+async function startCheckoutAttempt(request: Request, env: Env, context: RequestContext) {
   const body = await readJson(request);
   const plan = safePlan(body.plan);
   if (!plan) throw new ApiError(400, "Choose a valid NameSnap plan.");
@@ -366,7 +396,8 @@ async function startCheckout(request: Request, env: Env, context: RequestContext
         const session = await stripeCheckoutSession(env, legacy.session_id);
         if (session?.status === "open" && session.url) {
           if (legacy.plan === plan) return { status: 200, body: { url: session.url } };
-          await stripeRequest(env, `/v1/checkout/sessions/${encodeURIComponent(session.id)}/expire`, { method: "POST" });
+          const retired = await expireUnpaidCheckout(env, session);
+          if (retired.status !== "expired") throw CHECKOUT_CHANGED;
         }
         if (session?.status === "complete") {
           await applyCheckoutSession(env, session);
@@ -387,34 +418,47 @@ async function startCheckout(request: Request, env: Env, context: RequestContext
     }
     const prior = ownerReservation.session_id ? await stripeCheckoutSession(env, ownerReservation.session_id) : null;
     if (prior?.status === "open") {
-      await stripeRequest(env, `/v1/checkout/sessions/${encodeURIComponent(prior.id)}/expire`, { method: "POST" });
+      const retired = await expireUnpaidCheckout(env, prior);
+      if (retired.status !== "expired") throw CHECKOUT_CHANGED;
     } else if (prior?.status === "complete") {
       await applyCheckoutSession(env, prior);
       throw new ApiError(409, "Your previous checkout is complete. Restore that purchase before changing the email.");
     }
-    await env.DB.prepare("DELETE FROM purchase_checkouts WHERE owner_hash = ? AND generation = ?")
-      .bind(ownerHash, ownerReservation.generation).run();
+    const removed = await env.DB.prepare("DELETE FROM purchase_checkouts WHERE owner_hash = ? AND generation = ? RETURNING generation")
+      .bind(ownerHash, ownerReservation.generation).first<{ generation: string }>();
+    if (!removed) throw CHECKOUT_CHANGED;
   }
   let reservation = await env.DB.prepare("SELECT * FROM purchase_checkouts WHERE email_hash = ?")
     .bind(emailHash).first<CheckoutReservation>();
   if (reservation) {
-    const session = reservation.session_id ? await stripeCheckoutSession(env, reservation.session_id) : null;
+    let session = reservation.session_id ? await stripeCheckoutSession(env, reservation.session_id) : null;
+    if (!session && (reservation.owner_hash !== ownerHash || reservation.plan !== plan)) {
+      // Recover an uncertain creation using its frozen parameters before
+      // replacing it. Never return another browser's Checkout URL or Customer.
+      const recovered = await createStripeCheckoutSession(env, reservation.plan, email, emailHash, reservation);
+      const updated = await env.DB.prepare("UPDATE purchase_checkouts SET session_id = ?, expires_at = ? WHERE email_hash = ? AND generation = ? RETURNING generation")
+        .bind(recovered.id, recovered.expires_at, emailHash, reservation.generation).first<{ generation: string }>();
+      if (!updated) throw CHECKOUT_CHANGED;
+      session = await stripeCheckoutSession(env, recovered.id);
+    }
     if (session?.status === "complete") {
       await applyCheckoutSession(env, session);
       current = await resolveEntitlement(env, context);
       if (current?.active === 1 && (current.plan === "lifetime" || current.plan === plan)) return alreadyOwned(current);
+      if (await entitlementByEmail(env, emailHash) && !current) {
+        return { status: 409, body: { restoreRequired: true, error: "Restore the purchase for this email before starting another checkout." } };
+      }
       if (!current || current.checkout_session_id !== session.id) throw new ApiError(409, "Your payment is still processing. Restore your purchase in a moment.");
     } else if (session?.status === "open") {
-      if (reservation.owner_hash !== ownerHash) throw new ApiError(409, "A checkout for this email is already open. Finish it in the original browser or try again after that checkout expires.");
-      if (reservation.plan === plan && session.url) return { status: 200, body: { url: session.url } };
-      await stripeRequest(env, `/v1/checkout/sessions/${encodeURIComponent(session.id)}/expire`, { method: "POST" });
-    } else if (!session) {
-      if (reservation.owner_hash !== ownerHash || reservation.plan !== plan) throw new ApiError(409, "A checkout for this email is being prepared. Please try again shortly.");
-      // Retry the same reservation with stable Stripe idempotency keys.
+      if (reservation.owner_hash === ownerHash && reservation.plan === plan && session.url) return { status: 200, body: { url: session.url } };
+      const retired = await expireUnpaidCheckout(env, session);
+      if (retired.status !== "expired") throw CHECKOUT_CHANGED;
     }
+    // An uncertain creation keeps its reservation and stable idempotency keys.
     if (session) {
-      await env.DB.prepare("DELETE FROM purchase_checkouts WHERE email_hash = ? AND generation = ?")
-        .bind(emailHash, reservation.generation).run();
+      const removed = await env.DB.prepare("DELETE FROM purchase_checkouts WHERE email_hash = ? AND generation = ? RETURNING generation")
+        .bind(emailHash, reservation.generation).first<{ generation: string }>();
+      if (!removed) throw CHECKOUT_CHANGED;
       reservation = null;
     }
   }
@@ -428,13 +472,14 @@ async function startCheckout(request: Request, env: Env, context: RequestContext
     reservation = await env.DB.prepare("SELECT * FROM purchase_checkouts WHERE email_hash = ?")
       .bind(emailHash).first<CheckoutReservation>();
     if (!reservation || reservation.owner_hash !== ownerHash || reservation.plan !== plan) {
-      throw new ApiError(409, "A checkout for this email is already being prepared. Please try again shortly.");
+      throw CHECKOUT_CHANGED;
     }
   }
   const session = await createStripeCheckoutSession(env, plan, email, emailHash, reservation);
   if (!session.url) throw new ApiError(503, "NameSnap checkout is temporarily unavailable.");
-  await env.DB.prepare("UPDATE purchase_checkouts SET session_id = ?, expires_at = ? WHERE email_hash = ? AND generation = ?")
-    .bind(session.id, session.expires_at, emailHash, reservation.generation).run();
+  const updated = await env.DB.prepare("UPDATE purchase_checkouts SET session_id = ?, expires_at = ? WHERE email_hash = ? AND generation = ? RETURNING generation")
+    .bind(session.id, session.expires_at, emailHash, reservation.generation).first<{ generation: string }>();
+  if (!updated) throw CHECKOUT_CHANGED;
   return { status: 200, body: { url: session.url } };
 }
 
@@ -446,6 +491,9 @@ async function stripeRequest(env: Env, path: string, init: RequestInit = {}) {
   if (init.body) headers.set("Content-Type", "application/x-www-form-urlencoded");
   const response = await fetch(`https://api.stripe.com${path}`, { ...init, headers });
   if (!response.ok) {
+    // Stripe returns 409 while another request with this idempotency key is
+    // still running. The checkout loop retries the same persisted attempt.
+    if (response.status === 409 && headers.has("Idempotency-Key")) throw CHECKOUT_CHANGED;
     console.error("Stripe request failed", response.status, path);
     throw new ApiError(503, "NameSnap checkout is temporarily unavailable.");
   }

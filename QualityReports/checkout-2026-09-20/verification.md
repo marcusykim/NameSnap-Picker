@@ -26,9 +26,11 @@ both subsequent live Checkout sessions opened successfully.
 - Only a paid Checkout receipt or matching verified recovery identity unlocks
   access. Browser-only access survives refresh and remains separate from picker
   data and Start Fresh.
-- Email and owner reservations prevent concurrent sessions. Persisted parameters
-  make uncertain responses safe to retry. Unknown attempts older than 23 hours
-  require support recovery before another payable session can be issued.
+- Opening checkout from another browser automatically expires the prior unpaid
+  session and creates a replacement for the current browser. The original
+  browser is no longer a prerequisite. Same-owner retries can reopen the current
+  session. Persisted parameters make uncertain responses safe to retry; unknown
+  attempts older than 23 hours still require support recovery.
 - Existing monthly/lifetime ownership and subscription events are reconciled to
   avoid duplicate purchases, stale cancellation, or lifetime downgrade.
 - The payment return has an explicit confirmation state; active access has a
@@ -36,7 +38,7 @@ both subsequent live Checkout sessions opened successfully.
 
 ## Validation
 
-- 21 payment tests pass using real in-memory SQLite migrations and mocked Stripe,
+- 29 payment tests pass using real in-memory SQLite migrations and mocked Stripe,
   Firebase JWT verification, and signed webhook delivery. Includes wrong-browser
   access, unpaid/canceled sessions, duplicate and concurrent attempts, restore,
   subscription changes, uncertain responses, and idempotency-key eviction.
@@ -59,9 +61,13 @@ both subsequent live Checkout sessions opened successfully.
 - Live frontend assets: `index-KuF8CHaT.js`, `index-Cd4GiRi7.css` (verified from
   the production HTML after the final deployment).
 - Worker: `namesnap-web-payments`.
-- Worker version: `2c8a424d-c71e-4e27-806e-793d54da2860`.
+- Worker version: `27f3d099-cd83-4fd0-b101-0ca90647b6f9`.
 - D1 migrations `0003_email_checkout.sql` and `0004_checkout_recovery.sql` applied
   remotely. There were zero checkout reservations before migration 0004.
+
+The checkout replacement follow-up is documented in
+`checkout-replacement.md`. It changed only the backend and payment tests; the
+previously reviewed frontend assets and schema remain current.
 
 ## Live verification details
 

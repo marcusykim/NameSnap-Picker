@@ -22,7 +22,7 @@ async function setup(t) {
         db.exec(await readFile(new URL(`../worker/migrations/${file}`, import.meta.url), 'utf8'));
     const env = { DB: { prepare(sql) { const statement = db.prepare(sql); let values = []; return { bind(...args) { values = args; return this; }, async first() { return statement.get(...values) ?? null; }, async run() { return statement.run(...values); } }; } }, SITE_URL: 'https://getnamesnap.web.app', FIREBASE_PROJECT_ID: 'test-namesnap', STRIPE_RESTRICTED_KEY: 'fixture-only', STRIPE_WEBHOOK_SECRET: 'fixture-webhook-only' };
     const sessions = new Map(), customers = new Map(), subscriptions = new Map(), idempotency = new Map(), calls = [];
-    let counter = 0, cancelFails = false, readFails = false;
+    let counter = 0, cancelFails = false, readFails = false, expirationRace = null, createConflict = false, creationHold = null;
     t.mock.method(globalThis, 'fetch', async (url, init = {}) => {
         if (String(url).includes('googleapis.com/service_accounts'))
             return Response.json({ keys: [jwk] });
@@ -32,6 +32,10 @@ async function setup(t) {
         const headers = new Headers(init.headers);
         calls.push({ path, method, form });
         const idem = headers.get('Idempotency-Key');
+        if (path === '/v1/checkout/sessions' && createConflict) {
+            createConflict = false;
+            return Response.json({ error: 'Idempotent request still in progress' }, { status: 409 });
+        }
         if (idem && idempotency.has(idem)) {
             const previous = idempotency.get(idem);
             if (previous.body !== init.body)
@@ -52,6 +56,17 @@ async function setup(t) {
         }
         else if (path.endsWith('/expire')) {
             result = sessions.get(path.split('/').at(-2));
+            if (expirationRace) {
+                const race = expirationRace;
+                expirationRace = null;
+                if (race !== 'failure') {
+                    result.status = race === 'expired' ? 'expired' : 'complete';
+                    result.payment_status = race === 'paid' ? 'paid' : 'unpaid';
+                }
+                return Response.json({ error: 'Session cannot be expired' }, { status: 400 });
+            }
+            if (result.status !== 'open')
+                return Response.json({ error: 'Session cannot be expired' }, { status: 400 });
             result.status = 'expired';
         }
         else if (path.startsWith('/v1/checkout/sessions/')) {
@@ -71,6 +86,12 @@ async function setup(t) {
             throw new Error(`Unexpected Stripe fixture request: ${method} ${path}`);
         if (idem)
             idempotency.set(idem, { result, body: init.body });
+        if (path === '/v1/checkout/sessions' && creationHold) {
+            const hold = creationHold;
+            creationHold = null;
+            hold.created();
+            await hold.wait;
+        }
         return Response.json(result);
     });
     t.after(() => db.close());
@@ -80,7 +101,14 @@ async function setup(t) {
     async function confirm(session, identity = identityA, bearer) { return request('/api/confirm', { sessionId: session.id }, identity, bearer); }
     async function webhook(type, object) { const body = JSON.stringify({ type, data: { object } }); const time = Math.floor(Date.now() / 1000); const signature = createHmac('sha256', env.STRIPE_WEBHOOK_SECRET).update(`${time}.${body}`).digest('hex'); return worker.fetch(new Request(`${env.SITE_URL}/webhook`, { method: 'POST', body, headers: { 'Stripe-Signature': `t=${time},v1=${signature}` } }), env); }
     const paid = session => { session.status = 'complete'; session.payment_status = 'paid'; return session; };
-    return { env, db, sessions, customers, subscriptions, calls, request, checkout, confirm, webhook, paid, pruneIdempotency: () => idempotency.clear(), setCancelFails: () => cancelFails = true, setReadFails: () => readFails = true };
+    function holdCreation() {
+        let created, release;
+        const ready = new Promise(resolve => created = resolve);
+        const wait = new Promise(resolve => release = resolve);
+        creationHold = { created, wait };
+        return { ready, release };
+    }
+    return { env, db, sessions, customers, subscriptions, calls, request, checkout, confirm, webhook, paid, holdCreation, setCreateConflict: () => createConflict = true, pruneIdempotency: () => idempotency.clear(), setExpirationRace: (race) => expirationRace = race, setCancelFails: () => cancelFails = true, setReadFails: () => readFails = true };
 }
 test('guest checkout requires a valid email and collects payment without Firebase sign-in', async (t) => {
     const f = await setup(t);
@@ -93,15 +121,22 @@ test('guest checkout requires a valid email and collects payment without Firebas
     assert.equal(create.form.has('payment_method_types[0]'), false);
     assert.deepEqual((await f.request('/api/status')).body, { active: false, plan: null });
 });
-test('concurrent retries create one checkout and another browser cannot reuse its URL', async (t) => {
+test('concurrent retries share a checkout; another browser gets its own replacement checkout', async (t) => {
     const f = await setup(t);
     const responses = await Promise.all([f.checkout(), f.checkout()]);
     assert.equal(responses[0].body.url, responses[1].body.url);
     assert.equal(f.sessions.size, 1);
     const foreign = await f.checkout('lifetime', identityB);
-    assert.equal(foreign.status, 409);
-    assert.equal(foreign.body.url, undefined);
+    assert.equal(foreign.status, 200);
+    assert.notEqual(foreign.body.url, responses[0].body.url);
     assert.equal(foreign.body.active, undefined);
+    const [original, replacement] = [...f.sessions.values()];
+    assert.equal(original.status, 'expired');
+    assert.equal(replacement.status, 'open');
+    assert.notEqual(original.customer, replacement.customer);
+    assert.equal((await f.confirm(f.paid(replacement), identityB)).body.active, true);
+    assert.equal((await f.request('/api/status', undefined, identityA)).body.active, false);
+    assert.equal((await f.checkout('lifetime', identityA)).body.restoreRequired, true);
 });
 test('unpaid, canceled and stolen sessions never unlock access', async (t) => {
     const f = await setup(t);
@@ -298,4 +333,90 @@ test('unknown paid Checkout is not replayed after Stripe can prune its idempoten
     assert.match(retry.body.error, /earlier checkout/);
     assert.equal(f.sessions.size, 1);
     assert.equal(f.calls.length, callsBefore);
+});
+
+test('competing browsers can each open checkout while only the latest unpaid session remains payable', async (t) => {
+    const f = await setup(t);
+    const responses = await Promise.all([f.checkout(), f.checkout('lifetime', identityB)]);
+    assert.ok(responses.every(r => r.status === 200));
+    assert.notEqual(responses[0].body.url, responses[1].body.url);
+    assert.equal([...f.sessions.values()].filter(s => s.status === 'open').length, 1);
+    assert.equal(f.db.prepare('SELECT COUNT(*) AS count FROM purchase_checkouts').get().count, 1);
+});
+
+test('a different browser recovers a lost Stripe response and replaces it without exposing the original session', async (t) => {
+    const f = await setup(t);
+    await f.checkout('monthly');
+    const old = [...f.sessions.values()][0];
+    f.db.exec('UPDATE purchase_checkouts SET session_id = NULL');
+    const result = await f.checkout('lifetime', identityB);
+    assert.equal(result.status, 200);
+    assert.notEqual(result.body.url, old.url);
+    assert.equal(old.status, 'expired');
+    assert.equal(f.sessions.size, 2);
+});
+
+test('a payment completed before replacement is fulfilled and blocks a duplicate purchase', async (t) => {
+    const f = await setup(t);
+    await f.checkout();
+    f.paid([...f.sessions.values()][0]);
+    const result = await f.checkout('lifetime', identityB);
+    assert.equal(result.status, 409);
+    assert.equal(result.body.restoreRequired, true);
+    assert.equal(f.sessions.size, 1);
+    assert.equal((await f.request('/api/status')).body.active, true);
+    assert.equal((await f.request('/api/status', undefined, identityB)).body.active, false);
+});
+
+test('payment winning the expiration race is reconciled before a replacement can charge', async (t) => {
+    const f = await setup(t);
+    await f.checkout();
+    f.setExpirationRace('paid');
+    const result = await f.checkout('lifetime', identityB);
+    assert.equal(result.status, 409);
+    assert.equal(result.body.restoreRequired, true);
+    assert.equal(f.sessions.size, 1);
+    assert.equal((await f.request('/api/status')).body.active, true);
+});
+
+test('processing payment or failed expiration cannot leave two collectible sessions', async (t) => {
+    for (const race of ['processing', 'failure']) {
+        const f = await setup(t);
+        await f.checkout();
+        f.setExpirationRace(race);
+        const result = await f.checkout('lifetime', identityB);
+        assert.equal(result.status, race === 'processing' ? 409 : 503);
+        assert.equal(f.sessions.size, 1);
+        assert.equal((await f.request('/api/status', undefined, identityB)).body.active, false);
+    }
+});
+
+test('another request expiring the old session does not block replacement', async (t) => {
+    const f = await setup(t);
+    await f.checkout();
+    f.setExpirationRace('expired');
+    assert.equal((await f.checkout('monthly', identityB)).status, 200);
+    assert.equal([...f.sessions.values()].filter(s => s.status === 'open').length, 1);
+});
+
+test('a late creation response cannot overwrite another browser replacement', async (t) => {
+    const f = await setup(t);
+    const hold = f.holdCreation();
+    const original = f.checkout();
+    await hold.ready;
+    const replacement = await f.checkout('monthly', identityB);
+    assert.equal(replacement.status, 200);
+    hold.release();
+    assert.equal((await original).status, 200);
+    assert.equal([...f.sessions.values()].filter(s => s.status === 'open').length, 1);
+    const row = f.db.prepare('SELECT session_id FROM purchase_checkouts').get();
+    assert.equal(f.sessions.get(row.session_id).status, 'open');
+});
+
+test('Stripe idempotency contention is retried without surfacing an open-checkout block', async (t) => {
+    const f = await setup(t);
+    f.setCreateConflict();
+    assert.equal((await f.checkout()).status, 200);
+    assert.equal(f.sessions.size, 1);
+    assert.equal(f.customers.size, 1);
 });
