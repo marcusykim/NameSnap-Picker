@@ -982,6 +982,7 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
 .celebration-hero {
   position: absolute;
   z-index: 6;
+  pointer-events: none;
   top: 50%;
   width: clamp(240px, 34vw, 560px);
   max-height: 78vh;
@@ -1019,7 +1020,6 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
   box-shadow: 12px 14px 0 var(--celebration-secondary), 0 34px 90px rgba(0,0,0,.38);
   text-align: center;
   backdrop-filter: blur(22px);
-  animation: celebration-card-in .7s cubic-bezier(.16,.86,.3,1.18) both;
 }
 .winner-close {
   position: absolute;
@@ -1141,11 +1141,6 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
 @keyframes hero-bounce {
   from { margin-top: -10px; }
   to { margin-top: 12px; }
-}
-@keyframes celebration-card-in {
-  0% { opacity: 0; transform: scale(.72) rotate(-3deg); }
-  68% { opacity: 1; transform: scale(1.025) rotate(.6deg); }
-  100% { opacity: 1; transform: scale(1) rotate(0); }
 }
 @keyframes celebration-screen-pulse {
   0%, 100% { background: var(--celebration-primary); opacity: 0; }

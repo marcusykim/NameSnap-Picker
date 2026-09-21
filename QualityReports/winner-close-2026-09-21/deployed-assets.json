@@ -1,0 +1,20 @@
+{
+  "htmlStatus": 200,
+  "cacheControl": "no-cache, max-age=0, must-revalidate",
+  "assets": [
+    {
+      "asset": "/assets/index-C9RBPEd1.js",
+      "status": 200,
+      "bytes": 365466,
+      "sha256": "68ca3113306a8a943ae2385e1c536459f56e1bee9e0c0d6409aad123cb7b14a7",
+      "matchesBuild": true
+    },
+    {
+      "asset": "/assets/index-zzUqVPZJ.css",
+      "status": 200,
+      "bytes": 103654,
+      "sha256": "dadc180f461012d714fa1aab3f4b298c06ab6a8a908c6d6c698503f605eb7d26",
+      "matchesBuild": true
+    }
+  ]
+}

@@ -30,7 +30,7 @@ after(async () => {
 });
 
 async function fixture(t, viewport = { width: 1440, height: 1000 }) {
-  const context = await browser.newContext({ viewport });
+  const context = await browser.newContext({ viewport, hasTouch: viewport.width <= 720 });
   t.after(() => context.close());
   const page = await context.newPage();
   let paid = false;
@@ -266,3 +266,57 @@ test('repeated incoming names warn when they would create duplicates in a nonemp
   assert.deepEqual(await f.pool(), ['1. Alex', '2. Jordan']);
   assert.deepEqual(await f.draft(), ['Jordan', 'Jordan']);
 });
+
+for (const [label, viewport] of [
+  ['desktop', { width: 1440, height: 1000 }],
+  ['phone', { width: 390, height: 844 }],
+  ['landscape', { width: 844, height: 390 }],
+]) {
+  test(`${label}: winner close stays clickable throughout the celebration entrance`, async t => {
+    const f = await fixture(t, viewport);
+    await f.add(['Alex']);
+    // Select a wide, right-side hero deterministically in this isolated fixture.
+    await f.page.evaluate(() => {
+      const original = crypto.getRandomValues.bind(crypto);
+      crypto.getRandomValues = array => {
+        crypto.getRandomValues = original;
+        array.fill(1);
+        return array;
+      };
+    });
+    await f.page.getByRole('button', { name: 'Quick pick', exact: true }).click();
+    await f.page.locator('.picker-display').click();
+    await f.page.locator('.winner-modal').waitFor({ state: 'attached' });
+    const samples = await f.page.evaluate(() => {
+      const backdrop = document.querySelector('.winner-celebration-backdrop');
+      const animations = backdrop.getAnimations({ subtree: true });
+      const button = backdrop.querySelector('.winner-close');
+      const samples = [80, 200, 650, 1200, 2100, 4900].map(time => {
+        for (const animation of animations) { animation.pause(); animation.currentTime = time; }
+        const rect = button.getBoundingClientRect();
+        const x = rect.x + rect.width / 2;
+        const y = rect.y + rect.height / 2;
+        const hit = document.elementFromPoint(x, y);
+        return { time, x, y, target: hit?.className, clickable: hit === button };
+      });
+      return samples;
+    });
+    await f.screenshot(`winner-close-${label}-late`);
+    await f.page.evaluate(() => {
+      for (const animation of document.querySelector('.winner-celebration-backdrop').getAnimations({ subtree: true })) {
+        animation.currentTime = 200;
+      }
+    });
+    await f.screenshot(`winner-close-${label}`);
+    t.diagnostic(JSON.stringify(samples));
+    assert.ok(samples.every(sample => sample.clickable), 'Decorative animation must not intercept the close button');
+    const first = samples[0];
+    assert.ok(samples.every(sample => Math.abs(sample.x - first.x) < 1 && Math.abs(sample.y - first.y) < 1), 'The close target must stay still from its first visible frame');
+    const early = samples.find(sample => sample.time === 200);
+    if (viewport.width <= 720) await f.page.touchscreen.tap(early.x, early.y);
+    else await f.page.mouse.click(early.x, early.y);
+    assert.equal(await f.page.locator('.winner-modal').count(), 0);
+    assert.deepEqual(await f.draft(), ['Alex']);
+    assert.equal(await f.page.locator('.pool-preview-header b').textContent(), '0');
+  });
+}
