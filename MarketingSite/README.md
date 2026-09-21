@@ -94,6 +94,18 @@ actions tied to the current ChatGPT user. Leave public content anonymous.
 - `npm test`: build the starter and verify its rendered loading skeleton
 - `npm run db:generate`: generate Drizzle migrations after schema changes
 
+## NameSnap browser regression tests
+
+Run `npx playwright install chromium` once, then `npm run test:picker`.
+The suite builds the production static site, serves it on local port 4191,
+and tests picker sessions in isolated, headless browsers. Payment responses are
+fixtures; these tests do not sign into accounts, send email, or create charges.
+Set `NAMESNAP_ARTIFACT_DIR` to save desktop and phone screenshots.
+
+The retired-host configuration must preserve Firebase's `/__/` resources on
+their original origin. Redirecting `/__/firebase/init.json` breaks the hosted
+email action handler before it can return a restore link to NameSnap.
+
 ## Learn More
 
 - [vinext Documentation](https://github.com/cloudflare/vinext)

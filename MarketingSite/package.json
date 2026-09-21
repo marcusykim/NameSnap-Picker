@@ -17,7 +17,8 @@
     "worker:check": "wrangler deploy --dry-run --config worker/wrangler.toml --outdir .dry-run",
     "worker:dev": "wrangler dev --config worker/wrangler.toml --local",
     "worker:deploy": "wrangler deploy --config worker/wrangler.toml",
-    "test:checkout": "node --experimental-sqlite --test tests/checkout.test.mjs"
+    "test:checkout": "node --experimental-sqlite --test tests/checkout.test.mjs",
+    "test:picker": "npm run build:static && node --test tests/picker-session.browser.test.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",
@@ -41,6 +42,7 @@
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "7.1.1",
     "globals": "16.4.0",
+    "playwright": "1.62.1",
     "react-server-dom-webpack": "^19.2.8",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3",

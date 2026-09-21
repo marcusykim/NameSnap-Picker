@@ -40,6 +40,7 @@ const FREE_LIMIT = 16;
 const POOL_PREVIEW_LIMIT = 20;
 const STORAGE_KEY = "namesnap.web.session.v1";
 const PENDING_NAMES_KEY = "namesnap.web.pending-upgrade.v1";
+const PENDING_DRAFT_KEY = "namesnap.web.pending-upgrade-draft.v1";
 const IDENTITY_KEY = "namesnap.web.identity.v1";
 const AUTH_EMAIL_KEY = "namesnap.web.purchase-email.v1";
 const API_URL = "https://namesnap-web-payments.royal-fog-6bed.workers.dev";
@@ -699,7 +700,10 @@ export function NameSnapWebApp() {
             const additions = queued.map((name) => ({ id: makeId(), drawNumber: 0, name, included: true }));
             setEntries((current) => renumberEntries([...current, ...additions]));
             setLastAddedIds(additions.map((entry) => entry.id));
+            const submittedDraft = sessionStorage.getItem(PENDING_DRAFT_KEY);
+            setInput((current) => current === submittedDraft ? "" : current);
             sessionStorage.removeItem(PENDING_NAMES_KEY);
+            sessionStorage.removeItem(PENDING_DRAFT_KEY);
           }
           if (!cancellationRequired) setShowUpgrade(false);
         }
@@ -839,6 +843,8 @@ export function NameSnapWebApp() {
     // Picker state has its own key. Purchase identity, verified email, Firebase
     // authentication, and server-side entitlement records remain untouched.
     localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(PENDING_NAMES_KEY);
+    sessionStorage.removeItem(PENDING_DRAFT_KEY);
     setInput("");
     setEntries([]);
     setLastAddedIds([]);
@@ -946,7 +952,10 @@ export function NameSnapWebApp() {
   }, [confirmation, dismissWinner, pendingDuplicateNames.length, showSessionStart, showUpgrade, spin]);
 
   const appendNamesToPool = (names: string[]) => {
-    if (!names.length) return;
+    if (!names.length) {
+      setInput("");
+      return;
+    }
     if (!isPremium && entries.length + names.length > FREE_LIMIT) {
       setPendingNames(names);
       setShowUpgrade(true);
@@ -955,6 +964,7 @@ export function NameSnapWebApp() {
     const additions = names.map((name) => ({ id: makeId(), drawNumber: 0, name, included: true }));
     setEntries((current) => renumberEntries([...current, ...additions]));
     setLastAddedIds(additions.map((entry) => entry.id));
+    setInput("");
   };
 
   const addNames = () => {
@@ -1023,6 +1033,7 @@ export function NameSnapWebApp() {
     setCheckoutBusy(plan);
     setCheckoutError(null);
     sessionStorage.setItem(PENDING_NAMES_KEY, pendingNames.join("\n"));
+    sessionStorage.setItem(PENDING_DRAFT_KEY, input);
     try {
       const response = await apiFetch("/api/checkout", {
         method: "POST",
@@ -1087,6 +1098,8 @@ export function NameSnapWebApp() {
   const undoLastAdd = () => {
     if (!lastAddedIds.length) return;
     const ids = new Set(lastAddedIds);
+    const restoredNames = entries.filter((entry) => ids.has(entry.id)).map((entry) => entry.name);
+    setInput(writeInputNames([...restoredNames, ...parseNames(input)]));
     setEntries((current) => renumberEntries(current.filter((entry) => !ids.has(entry.id))));
     setExcludedIds((current) => current.filter((id) => !ids.has(id)));
     setLastAddedIds([]);

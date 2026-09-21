@@ -273,14 +273,22 @@ test("provides a stage-only web presentation fallback when browser fullscreen is
   assert.ok(standardCelebration > stageEnd);
 });
 
-test("retires the old Firebase hostname with path-preserving permanent redirects", async () => {
+test("redirects old public pages while keeping Firebase authentication resources on their origin", async () => {
   const retiredConfig = JSON.parse(
     await readFile(path.join(marketingDirectory, "firebase.retired.json"), "utf8"),
   );
 
   assert.equal(retiredConfig.hosting.site, "namesnap-picker-6759588637");
-  assert.deepEqual(retiredConfig.hosting.redirects, [
-    { source: "/", destination: "https://getnamesnap.web.app/", type: 301 },
-    { source: "/:path*", destination: "https://getnamesnap.web.app/:path", type: 301 },
-  ]);
+  const [root, publicPages] = retiredConfig.hosting.redirects;
+  assert.deepEqual(root, { source: "/", destination: "https://getnamesnap.web.app/", type: 301 });
+  assert.equal(publicPages.destination, "https://getnamesnap.web.app/:path");
+  assert.equal(publicPages.type, 301);
+  // This RE2-compatible pattern uses Python-style named captures in Hosting.
+  const route = new RegExp(publicPages.regex.replace("(?P<path>", "(?<path>"));
+  for (const pathname of ["/support", "/privacy", "/terms", "/assets/icon.png", "/_legacy/page", "/_"]) {
+    assert.equal(route.exec(pathname)?.groups.path, pathname.slice(1));
+  }
+  for (const pathname of ["/__/firebase/init.json", "/__/firebase/init.js", "/__/auth/action", "/__/auth/handler", "/__/auth/iframe"]) {
+    assert.equal(route.test(pathname), false, `${pathname} must stay on the Firebase origin`);
+  }
 });

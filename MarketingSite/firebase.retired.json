@@ -13,7 +13,7 @@
         "type": 301
       },
       {
-        "source": "/:path*",
+        "regex": "^/(?P<path>[^_].*|_[^_].*|_)$",
         "destination": "https://getnamesnap.web.app/:path",
         "type": 301
       }
