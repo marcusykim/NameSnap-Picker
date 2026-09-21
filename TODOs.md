@@ -1,5 +1,18 @@
 # NameSnap TODOs
 
+## Current priorities — September 21, 2026
+
+Web status: implementation is done, with the two accuracy checks below remaining.
+
+- [ ] **Verify individual picks are accurate.** Confirm the selected eligible contestant's name and number match the wheel/quick-pick result, winner modal, and pick history, including contestants with identical names.
+- [ ] **Verify individual name manipulation is accurate.** Check adding, editing, deleting, including/excluding, undoing additions, and resetting picks affect the intended contestant only and keep names, numbers, and active-pool state consistent.
+- [ ] **Finalize the iPhone app.** Complete app QA, purchase/restore checks, and release preparation.
+- [ ] **Upload the iPhone app.** Validate the release archive and upload the finalized build to App Store Connect.
+- [ ] **Find 100 Twitch streamers for NameSnap DM outreach.** Build a prospect list with channel links, relevant use cases, and available contact routes.
+
+The release notes below are historical context. Recheck their status before
+acting; the list above is the current work queue.
+
 ## Current App Store Submission Priorities
 
 ### 1. Fix signing and provisioning for iPhoneOS Release builds
