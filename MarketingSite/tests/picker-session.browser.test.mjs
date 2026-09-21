@@ -46,6 +46,10 @@ async function fixture(t, viewport = { width: 1440, height: 1000 }) {
     for (const name of names) await page.locator('.name-editor-row-new input').fill(name);
   }
   async function add(names) { await typeNames(names); await page.locator('.add-button').click(); }
+  async function clearDraft() {
+    await page.getByRole('button', { name: 'Clear this list', exact: true }).click();
+    await page.getByRole('button', { name: 'Clear list', exact: true }).click();
+  }
   async function screenshot(name) {
     if (artifactDirectory) await page.screenshot({ path: path.join(artifactDirectory, name + '.png') });
   }
@@ -55,57 +59,66 @@ async function fixture(t, viewport = { width: 1440, height: 1000 }) {
     await page.locator('.lifetime-plan').click();
     await page.waitForURL('https://checkout.stripe.com/**');
   }
-  return { page, draft, pool, add, typeNames, screenshot, beginUpgrade, setPaid: () => { paid = true; } };
+  return { page, draft, pool, add, typeNames, clearDraft, screenshot, beginUpgrade, setPaid: () => { paid = true; } };
 }
 
 for (const [label, viewport] of [['desktop', { width: 1440, height: 1000 }], ['phone', { width: 390, height: 844 }]]) {
-  test(`${label}: a new batch does not resubmit names from the previous add`, async t => {
+  test(`${label}: added names persist until cleared and fresh sessions start without warnings`, async t => {
     const f = await fixture(t, viewport);
     await f.add(['Alex', 'Jordan']);
+    assert.deepEqual(await f.draft(), ['Alex', 'Jordan']);
+    assert.equal(await f.page.locator('.duplicate-modal').count(), 0);
+    assert.equal(await f.page.locator('.add-button').isEnabled(), true);
+    await f.screenshot(`${label}-added`);
+    await f.page.getByRole('button', { name: 'Clear this list', exact: true }).click();
+    await f.page.getByRole('button', { name: 'Cancel', exact: true }).click();
+    assert.deepEqual(await f.draft(), ['Alex', 'Jordan']);
+    await f.clearDraft();
     assert.deepEqual(await f.draft(), []);
+    assert.deepEqual(await f.pool(), ['1. Alex', '2. Jordan']);
     await f.add(['Casey']);
     assert.equal(await f.page.locator('.duplicate-modal').count(), 0);
     assert.deepEqual(await f.pool(), ['1. Alex', '2. Jordan', '3. Casey']);
-    assert.deepEqual(await f.draft(), []);
-    assert.equal(await f.page.locator('.add-button').isDisabled(), true);
-    await f.screenshot(`${label}-added`);
+    assert.deepEqual(await f.draft(), ['Casey']);
     await f.page.reload();
     await f.page.locator('.session-fresh').click();
     assert.deepEqual(await f.pool(), []);
+    assert.deepEqual(await f.draft(), []);
     await f.add(['Alex', 'Jordan']);
     assert.equal(await f.page.locator('.duplicate-modal').count(), 0);
     assert.deepEqual(await f.pool(), ['1. Alex', '2. Jordan']);
+    assert.deepEqual(await f.draft(), ['Alex', 'Jordan']);
     await f.screenshot(`${label}-fresh`);
   });
 }
 
-test('real duplicates still offer cancel, skip, and add-all choices', async t => {
+test('active-pool duplicates offer cancel, skip, and add-all without clearing the input', async t => {
   const f = await fixture(t);
-  await f.add(['Alex', 'Alex']);
+  await f.add(['Alex']);
+  await f.add(['Casey']);
   await f.page.locator('.duplicate-modal').waitFor();
+  assert.match(await f.page.locator('#duplicate-message').textContent(), /1 duplicate name in the active pool/);
   await f.page.getByRole('button', { name: 'Cancel', exact: true }).click();
-  assert.deepEqual(await f.draft(), ['Alex', 'Alex']);
-  assert.deepEqual(await f.pool(), []);
+  assert.deepEqual(await f.draft(), ['Alex', 'Casey']);
+  assert.deepEqual(await f.pool(), ['1. Alex']);
   await f.page.locator('.add-button').click();
   await f.page.getByRole('button', { name: 'Skip duplicates', exact: true }).click();
-  assert.deepEqual(await f.pool(), ['1. Alex']);
-  assert.deepEqual(await f.draft(), []);
-  await f.add(['Alex', 'Casey']);
-  await f.page.getByRole('button', { name: 'Skip duplicates', exact: true }).click();
   assert.deepEqual(await f.pool(), ['1. Alex', '2. Casey']);
-  assert.deepEqual(await f.draft(), []);
-  await f.add(['Alex']);
+  assert.deepEqual(await f.draft(), ['Alex', 'Casey']);
+  await f.page.locator('.add-button').click();
   await f.page.getByRole('button', { name: 'Skip duplicates', exact: true }).click();
-  assert.deepEqual(await f.draft(), []);
+  assert.deepEqual(await f.draft(), ['Alex', 'Casey']);
   assert.deepEqual(await f.pool(), ['1. Alex', '2. Casey']);
-  await f.add(['Alex']);
+  await f.page.locator('.add-button').click();
   await f.screenshot('actual-duplicate');
+  await f.page.setViewportSize({ width: 390, height: 844 });
+  await f.screenshot('actual-duplicate-phone');
   await f.page.getByRole('button', { name: 'Add all anyway', exact: true }).click();
-  assert.deepEqual(await f.pool(), ['1. Alex', '2. Casey', '3. Alex']);
-  assert.deepEqual(await f.draft(), []);
+  assert.deepEqual(await f.pool(), ['1. Alex', '2. Casey', '3. Alex', '4. Casey']);
+  assert.deepEqual(await f.draft(), ['Alex', 'Casey']);
 });
 
-test('undo returns the added batch to the editor and preserves new unsent names', async t => {
+test('undo changes the pool without changing the persistent input', async t => {
   const f = await fixture(t);
   await f.add(['Alex', 'Jordan']);
   await f.typeNames(['Casey']);
@@ -115,22 +128,24 @@ test('undo returns the added batch to the editor and preserves new unsent names'
   await f.page.locator('.add-button').click();
   assert.equal(await f.page.locator('.duplicate-modal').count(), 0);
   assert.deepEqual(await f.pool(), ['1. Alex', '2. Jordan', '3. Casey']);
+  assert.deepEqual(await f.draft(), ['Alex', 'Jordan', 'Casey']);
 });
 
-test('continuing a saved session keeps the pool and only the unsubmitted draft', async t => {
+test('continuing a saved session preserves both submitted and unsubmitted input', async t => {
   const f = await fixture(t);
   await f.add(['Alex']);
   await f.typeNames(['Casey']);
   await f.page.reload();
   await f.page.locator('.session-continue').click();
   assert.deepEqual(await f.pool(), ['1. Alex']);
-  assert.deepEqual(await f.draft(), ['Casey']);
+  assert.deepEqual(await f.draft(), ['Alex', 'Casey']);
   await f.page.locator('.add-button').click();
-  assert.equal(await f.page.locator('.duplicate-modal').count(), 0);
+  assert.equal(await f.page.locator('.duplicate-modal').count(), 1);
+  await f.page.getByRole('button', { name: 'Skip duplicates', exact: true }).click();
   assert.deepEqual(await f.pool(), ['1. Alex', '2. Casey']);
 });
 
-test('exceeding the free limit preserves the draft until the queued add succeeds', async t => {
+test('checkout cancellation and success both preserve the input', async t => {
   const f = await fixture(t);
   await f.beginUpgrade();
   await f.page.goto(baseUrl + '/?checkout=cancelled');
@@ -141,7 +156,7 @@ test('exceeding the free limit preserves the draft until the queued add succeeds
   f.setPaid();
   await f.page.goto(baseUrl + '/?checkout=success&session_id=cs_test_pickerfixture');
   await f.page.waitForFunction(() => document.querySelectorAll('.pool-preview li').length === 17);
-  assert.deepEqual(await f.draft(), []);
+  assert.equal((await f.draft()).length, 17);
 });
 
 test('starting fresh discards pending checkout names without removing paid access', async t => {
@@ -174,4 +189,80 @@ test('a late checkout return preserves a newer unsubmitted draft', async t => {
   await f.page.goto(baseUrl + '/?checkout=success&session_id=cs_test_pickerfixture');
   await f.page.waitForFunction(() => document.querySelectorAll('.pool-preview li').length === 17);
   assert.deepEqual(await f.draft(), ['New participant']);
+});
+
+test('zero active contestants does not warn when adding names from previous picks', async t => {
+  const f = await fixture(t);
+  await f.add(['Alex']);
+  await f.page.getByRole('button', { name: 'Quick pick', exact: true }).click();
+  await f.page.locator('.picker-display').click();
+  await f.page.getByRole('button', { name: 'Keep going', exact: true }).click();
+  assert.equal(await f.page.locator('.pool-preview-header b').textContent(), '0');
+  await f.screenshot('zero-active-before-add');
+  await f.page.locator('.add-button').click();
+  assert.equal(await f.page.locator('.duplicate-modal').count(), 0);
+  assert.equal(await f.page.locator('.pool-preview-header b').textContent(), '1');
+  await f.screenshot('zero-active-added');
+});
+
+test('zero active pool accepts the first submitted list without a duplicate confirmation', async t => {
+  const f = await fixture(t);
+  assert.equal(await f.page.locator('.pool-preview-header b').textContent(), '0');
+  await f.add(['Alex', 'Alex']);
+  assert.equal(await f.page.locator('.duplicate-modal').count(), 0);
+  assert.deepEqual(await f.pool(), ['1. Alex', '2. Alex']);
+});
+
+test('a duplicate confirmation closes if an in-progress pick empties the active pool', async t => {
+  const f = await fixture(t);
+  await f.add(['Alex']);
+  await f.page.getByRole('button', { name: 'Quick pick', exact: true }).click();
+  await f.page.locator('.picker-display').click();
+  await f.page.locator('.add-button').click();
+  await f.page.locator('.duplicate-modal').waitFor();
+  await f.page.getByRole('button', { name: 'Keep going', exact: true }).click();
+  assert.equal(await f.page.locator('.pool-preview-header b').textContent(), '0');
+  assert.equal(await f.page.locator('.duplicate-modal').count(), 0);
+  assert.deepEqual(await f.draft(), ['Alex']);
+  await f.screenshot('zero-active-after-pending-pick');
+  await f.page.locator('.add-button').click();
+  assert.equal(await f.page.locator('.duplicate-modal').count(), 0);
+  assert.equal(await f.page.locator('.pool-preview-header b').textContent(), '1');
+});
+
+test('clearing the pool preserves the input and permits it to be added without a warning', async t => {
+  const f = await fixture(t);
+  await f.add(['Alex', 'Jordan']);
+  await f.page.getByRole('button', { name: 'Clear pool', exact: true }).first().click();
+  await f.page.locator('.confirmation-confirm').click();
+  assert.deepEqual(await f.draft(), ['Alex', 'Jordan']);
+  assert.equal(await f.page.locator('.pool-preview-header b').textContent(), '0');
+  await f.page.locator('.add-button').click();
+  assert.equal(await f.page.locator('.duplicate-modal').count(), 0);
+  assert.deepEqual(await f.pool(), ['1. Alex', '2. Jordan']);
+});
+
+test('inactive picked names do not count as duplicates while other contestants are still active', async t => {
+  const f = await fixture(t);
+  await f.add(['Alex', 'Jordan']);
+  await f.page.getByRole('button', { name: 'Quick pick', exact: true }).click();
+  await f.page.locator('.picker-display').click();
+  await f.page.getByRole('button', { name: 'Keep going', exact: true }).click();
+  const pickedName = (await f.page.locator('.pool-preview li.picked > span').textContent()).replace(/^\d+\. /, '');
+  await f.clearDraft();
+  await f.add([pickedName]);
+  assert.equal(await f.page.locator('.duplicate-modal').count(), 0);
+  assert.equal(await f.page.locator('.pool-preview-header b').textContent(), '2');
+});
+
+test('repeated incoming names warn when they would create duplicates in a nonempty active pool', async t => {
+  const f = await fixture(t);
+  await f.add(['Alex']);
+  await f.clearDraft();
+  await f.add(['Jordan', 'Jordan']);
+  await f.page.locator('.duplicate-modal').waitFor();
+  assert.match(await f.page.locator('#duplicate-message').textContent(), /1 duplicate name in the active pool/);
+  await f.page.getByRole('button', { name: 'Skip duplicates', exact: true }).click();
+  assert.deepEqual(await f.pool(), ['1. Alex', '2. Jordan']);
+  assert.deepEqual(await f.draft(), ['Jordan', 'Jordan']);
 });

@@ -633,6 +633,16 @@ export function NameSnapWebApp() {
     () => entries.filter((entry) => entry.included && (!noRepeats || !excludedIds.includes(entry.id))),
     [entries, excludedIds, noRepeats],
   );
+  const pendingDuplicateCount = pendingDuplicateNames.length
+    - namesExcludingDuplicates(pendingDuplicateNames, activeEntries.map((entry) => entry.name)).length;
+
+  useEffect(() => {
+    // A pick may finish while the duplicate decision is open.
+    if (pendingDuplicateNames.length && (!activeEntries.length || !pendingDuplicateCount)) {
+      setPendingDuplicateNames([]);
+    }
+  }, [activeEntries.length, pendingDuplicateCount, pendingDuplicateNames.length]);
+
   const celebrationPieces = useMemo(
     () => celebrationParticles(celebration?.variation ?? 0),
     [celebration?.variation],
@@ -700,8 +710,6 @@ export function NameSnapWebApp() {
             const additions = queued.map((name) => ({ id: makeId(), drawNumber: 0, name, included: true }));
             setEntries((current) => renumberEntries([...current, ...additions]));
             setLastAddedIds(additions.map((entry) => entry.id));
-            const submittedDraft = sessionStorage.getItem(PENDING_DRAFT_KEY);
-            setInput((current) => current === submittedDraft ? "" : current);
             sessionStorage.removeItem(PENDING_NAMES_KEY);
             sessionStorage.removeItem(PENDING_DRAFT_KEY);
           }
@@ -952,10 +960,7 @@ export function NameSnapWebApp() {
   }, [confirmation, dismissWinner, pendingDuplicateNames.length, showSessionStart, showUpgrade, spin]);
 
   const appendNamesToPool = (names: string[]) => {
-    if (!names.length) {
-      setInput("");
-      return;
-    }
+    if (!names.length) return;
     if (!isPremium && entries.length + names.length > FREE_LIMIT) {
       setPendingNames(names);
       setShowUpgrade(true);
@@ -964,14 +969,13 @@ export function NameSnapWebApp() {
     const additions = names.map((name) => ({ id: makeId(), drawNumber: 0, name, included: true }));
     setEntries((current) => renumberEntries([...current, ...additions]));
     setLastAddedIds(additions.map((entry) => entry.id));
-    setInput("");
   };
 
   const addNames = () => {
     const names = parseNames(input);
     if (!names.length) return;
-    const uniqueNames = namesExcludingDuplicates(names, entries.map((entry) => entry.name));
-    if (uniqueNames.length !== names.length) {
+    const uniqueNames = namesExcludingDuplicates(names, activeEntries.map((entry) => entry.name));
+    if (activeEntries.length > 0 && uniqueNames.length !== names.length) {
       setPendingDuplicateNames(names);
       return;
     }
@@ -1033,7 +1037,6 @@ export function NameSnapWebApp() {
     setCheckoutBusy(plan);
     setCheckoutError(null);
     sessionStorage.setItem(PENDING_NAMES_KEY, pendingNames.join("\n"));
-    sessionStorage.setItem(PENDING_DRAFT_KEY, input);
     try {
       const response = await apiFetch("/api/checkout", {
         method: "POST",
@@ -1098,8 +1101,6 @@ export function NameSnapWebApp() {
   const undoLastAdd = () => {
     if (!lastAddedIds.length) return;
     const ids = new Set(lastAddedIds);
-    const restoredNames = entries.filter((entry) => ids.has(entry.id)).map((entry) => entry.name);
-    setInput(writeInputNames([...restoredNames, ...parseNames(input)]));
     setEntries((current) => renumberEntries(current.filter((entry) => !ids.has(entry.id))));
     setExcludedIds((current) => current.filter((id) => !ids.has(id)));
     setLastAddedIds([]);
@@ -1177,9 +1178,6 @@ export function NameSnapWebApp() {
       await stageRef.current.requestFullscreen().catch(() => undefined);
     }
   };
-
-  const pendingDuplicateCount = pendingDuplicateNames.length
-    - namesExcludingDuplicates(pendingDuplicateNames, entries.map((entry) => entry.name)).length;
 
   const winnerCelebrationOverlay = winner && celebration ? (
     <div
@@ -1518,17 +1516,17 @@ export function NameSnapWebApp() {
         </div>
       )}
 
-      {pendingDuplicateNames.length > 0 && (
+      {activeEntries.length > 0 && pendingDuplicateCount > 0 && (
         <div className="modal-backdrop confirmation-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setPendingDuplicateNames([]); }}>
           <section className="confirmation-modal duplicate-modal" role="dialog" aria-modal="true" aria-labelledby="duplicate-title" aria-describedby="duplicate-message">
             <span className="confirmation-kicker">DUPLICATES FOUND</span>
             <span className="confirmation-mark" aria-hidden="true">?</span>
             <h2 id="duplicate-title">Add them again?</h2>
-            <p id="duplicate-message">{pendingDuplicateCount} duplicate {pendingDuplicateCount === 1 ? "name was" : "names were"} found in this list or pool. What should NameSnap do?</p>
+            <p id="duplicate-message">Adding this list would create {pendingDuplicateCount} duplicate {pendingDuplicateCount === 1 ? "name" : "names"} in the active pool. What should NameSnap do?</p>
             <div className="duplicate-actions">
               <button ref={duplicateCancelRef} type="button" className="confirmation-cancel" onClick={() => setPendingDuplicateNames([])}>Cancel</button>
               <button type="button" className="confirmation-cancel" onClick={() => {
-                const uniqueNames = namesExcludingDuplicates(pendingDuplicateNames, entries.map((entry) => entry.name));
+                const uniqueNames = namesExcludingDuplicates(pendingDuplicateNames, activeEntries.map((entry) => entry.name));
                 setPendingDuplicateNames([]);
                 appendNamesToPool(uniqueNames);
               }}>Skip duplicates</button>

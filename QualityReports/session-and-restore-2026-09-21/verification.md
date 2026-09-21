@@ -2,6 +2,11 @@
 
 September 21, 2026. Site: https://getnamesnap.web.app.
 
+> The picker input-clearing behavior below was superseded later the same day by
+> the user's explicit request to preserve input. See
+> [the subsequent release](../persistent-input-active-pool-2026-09-21/verification.md).
+> The restore-link findings and repair remain applicable.
+
 ## Picker state
 
 Reproduced the stale-draft problem: adding Alex and Jordan left both names in

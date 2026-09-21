@@ -230,7 +230,7 @@ test("offers three duplicate-name outcomes and uses only 120+ BPM winner music",
   assert.match(webAppSource, />Cancel<\/button>/);
   assert.match(webAppSource, />Skip duplicates<\/button>/);
   assert.match(webAppSource, />Add all anyway<\/button>/);
-  assert.match(webAppSource, /namesExcludingDuplicates\(names, entries\.map/);
+  assert.match(webAppSource, /namesExcludingDuplicates\(names, activeEntries\.map/);
   assert.match(webAppSource, /\{ length: 100 \}/);
   assert.match(webAppSource, /winnerAutoDismissTimerRef/);
   assert.match(webAppSource, /setTimeout\(dismissWinner, 10_000\)/);
