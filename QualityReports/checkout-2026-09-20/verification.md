@@ -4,14 +4,17 @@ Implemented September 20, 2026 for the purchase flow at https://getnamesnap.web.
 
 ## Release status
 
-The frontend and payment worker are deployed. **Live checkout remains blocked:**
-Stripe returned HTTP 403 for `POST /v1/customers` during the browser smoke test.
-The purchase dialog displays the payment service error; it did not reach hosted
-Stripe Checkout. No payment was attempted or charged.
+The frontend and payment worker are deployed. **Live checkout opening passed**
+for both $6.99 Lifetime and $0.99/month Monthly, with the purchase email carried
+into Stripe's payment form. Both flows reached the regular payment form without
+email-link authentication. No payment was submitted or charged.
 
-Approval has been requested to enable Customers: Write on the existing restricted
-Stripe key used by the NameSnap worker. Do not describe this release as a working
-end-to-end checkout until that permission is verified and a live session opens.
+The initial smoke test exposed HTTP 403 for `POST /v1/customers`. With Marcus's
+explicit approval, Customers changed from None to Write on the existing
+“NameSnap web payments runtime” restricted key in the visibly verified SideQuest
+Software Stripe account. A comparison of permission selections confirmed that
+Customers was the only changed resource. Saving the setting resolved the error;
+both subsequent live Checkout sessions opened successfully.
 
 ## Behavior
 
@@ -60,9 +63,22 @@ end-to-end checkout until that permission is verified and a live session opens.
 - D1 migrations `0003_email_checkout.sql` and `0004_checkout_recovery.sql` applied
   remotely. There were zero checkout reservations before migration 0004.
 
-## Remaining acceptance check
+## Live verification details
 
-Verify the correct Stripe account and restricted key, resolve the customer-create
-permission failure, and open a live hosted checkout showing the selected price
-and purchase email. Stop before payment. A real charge and email-delivery test
-require separate explicit scope; neither was performed here.
+- Lifetime displayed “NameSnap Unlimited Lifetime”, $6.99, and the purchase email.
+- Monthly displayed “Subscribe to NameSnap Unlimited Monthly”, $0.99 per month,
+  and the same purchase email. Switching plans expired the earlier open checkout.
+- Stripe offered optional Link verification for the existing email. Choosing
+  “Pay without Link” opened the regular payment form without accessing saved
+  payment information or entering a verification code.
+- Returned the browser to NameSnap's purchase choices after verification.
+- A real charge and real recovery-email delivery were not performed.
+
+## Browser cleanup
+
+The NameSnap launcher still included the retired Firebase hostname. Because that
+URL redirects to getnamesnap.web.app, every lease-wrapper launch reopened it.
+Updated only NameSnap's website URL in the live project registry and platform
+manifest to the canonical hostname, deduplicated that project's launch URLs,
+and synchronized the browser runtime. Duplicate NameSnap root-page tabs were
+closed while preserving the current purchase screen and all account tabs.
