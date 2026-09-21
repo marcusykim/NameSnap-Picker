@@ -16,7 +16,8 @@
     "db:generate": "drizzle-kit generate",
     "worker:check": "wrangler deploy --dry-run --config worker/wrangler.toml --outdir .dry-run",
     "worker:dev": "wrangler dev --config worker/wrangler.toml --local",
-    "worker:deploy": "wrangler deploy --config worker/wrangler.toml"
+    "worker:deploy": "wrangler deploy --config worker/wrangler.toml",
+    "test:checkout": "node --experimental-sqlite --test tests/checkout.test.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

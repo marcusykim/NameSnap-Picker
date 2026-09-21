@@ -1795,3 +1795,31 @@ h1 em, h2 em { color: var(--ns-indigo); font-family: "Rubik Mono One", sans-seri
 ):disabled {
   --ns-overlap-stroke: var(--ns-disabled-line);
 }
+
+/* Purchase email and plan choices remain readable at phone and tablet widths. */
+.upgrade-modal .purchase-account { min-width: 0; margin-top: 20px; }
+.upgrade-modal .purchase-account input { width: 100%; min-width: 0; font-size: 16px; }
+.upgrade-modal .purchase-account label { font-size: 10px; }
+.upgrade-modal .purchase-account p { font-size: 12px; font-weight: 600; }
+.upgrade-modal .checkout-handoff { margin: 20px 0 0 !important; font-size: 12px; font-weight: 600 !important; text-align: center; }
+.upgrade-modal .restore-button { min-height: 44px; margin-top: 8px; font-size: 12px; }
+.upgrade-modal .checkout-error { font-size: 12px; }
+.upgrade-modal .modal-close { width: 44px; height: 44px; }
+.upgrade-modal .plan-grid button b { overflow-wrap: normal; }
+@media (max-width: 480px) {
+  .upgrade-modal { padding: 32px 20px 24px; }
+  .upgrade-modal h2 { font-size: 32px; }
+  .upgrade-modal .plan-grid { gap: 12px; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .upgrade-modal .plan-grid.lifetime-only { grid-template-columns: minmax(0,1fr); }
+  .upgrade-modal .plan-grid button { padding: 14px 10px; min-height: 132px; }
+  .upgrade-modal .plan-grid button b { font-size: 11px; }
+  .upgrade-modal .plan-grid button strong { font-size: 26px; }
+  .upgrade-modal .legal-links { margin-right: -20px; margin-left: -20px; }
+}
+
+.upgrade-modal .renewal-copy { margin: 20px 0 0; font-size: 11px; }
+.upgrade-modal .platform-note { margin-top: 20px; font-size: 10px; }
+.upgrade-modal .payment-processing { padding: 24px 16px; border: 2px solid var(--ns-ink); border-radius: 16px; background: #e0f4ab; font-size: 16px; text-align: center; }
+.purchase-active-notice { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0 28px 20px; padding: 14px 18px; border: 2px solid var(--ns-ink); border-radius: 16px; background: #e0f4ab; color: #18222b; font-size: 14px; }
+.is-presenting .purchase-active-notice { display: none; }
+@media (max-width: 480px) { .purchase-active-notice { margin: 0 14px 16px; } }

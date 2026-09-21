@@ -127,7 +127,8 @@ test("publishes the privacy policy with the current contact", async () => {
   assert.doesNotMatch(html, /Party while you do it/i);
   assert.match(html, /Contestant data stays local/i);
   assert.match(html, /does not send contestant names or winner history/i);
-  assert.match(html, /Cloudflare stores only one-way hashes/i);
+  assert.match(html, /Cloudflare stores one-way hashes/i);
+  assert.match(html, /an email sign-in link is not required/i);
   assert.match(html, /Firebase provides website hosting/i);
   assert.match(html, /mailto:sidequest@ik\.me\?subject=NameSnap%20Privacy/i);
   assert.doesNotMatch(html, /Mracuth@gmail\.com/i);

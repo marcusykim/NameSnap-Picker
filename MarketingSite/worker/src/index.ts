@@ -44,12 +44,18 @@ interface StripeCheckoutSession {
   customer_details?: { email?: string | null } | null;
 }
 
-interface CheckoutAttemptRow {
-  account_hash: string;
+interface CheckoutReservation {
+  email_hash: string;
+  owner_hash: string;
   plan: Plan;
-  session_id: string;
-  checkout_url: string;
+  generation: string;
+  session_id: string | null;
   expires_at: number;
+  customer_id: string | null;
+  identity_hash: string | null;
+  buyer_identity: string | null;
+  account_hash: string | null;
+  first_attempt_at: number | null;
 }
 
 interface StripeSubscription {
@@ -79,6 +85,7 @@ interface RequestContext {
 const LOCAL_ORIGINS = new Set(["http://localhost:3000", "http://localhost:4190"]);
 const ACTIVE_SUBSCRIPTION_STATES = new Set(["active", "trialing"]);
 const IDENTITY_PATTERN = /^[A-Za-z0-9_-]{43,128}$/;
+const BROWSER_REFERENCE_PATTERN = /^b_([a-f0-9]{64})$/;
 const ACCOUNT_REFERENCE_PATTERN = /^a_([a-f0-9]{64})$/;
 let firebaseJwksCache: { expiresAt: number; keys: Record<string, JsonWebKey> } | null = null;
 
@@ -145,7 +152,7 @@ async function firebaseJwks() {
   if (firebaseJwksCache && firebaseJwksCache.expiresAt > Date.now()) return firebaseJwksCache.keys;
   const response = await fetch("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com");
   if (!response.ok) throw new ApiError(503, "Purchase accounts are temporarily unavailable.");
-  const payload = await response.json() as { keys?: JsonWebKey[] };
+  const payload = await response.json() as { keys?: (JsonWebKey & { kid?: string })[] };
   const keys = Object.fromEntries((payload.keys ?? []).flatMap((key) => typeof key.kid === "string" ? [[key.kid, key]] : []));
   if (!Object.keys(keys).length) throw new ApiError(503, "Purchase accounts are temporarily unavailable.");
   const maxAge = Number(response.headers.get("Cache-Control")?.match(/max-age=(\d+)/)?.[1] ?? 3600);
@@ -229,21 +236,22 @@ async function resolveEntitlement(env: Env, context: RequestContext) {
   if (accountRow) return accountRow;
 
   const browserRow = await entitlement(env, context.identity);
-  if (browserRow?.active === 1 && !browserRow.account_hash) {
-    await env.DB.prepare("UPDATE entitlements SET account_hash = ?, email_hash = ?, updated_at = unixepoch() WHERE identity_hash = ?")
-      .bind(context.accountHash, context.emailHash, browserRow.identity_hash).run();
-    return { ...browserRow, account_hash: context.accountHash, email_hash: context.emailHash };
-  }
-
   if (context.emailHash) {
     const emailRow = await entitlementByEmail(env, context.emailHash);
     if (emailRow && (!emailRow.account_hash || emailRow.account_hash === context.accountHash)) {
       if (!emailRow.account_hash) {
-        await env.DB.prepare("UPDATE entitlements SET account_hash = ?, updated_at = unixepoch() WHERE identity_hash = ?")
+        await env.DB.prepare("UPDATE entitlements SET account_hash = ?, updated_at = unixepoch() WHERE identity_hash = ? AND account_hash IS NULL")
           .bind(context.accountHash, emailRow.identity_hash).run();
       }
       return { ...emailRow, account_hash: context.accountHash };
     }
+  }
+
+  // Never bind a guest receipt to a different verified email on a shared browser.
+  if (browserRow?.active === 1 && !browserRow.account_hash && !browserRow.email_hash) {
+    await env.DB.prepare("UPDATE entitlements SET account_hash = ?, email_hash = ?, updated_at = unixepoch() WHERE identity_hash = ? AND account_hash IS NULL")
+      .bind(context.accountHash, context.emailHash, browserRow.identity_hash).run();
+    return { ...browserRow, account_hash: context.accountHash, email_hash: context.emailHash };
   }
 
   // A browser can be shared. Once an entitlement is bound to a purchase
@@ -278,6 +286,7 @@ async function saveEntitlement(env: Env, values: {
       account_hash = COALESCE(excluded.account_hash, entitlements.account_hash),
       email_hash = COALESCE(excluded.email_hash, entitlements.email_hash),
       updated_at = unixepoch()
+    WHERE NOT (entitlements.plan = 'lifetime' AND entitlements.active = 1 AND excluded.plan = 'monthly')
   `).bind(
     values.identity,
     values.plan,
@@ -305,59 +314,127 @@ async function readJson(request: Request) {
   }
 }
 
+function purchaseEmail(value: unknown) {
+  const email = typeof value === "string" ? value.trim().toLowerCase() : "";
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new ApiError(400, "Enter a valid purchase email address.");
+  }
+  return email;
+}
+
+function alreadyOwned(current: EntitlementRow) {
+  return {
+    status: 409,
+    body: {
+      error: current.plan === "lifetime" ? "Lifetime is already owned by this purchase account." : "Monthly is already active for this purchase account.",
+      active: true,
+      plan: current.plan,
+      subscriptionStatus: current.subscription_status,
+    },
+  };
+}
+
 async function startCheckout(request: Request, env: Env, context: RequestContext) {
   const body = await readJson(request);
   const plan = safePlan(body.plan);
   if (!plan) throw new ApiError(400, "Choose a valid NameSnap plan.");
-  if (!context.accountHash || !context.email) throw new ApiError(401, "Verify a purchase email before opening checkout.");
-
-  const current = await resolveEntitlement(env, context);
-  if (current?.active === 1 && (current.plan === "lifetime" || current.plan === plan)) {
-    return {
-      status: 409,
-      body: {
-        error: current.plan === "lifetime" ? "Lifetime is already owned by this purchase account." : "Monthly is already active for this purchase account.",
-        active: true,
-        plan: current.plan,
-      },
-    };
-  }
-
-  const previousAttempt = await env.DB.prepare(`
-    SELECT account_hash, plan, session_id, checkout_url, expires_at
-    FROM checkout_attempts WHERE account_hash = ? AND plan = ?
-  `).bind(context.accountHash, plan).first<CheckoutAttemptRow>();
-  if (previousAttempt) {
-    const previousSession = await stripeCheckoutSession(env, previousAttempt.session_id);
-    if (previousSession?.status === "complete") {
-      await applyCheckoutSession(env, previousSession);
-      const completed = await resolveEntitlement(env, context);
-      if (completed?.active === 1) {
-        return { status: 409, body: { active: true, plan: completed.plan } };
-      }
-    } else if (previousSession?.status === "open" && previousSession.url) {
-      return { status: 200, body: { url: previousSession.url } };
+  const email = purchaseEmail(context.email ?? body.email);
+  const emailHash = await sha256(email);
+  const ownerHash = context.accountHash ?? context.identity;
+  let current = await resolveEntitlement(env, context);
+  if (current?.active === 1 && (current.plan === "lifetime" || current.plan === plan)) return alreadyOwned(current);
+  if (current?.plan === "monthly" && current.subscription_id && plan === "monthly") {
+    const response = await stripeRequest(env, `/v1/subscriptions/${encodeURIComponent(current.subscription_id)}`);
+    const subscription = await response.json() as StripeSubscription;
+    if (!["canceled", "incomplete_expired"].includes(subscription.status)) {
+      throw new ApiError(409, "Your existing Monthly subscription needs attention. Contact sidequest@ik.me before starting another subscription.");
     }
-    await deleteCheckoutAttempt(env, context.accountHash, plan);
+  }
+  const emailRow = await entitlementByEmail(env, emailHash);
+  // An address is enough to prevent another charge, never to disclose or grant access.
+  if ((emailRow && emailRow.identity_hash !== current?.identity_hash) ||
+      (current?.email_hash && current.email_hash !== emailHash)) {
+    return { status: 409, body: { restoreRequired: true, error: "Restore the purchase for this email before starting another checkout." } };
   }
 
-  const session = await createStripeCheckoutSession(
-    env,
-    context,
-    plan,
-    current?.stripe_customer_id ?? null,
-    previousAttempt?.session_id ?? null,
-  );
+  // Preserve an in-flight checkout created by the previous verified-account flow.
+  if (context.accountHash) {
+    for (const legacyPlan of [plan === "monthly" ? "lifetime" : "monthly", plan]) {
+      const legacy = await env.DB.prepare("SELECT session_id, plan FROM checkout_attempts WHERE account_hash = ? AND plan = ?")
+        .bind(context.accountHash, legacyPlan).first<{ session_id: string; plan: Plan }>();
+      if (legacy) {
+        const session = await stripeCheckoutSession(env, legacy.session_id);
+        if (session?.status === "open" && session.url) {
+          if (legacy.plan === plan) return { status: 200, body: { url: session.url } };
+          await stripeRequest(env, `/v1/checkout/sessions/${encodeURIComponent(session.id)}/expire`, { method: "POST" });
+        }
+        if (session?.status === "complete") {
+          await applyCheckoutSession(env, session);
+          current = await resolveEntitlement(env, context);
+          if (current?.active === 1 && (current.plan === "lifetime" || current.plan === plan)) return alreadyOwned(current);
+          if (!current || current.checkout_session_id !== session.id) throw new ApiError(409, "Your payment is still processing. Please restore your purchase in a moment.");
+        }
+        await deleteCheckoutAttempt(env, context.accountHash, legacy.plan);
+      }
+    }
+  }
+
+  const ownerReservation = await env.DB.prepare("SELECT * FROM purchase_checkouts WHERE owner_hash = ?")
+    .bind(ownerHash).first<CheckoutReservation>();
+  if (ownerReservation && ownerReservation.email_hash !== emailHash) {
+    if (!ownerReservation.session_id) {
+      throw new ApiError(409, "Your previous checkout is being prepared. Please try again shortly.");
+    }
+    const prior = ownerReservation.session_id ? await stripeCheckoutSession(env, ownerReservation.session_id) : null;
+    if (prior?.status === "open") {
+      await stripeRequest(env, `/v1/checkout/sessions/${encodeURIComponent(prior.id)}/expire`, { method: "POST" });
+    } else if (prior?.status === "complete") {
+      await applyCheckoutSession(env, prior);
+      throw new ApiError(409, "Your previous checkout is complete. Restore that purchase before changing the email.");
+    }
+    await env.DB.prepare("DELETE FROM purchase_checkouts WHERE owner_hash = ? AND generation = ?")
+      .bind(ownerHash, ownerReservation.generation).run();
+  }
+  let reservation = await env.DB.prepare("SELECT * FROM purchase_checkouts WHERE email_hash = ?")
+    .bind(emailHash).first<CheckoutReservation>();
+  if (reservation) {
+    const session = reservation.session_id ? await stripeCheckoutSession(env, reservation.session_id) : null;
+    if (session?.status === "complete") {
+      await applyCheckoutSession(env, session);
+      current = await resolveEntitlement(env, context);
+      if (current?.active === 1 && (current.plan === "lifetime" || current.plan === plan)) return alreadyOwned(current);
+      if (!current || current.checkout_session_id !== session.id) throw new ApiError(409, "Your payment is still processing. Restore your purchase in a moment.");
+    } else if (session?.status === "open") {
+      if (reservation.owner_hash !== ownerHash) throw new ApiError(409, "A checkout for this email is already open. Finish it in the original browser or try again after that checkout expires.");
+      if (reservation.plan === plan && session.url) return { status: 200, body: { url: session.url } };
+      await stripeRequest(env, `/v1/checkout/sessions/${encodeURIComponent(session.id)}/expire`, { method: "POST" });
+    } else if (!session) {
+      if (reservation.owner_hash !== ownerHash || reservation.plan !== plan) throw new ApiError(409, "A checkout for this email is being prepared. Please try again shortly.");
+      // Retry the same reservation with stable Stripe idempotency keys.
+    }
+    if (session) {
+      await env.DB.prepare("DELETE FROM purchase_checkouts WHERE email_hash = ? AND generation = ?")
+        .bind(emailHash, reservation.generation).run();
+      reservation = null;
+    }
+  }
+  if (!reservation) {
+    const generation = crypto.randomUUID();
+    await env.DB.prepare(`INSERT INTO purchase_checkouts (email_hash, owner_hash, plan, generation, expires_at, customer_id, identity_hash, buyer_identity, account_hash, first_attempt_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`)
+      .bind(emailHash, ownerHash, plan, generation, Math.floor(Date.now() / 1000) + 86400,
+        current?.stripe_customer_id ?? null, current?.identity_hash ?? context.accountHash ?? context.identity,
+        context.identity, context.accountHash, Math.floor(Date.now() / 1000)).run();
+    reservation = await env.DB.prepare("SELECT * FROM purchase_checkouts WHERE email_hash = ?")
+      .bind(emailHash).first<CheckoutReservation>();
+    if (!reservation || reservation.owner_hash !== ownerHash || reservation.plan !== plan) {
+      throw new ApiError(409, "A checkout for this email is already being prepared. Please try again shortly.");
+    }
+  }
+  const session = await createStripeCheckoutSession(env, plan, email, emailHash, reservation);
   if (!session.url) throw new ApiError(503, "NameSnap checkout is temporarily unavailable.");
-  await env.DB.prepare(`
-    INSERT INTO checkout_attempts (account_hash, plan, session_id, checkout_url, expires_at, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, unixepoch(), unixepoch())
-    ON CONFLICT(account_hash, plan) DO UPDATE SET
-      session_id = excluded.session_id,
-      checkout_url = excluded.checkout_url,
-      expires_at = excluded.expires_at,
-      updated_at = unixepoch()
-  `).bind(context.accountHash, plan, session.id, session.url, session.expires_at ?? Math.floor(Date.now() / 1000) + 86400).run();
+  await env.DB.prepare("UPDATE purchase_checkouts SET session_id = ?, expires_at = ? WHERE email_hash = ? AND generation = ?")
+    .bind(session.id, session.expires_at, emailHash, reservation.generation).run();
   return { status: 200, body: { url: session.url } };
 }
 
@@ -377,25 +454,42 @@ async function stripeRequest(env: Env, path: string, init: RequestInit = {}) {
 
 async function stripeCheckoutSession(env: Env, sessionId: string) {
   if (!/^cs_(test_|live_)?[A-Za-z0-9]+$/.test(sessionId)) return null;
-  try {
-    const response = await stripeRequest(env, `/v1/checkout/sessions/${encodeURIComponent(sessionId)}`);
-    return await response.json() as StripeCheckoutSession;
-  } catch {
-    return null;
-  }
+  const response = await stripeRequest(env, `/v1/checkout/sessions/${encodeURIComponent(sessionId)}`);
+  return await response.json() as StripeCheckoutSession;
 }
 
 async function createStripeCheckoutSession(
   env: Env,
-  context: RequestContext,
   plan: Plan,
-  customerId: string | null,
-  predecessorSessionId: string | null,
+  email: string,
+  emailHash: string,
+  reservation: CheckoutReservation,
 ) {
-  if (!context.accountHash || !context.email) throw new ApiError(401, "Verify a purchase email before opening checkout.");
+  const identity = reservation.identity_hash;
+  if (!identity || !reservation.buyer_identity) throw new ApiError(409, "This earlier checkout needs recovery. Contact sidequest@ik.me before starting another purchase.");
+  // Stripe may forget idempotency keys after 24 hours. Leave a one-hour margin
+  // and fail closed when an uncertain request can no longer be safely replayed.
+  if (!reservation.first_attempt_at || Date.now() / 1000 - reservation.first_attempt_at >= 23 * 3600) {
+    throw new ApiError(409, "We need to check your earlier checkout before starting another purchase. Contact sidequest@ik.me for help.");
+  }
+  // A new Customer locks the required address in Checkout. Never look up saved
+  // billing details or attach an existing Customer using an unverified email.
+  let customerId = reservation.customer_id;
+  if (!customerId) {
+    const customer = await stripeRequest(env, "/v1/customers", {
+      method: "POST",
+      headers: { "Idempotency-Key": `namesnap-customer-${reservation.generation}` },
+      body: new URLSearchParams({ email }).toString(),
+    });
+    customerId = (await customer.json() as { id: string }).id;
+    // Persist the Customer before issuing Checkout. If either response is lost,
+    // retries retain the exact same Checkout parameters and idempotency key.
+    await env.DB.prepare("UPDATE purchase_checkouts SET customer_id = ? WHERE email_hash = ? AND generation = ?")
+      .bind(customerId, emailHash, reservation.generation).run();
+  }
   const form = new URLSearchParams();
   form.set("mode", plan === "monthly" ? "subscription" : "payment");
-  form.set("client_reference_id", `a_${context.accountHash}`);
+  form.set("client_reference_id", `b_${identity}`);
   form.set("success_url", `${env.SITE_URL}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`);
   form.set("cancel_url", `${env.SITE_URL}/?checkout=cancelled`);
   form.set("line_items[0][quantity]", "1");
@@ -404,32 +498,32 @@ async function createStripeCheckoutSession(
   form.set("line_items[0][price_data][product_data][name]", plan === "monthly" ? "NameSnap Unlimited Monthly" : "NameSnap Unlimited Lifetime");
   form.set("line_items[0][price_data][product_data][description]", plan === "monthly" ? "Unlimited contestants on NameSnap Web, billed monthly until canceled." : "Unlimited contestants on NameSnap Web, unlocked for life with one payment.");
   form.set("metadata[namesnap_plan]", plan);
-  form.set("metadata[namesnap_identity]", context.accountHash);
+  form.set("metadata[namesnap_identity]", identity);
+  form.set("metadata[namesnap_buyer_identity]", reservation.buyer_identity);
+  form.set("metadata[namesnap_email_hash]", emailHash);
+  form.set("metadata[namesnap_checkout_version]", "2");
+  if (reservation.account_hash) form.set("metadata[namesnap_account_hash]", reservation.account_hash);
   // Keep Stripe's dynamic payment methods enabled. The suffix identifies this
   // integration in Stripe without exposing a customer or browser identifier.
   form.set("integration_identifier", "namesnap_web_checkout_qhtrpvks");
-  if (customerId) {
-    form.set("customer", customerId);
-  } else {
-    form.set("customer_email", context.email);
-    if (plan === "lifetime") form.set("customer_creation", "always");
-  }
+  form.set("customer", customerId);
   if (plan === "monthly") {
     form.set("line_items[0][price_data][recurring][interval]", "month");
-    form.set("subscription_data[metadata][namesnap_identity]", context.accountHash);
+    form.set("subscription_data[metadata][namesnap_identity]", identity);
+    form.set("subscription_data[metadata][namesnap_checkout_version]", "2");
+    form.set("subscription_data[metadata][namesnap_email_hash]", emailHash);
+    if (reservation.account_hash) form.set("subscription_data[metadata][namesnap_account_hash]", reservation.account_hash);
     form.set("subscription_data[metadata][namesnap_plan]", plan);
   } else {
-    form.set("payment_intent_data[metadata][namesnap_identity]", context.accountHash);
+    form.set("payment_intent_data[metadata][namesnap_identity]", identity);
     form.set("payment_intent_data[metadata][namesnap_plan]", plan);
   }
 
   const response = await stripeRequest(env, "/v1/checkout/sessions", {
     method: "POST",
-    // The initial key is stable so a network retry cannot create two open
-    // sessions. A canceled or expired predecessor becomes the next key's
-    // suffix, allowing an immediate clean retry without reviving that session.
+    // Retries and concurrent clicks share one session per reserved email.
     headers: {
-      "Idempotency-Key": `namesnap-${plan}-${context.accountHash}-${predecessorSessionId ?? "initial"}`,
+      "Idempotency-Key": `namesnap-checkout-${reservation.generation}`,
     },
     body: form.toString(),
   });
@@ -479,21 +573,34 @@ async function cancelStripeSubscription(env: Env, subscriptionId: string) {
 
 async function applyCheckoutSession(env: Env, session: StripeCheckoutSession) {
   const reference = session.client_reference_id ?? session.metadata?.namesnap_identity;
-  const accountHash = reference?.match(ACCOUNT_REFERENCE_PATTERN)?.[1]
-    ?? (reference && /^[a-f0-9]{64}$/.test(reference) ? reference : null);
-  const identity = accountHash ?? reference;
-  const plan = safePlan(session.metadata?.namesnap_plan)
-    ?? (session.mode === "subscription" ? "monthly" : session.mode === "payment" ? "lifetime" : null);
-  const paid = plan === "lifetime" ? session.payment_status === "paid" : session.status === "complete";
-  if (!identity || !/^[a-f0-9]{64}$/.test(identity) || !plan || !paid) return;
-
-  const current = accountHash ? await entitlementByAccount(env, accountHash) : await entitlement(env, identity);
-  if (current?.plan === "lifetime" && current.active === 1 && plan === "monthly") return;
+  const guestIdentity = reference?.match(BROWSER_REFERENCE_PATTERN)?.[1];
+  const accountHash = guestIdentity
+    ? session.metadata?.namesnap_account_hash || null
+    : reference?.match(ACCOUNT_REFERENCE_PATTERN)?.[1]
+      ?? (reference && /^[a-f0-9]{64}$/.test(reference) ? reference : null);
+  const identity = guestIdentity ?? accountHash ?? reference;
+  const plan = safePlan(session.metadata?.namesnap_plan);
+  if (!identity || !/^[a-f0-9]{64}$/.test(identity) || !plan || session.status !== "complete" || session.payment_status !== "paid") return;
+  const email = session.customer_details?.email?.trim().toLowerCase();
+  const emailHash = email ? await sha256(email) : null;
+  if (guestIdentity && (!emailHash || emailHash !== session.metadata?.namesnap_email_hash)) {
+    throw new ApiError(409, "The checkout email could not be confirmed. Contact NameSnap billing support.");
+  }
+  const current = (accountHash ? await entitlementByAccount(env, accountHash) : null) ?? await entitlement(env, identity);
+  if (current?.checkout_session_id === session.id && current.active === 1) return;
+  if (current?.plan === "lifetime" && current.active === 1) return;
+  const subscriptionId = objectId(session.subscription);
   let subscriptionStatus: string | null = null;
+  if (plan === "monthly") {
+    if (!subscriptionId) return;
+    const response = await stripeRequest(env, `/v1/subscriptions/${encodeURIComponent(subscriptionId)}`);
+    const subscription = await response.json() as StripeSubscription;
+    if (!ACTIVE_SUBSCRIPTION_STATES.has(subscription.status)) return;
+    subscriptionStatus = subscription.status;
+  }
   if (plan === "lifetime" && current?.plan === "monthly" && current.subscription_id) {
     subscriptionStatus = await cancelStripeSubscription(env, current.subscription_id) ? "canceled" : "cancellation_required";
   }
-  const email = session.customer_details?.email?.trim().toLocaleLowerCase();
   await saveEntitlement(env, {
     identity: current?.identity_hash ?? identity,
     plan,
@@ -503,7 +610,7 @@ async function applyCheckoutSession(env: Env, session: StripeCheckoutSession) {
     checkoutSessionId: session.id,
     subscriptionStatus,
     accountHash,
-    emailHash: email ? await sha256(email) : null,
+    emailHash,
   });
   if (accountHash) await deleteCheckoutAttempt(env, accountHash, plan);
 }
@@ -523,26 +630,16 @@ async function handleWebhook(request: Request, env: Env) {
 
   if (["customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted"].includes(event.type)) {
     const subscription = object as unknown as StripeSubscription;
-    const accountIdentity = subscription.metadata?.namesnap_identity;
-    let identity = accountIdentity;
-    if (!identity) {
-      const row = await env.DB.prepare("SELECT identity_hash FROM entitlements WHERE subscription_id = ?")
-        .bind(subscription.id).first<{ identity_hash: string }>();
-      identity = row?.identity_hash;
-    }
-    if (identity && /^[a-f0-9]{64}$/.test(identity)) {
-      const current = await entitlementByAccount(env, identity) ?? await entitlement(env, identity);
-      if (current?.plan === "lifetime" && current.active === 1) return json(200, { received: true });
-      await saveEntitlement(env, {
-        identity: current?.identity_hash ?? identity,
-        plan: "monthly",
-        active: ACTIVE_SUBSCRIPTION_STATES.has(subscription.status),
-        customerId: objectId(subscription.customer),
-        subscriptionId: subscription.id,
-        subscriptionStatus: subscription.status,
-        accountHash: current?.account_hash ?? (accountIdentity ? identity : null),
-        emailHash: current?.email_hash ?? null,
-      });
+    // Only the subscription attached by paid Checkout fulfillment may change
+    // access. Old, unpaid, and out-of-order subscriptions cannot overwrite it.
+    const row = await env.DB.prepare("SELECT identity_hash FROM entitlements WHERE subscription_id = ?")
+      .bind(subscription.id).first<{ identity_hash: string }>();
+    if (row) {
+      const response = await stripeRequest(env, `/v1/subscriptions/${encodeURIComponent(subscription.id)}`);
+      const latest = await response.json() as StripeSubscription;
+      await env.DB.prepare(`UPDATE entitlements SET active = ?, subscription_status = ?, updated_at = unixepoch()
+        WHERE identity_hash = ? AND subscription_id = ? AND plan = 'monthly'`)
+        .bind(ACTIVE_SUBSCRIPTION_STATES.has(latest.status) ? 1 : 0, latest.status, row.identity_hash, subscription.id).run();
     }
   }
 
@@ -562,6 +659,18 @@ export default {
       const context = await requestContext(request, env);
 
       if (url.pathname === "/api/status" && request.method === "GET") {
+        return json(200, await refreshEntitlement(env, context), origin);
+      }
+      if (url.pathname === "/api/confirm" && request.method === "POST") {
+        const body = await readJson(request);
+        const session = typeof body.sessionId === "string" ? await stripeCheckoutSession(env, body.sessionId) : null;
+        const ownsSession = session && (
+          session.metadata?.namesnap_buyer_identity === context.identity ||
+          (context.accountHash && (session.client_reference_id === `a_${context.accountHash}` ||
+            session.metadata?.namesnap_account_hash === context.accountHash))
+        );
+        if (!session || !ownsSession) throw new ApiError(403, "This checkout belongs to another browser. Restore with your purchase email.");
+        await applyCheckoutSession(env, session);
         return json(200, await refreshEntitlement(env, context), origin);
       }
       if (url.pathname === "/api/checkout" && request.method === "POST") {
