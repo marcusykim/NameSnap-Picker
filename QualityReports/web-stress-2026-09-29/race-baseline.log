@@ -1,0 +1,370 @@
+TAP version 13
+# Subtest: classic: clearPool cancels the pending result
+not ok 1 - classic: clearPool cancels the pending result
+  ---
+  duration_ms: 8.532084
+  location: '/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:43:5'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+
+    + [
+    +   {
+    +     id: 'result-0',
+    +     name: 'Alex',
+    +     number: 1,
+    +     pickedAt: '2026-09-30T05:15:13.349Z'
+    +   }
+    + ]
+    - []
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0:
+      id: 'result-0'
+      name: 'Alex'
+      number: 1
+      pickedAt: '2026-09-30T05:15:13.349Z'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/marcuskim/Documents/Sidequest%20Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:48:14)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.start (node:internal/test_runner/test:877:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: classic: resetPool cancels the pending result
+not ok 2 - classic: resetPool cancels the pending result
+  ---
+  duration_ms: 0.474625
+  location: '/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:43:5'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+
+    + [
+    +   {
+    +     id: 'result-0',
+    +     name: 'Alex',
+    +     number: 1,
+    +     pickedAt: '2026-09-30T05:15:13.357Z'
+    +   }
+    + ]
+    - []
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0:
+      id: 'result-0'
+      name: 'Alex'
+      number: 1
+      pickedAt: '2026-09-30T05:15:13.357Z'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/marcuskim/Documents/Sidequest%20Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:48:14)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: classic: removeEntry cancels the pending result
+not ok 3 - classic: removeEntry cancels the pending result
+  ---
+  duration_ms: 0.322584
+  location: '/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:43:5'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+
+    + [
+    +   {
+    +     id: 'result-0',
+    +     name: 'Alex',
+    +     number: 1,
+    +     pickedAt: '2026-09-30T05:15:13.358Z'
+    +   }
+    + ]
+    - []
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0:
+      id: 'result-0'
+      name: 'Alex'
+      number: 1
+      pickedAt: '2026-09-30T05:15:13.358Z'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/marcuskim/Documents/Sidequest%20Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:48:14)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: classic: undoLastAdd cancels the pending result
+not ok 4 - classic: undoLastAdd cancels the pending result
+  ---
+  duration_ms: 0.433541
+  location: '/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:43:5'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+
+    + [
+    +   {
+    +     id: 'result-0',
+    +     name: 'Alex',
+    +     number: 1,
+    +     pickedAt: '2026-09-30T05:15:13.358Z'
+    +   }
+    + ]
+    - []
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0:
+      id: 'result-0'
+      name: 'Alex'
+      number: 1
+      pickedAt: '2026-09-30T05:15:13.358Z'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/marcuskim/Documents/Sidequest%20Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:48:14)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: classic: two synchronous spin triggers commit one result
+not ok 5 - classic: two synchronous spin triggers commit one result
+  ---
+  duration_ms: 0.221667
+  location: '/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:53:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    2 !== 1
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 2
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/marcuskim/Documents/Sidequest%20Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:56:12)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: wheel: clearPool cancels the pending result
+not ok 6 - wheel: clearPool cancels the pending result
+  ---
+  duration_ms: 0.162375
+  location: '/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:43:5'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+
+    + [
+    +   {
+    +     id: 'result-0',
+    +     name: 'Alex',
+    +     number: 1,
+    +     pickedAt: '2026-09-30T05:15:13.359Z'
+    +   }
+    + ]
+    - []
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0:
+      id: 'result-0'
+      name: 'Alex'
+      number: 1
+      pickedAt: '2026-09-30T05:15:13.359Z'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/marcuskim/Documents/Sidequest%20Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:48:14)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: wheel: resetPool cancels the pending result
+not ok 7 - wheel: resetPool cancels the pending result
+  ---
+  duration_ms: 0.172167
+  location: '/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:43:5'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+
+    + [
+    +   {
+    +     id: 'result-0',
+    +     name: 'Alex',
+    +     number: 1,
+    +     pickedAt: '2026-09-30T05:15:13.359Z'
+    +   }
+    + ]
+    - []
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0:
+      id: 'result-0'
+      name: 'Alex'
+      number: 1
+      pickedAt: '2026-09-30T05:15:13.359Z'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/marcuskim/Documents/Sidequest%20Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:48:14)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: wheel: removeEntry cancels the pending result
+not ok 8 - wheel: removeEntry cancels the pending result
+  ---
+  duration_ms: 0.203459
+  location: '/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:43:5'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+
+    + [
+    +   {
+    +     id: 'result-0',
+    +     name: 'Alex',
+    +     number: 1,
+    +     pickedAt: '2026-09-30T05:15:13.359Z'
+    +   }
+    + ]
+    - []
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0:
+      id: 'result-0'
+      name: 'Alex'
+      number: 1
+      pickedAt: '2026-09-30T05:15:13.359Z'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/marcuskim/Documents/Sidequest%20Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:48:14)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: wheel: undoLastAdd cancels the pending result
+not ok 9 - wheel: undoLastAdd cancels the pending result
+  ---
+  duration_ms: 1.569667
+  location: '/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:43:5'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+
+    + [
+    +   {
+    +     id: 'result-0',
+    +     name: 'Alex',
+    +     number: 1,
+    +     pickedAt: '2026-09-30T05:15:13.360Z'
+    +   }
+    + ]
+    - []
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0:
+      id: 'result-0'
+      name: 'Alex'
+      number: 1
+      pickedAt: '2026-09-30T05:15:13.360Z'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/marcuskim/Documents/Sidequest%20Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:48:14)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: wheel: two synchronous spin triggers commit one result
+not ok 10 - wheel: two synchronous spin triggers commit one result
+  ---
+  duration_ms: 0.54325
+  location: '/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:53:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    2 !== 1
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 2
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/marcuskim/Documents/Sidequest%20Software/NameSnap-Picker/MarketingSite/tests/picker-races.test.mjs:56:12)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 0
+# fail 10
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 417.406708

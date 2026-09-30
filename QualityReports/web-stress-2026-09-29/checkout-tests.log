@@ -1,0 +1,167 @@
+
+> site-creator-vinext-starter@0.1.0 test:checkout
+> node --experimental-sqlite --test tests/checkout.test.mjs
+
+TAP version 13
+# (node:91031) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: guest checkout requires a valid email and collects payment without Firebase sign-in
+ok 1 - guest checkout requires a valid email and collects payment without Firebase sign-in
+  ---
+  duration_ms: 39.453375
+  ...
+# Subtest: concurrent retries share a checkout; another browser gets its own replacement checkout
+ok 2 - concurrent retries share a checkout; another browser gets its own replacement checkout
+  ---
+  duration_ms: 7.989833
+  ...
+# Subtest: unpaid, canceled and stolen sessions never unlock access
+ok 3 - unpaid, canceled and stolen sessions never unlock access
+  ---
+  duration_ms: 4.746667
+  ...
+# Subtest: paid guest unlocks, survives reload and cannot buy lifetime again
+ok 4 - paid guest unlocks, survives reload and cannot buy lifetime again
+  ---
+  duration_ms: 3.895083
+  ...
+# Subtest: an existing email blocks another charge without granting or exposing ownership
+ok 5 - an existing email blocks another charge without granting or exposing ownership
+  ---
+  duration_ms: 4.742584
+  ...
+# Subtest: verified matching email restores guest purchase on another browser; unrelated email cannot claim it
+ok 6 - verified matching email restores guest purchase on another browser; unrelated email cannot claim it
+  ---
+  duration_ms: 7.1475
+  ...
+# Stripe request failed 503 /v1/subscriptions/sub_fixture2
+# Subtest: paid monthly purchase upgrades to lifetime, cancels renewal, and webhook replay preserves warning
+ok 7 - paid monthly purchase upgrades to lifetime, cancels renewal, and webhook replay preserves warning
+  ---
+  duration_ms: 5.466416
+  ...
+# Stripe request failed 503 /v1/checkout/sessions/cs_test_fixture4
+# Subtest: switching plan expires previous checkout; Stripe lookup failure prevents another session
+ok 8 - switching plan expires previous checkout; Stripe lookup failure prevents another session
+  ---
+  duration_ms: 5.924291
+  ...
+# Subtest: signed webhook unlocks a paid guest even when they never visit success URL
+ok 9 - signed webhook unlocks a paid guest even when they never visit success URL
+  ---
+  duration_ms: 4.123833
+  ...
+# Subtest: subscription created event before payment cannot unlock; cancellation revokes monthly only
+ok 10 - subscription created event before payment cannot unlock; cancellation revokes monthly only
+  ---
+  duration_ms: 2.808833
+  ...
+# Subtest: a Stripe email mismatch does not attach an entitlement to a different address
+ok 11 - a Stripe email mismatch does not attach an entitlement to a different address
+  ---
+  duration_ms: 2.06075
+  ...
+# Subtest: verified customers can purchase and restore through the same flow
+ok 12 - verified customers can purchase and restore through the same flow
+  ---
+  duration_ms: 4.229334
+  ...
+# Subtest: canceled monthly can be bought again and stale subscription events cannot revoke it
+ok 13 - canceled monthly can be bought again and stale subscription events cannot revoke it
+  ---
+  duration_ms: 4.349959
+  ...
+# Subtest: editing email expires original open session and reserves only one checkout per browser
+ok 14 - editing email expires original open session and reserves only one checkout per browser
+  ---
+  duration_ms: 2.573458
+  ...
+# Subtest: concurrent different-email checkouts cannot reserve the same browser twice
+ok 15 - concurrent different-email checkouts cannot reserve the same browser twice
+  ---
+  duration_ms: 2.194333
+  ...
+# Subtest: subscription webhook cannot downgrade paid lifetime
+ok 16 - subscription webhook cannot downgrade paid lifetime
+  ---
+  duration_ms: 3.576458
+  ...
+# Subtest: past-due monthly cannot start a second collectible monthly subscription
+ok 17 - past-due monthly cannot start a second collectible monthly subscription
+  ---
+  duration_ms: 5.071083
+  ...
+# Subtest: uncertain Checkout response survives reservation age and recovers the same session
+ok 18 - uncertain Checkout response survives reservation age and recovers the same session
+  ---
+  duration_ms: 2.337875
+  ...
+# Subtest: verified account can recover uncertain Checkout from a second browser with identical parameters
+ok 19 - verified account can recover uncertain Checkout from a second browser with identical parameters
+  ---
+  duration_ms: 3.694166
+  ...
+# Subtest: unknown Checkout cannot be discarded merely by changing email after a timeout
+ok 20 - unknown Checkout cannot be discarded merely by changing email after a timeout
+  ---
+  duration_ms: 2.013959
+  ...
+# Subtest: unknown paid Checkout is not replayed after Stripe can prune its idempotency key
+ok 21 - unknown paid Checkout is not replayed after Stripe can prune its idempotency key
+  ---
+  duration_ms: 2.244375
+  ...
+# Subtest: competing browsers can each open checkout while only the latest unpaid session remains payable
+ok 22 - competing browsers can each open checkout while only the latest unpaid session remains payable
+  ---
+  duration_ms: 2.267
+  ...
+# Subtest: a different browser recovers a lost Stripe response and replaces it without exposing the original session
+ok 23 - a different browser recovers a lost Stripe response and replaces it without exposing the original session
+  ---
+  duration_ms: 3.032125
+  ...
+# Subtest: a payment completed before replacement is fulfilled and blocks a duplicate purchase
+ok 24 - a payment completed before replacement is fulfilled and blocks a duplicate purchase
+  ---
+  duration_ms: 2.552583
+  ...
+# Stripe request failed 400 /v1/checkout/sessions/cs_test_fixture2/expire
+# Subtest: payment winning the expiration race is reconciled before a replacement can charge
+ok 25 - payment winning the expiration race is reconciled before a replacement can charge
+  ---
+  duration_ms: 164.115958
+  ...
+# Stripe request failed 400 /v1/checkout/sessions/cs_test_fixture2/expire
+# Stripe request failed 400 /v1/checkout/sessions/cs_test_fixture2/expire
+# Subtest: processing payment or failed expiration cannot leave two collectible sessions
+ok 26 - processing payment or failed expiration cannot leave two collectible sessions
+  ---
+  duration_ms: 141.632125
+  ...
+# Stripe request failed 400 /v1/checkout/sessions/cs_test_fixture2/expire
+# Subtest: another request expiring the old session does not block replacement
+ok 27 - another request expiring the old session does not block replacement
+  ---
+  duration_ms: 3.99825
+  ...
+# Subtest: a late creation response cannot overwrite another browser replacement
+ok 28 - a late creation response cannot overwrite another browser replacement
+  ---
+  duration_ms: 149.855208
+  ...
+# Subtest: Stripe idempotency contention is retried without surfacing an open-checkout block
+ok 29 - Stripe idempotency contention is retried without surfacing an open-checkout block
+  ---
+  duration_ms: 117.879084
+  ...
+1..29
+# tests 29
+# suites 0
+# pass 29
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1186.569667

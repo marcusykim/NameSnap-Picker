@@ -1,0 +1,104 @@
+
+> site-creator-vinext-starter@0.1.0 test:logic
+> node --test tests/name-input.test.mjs tests/picker-races.test.mjs
+
+TAP version 13
+# Subtest: numeric handles survive paste, editor and serialization
+ok 1 - numeric handles survive paste, editor and serialization
+  ---
+  duration_ms: 1.873666
+  ...
+# Subtest: numbered lists, commas, CRLF and blank separators preserve individual names
+ok 2 - numbered lists, commas, CRLF and blank separators preserve individual names
+  ---
+  duration_ms: 0.122
+  ...
+# Subtest: 10000-name round trip preserves order and repeated occurrences
+ok 3 - 10000-name round trip preserves order and repeated occurrences
+  ---
+  duration_ms: 9.736
+  ...
+# Subtest: duplicate skipping compares normalized names and preserves spelling
+ok 4 - duplicate skipping compares normalized names and preserves spelling
+  ---
+  duration_ms: 0.643583
+  ...
+# Subtest: duplicate display names retain distinct identities and inclusion after restore/delete
+ok 5 - duplicate display names retain distinct identities and inclusion after restore/delete
+  ---
+  duration_ms: 0.872833
+  ...
+# Subtest: invalid saved rows are discarded and valid rows receive identities
+ok 6 - invalid saved rows are discarded and valid rows receive identities
+  ---
+  duration_ms: 0.970084
+  ...
+# Subtest: wheel: every selected segment lands at the pointer and commits the same contestant
+ok 7 - wheel: every selected segment lands at the pointer and commits the same contestant
+  ---
+  duration_ms: 53.754791
+  ...
+# Subtest: repeat mode commits a result without consuming the selected contestant
+ok 8 - repeat mode commits a result without consuming the selected contestant
+  ---
+  duration_ms: 0.267875
+  ...
+# Subtest: classic: clearPool cancels the pending result
+ok 9 - classic: clearPool cancels the pending result
+  ---
+  duration_ms: 0.401916
+  ...
+# Subtest: classic: resetPool cancels the pending result
+ok 10 - classic: resetPool cancels the pending result
+  ---
+  duration_ms: 0.082375
+  ...
+# Subtest: classic: removeEntry cancels the pending result
+ok 11 - classic: removeEntry cancels the pending result
+  ---
+  duration_ms: 0.214334
+  ...
+# Subtest: classic: undoLastAdd cancels the pending result
+ok 12 - classic: undoLastAdd cancels the pending result
+  ---
+  duration_ms: 0.094375
+  ...
+# Subtest: classic: two synchronous spin triggers commit one result
+ok 13 - classic: two synchronous spin triggers commit one result
+  ---
+  duration_ms: 0.175584
+  ...
+# Subtest: wheel: clearPool cancels the pending result
+ok 14 - wheel: clearPool cancels the pending result
+  ---
+  duration_ms: 0.060917
+  ...
+# Subtest: wheel: resetPool cancels the pending result
+ok 15 - wheel: resetPool cancels the pending result
+  ---
+  duration_ms: 2.131125
+  ...
+# Subtest: wheel: removeEntry cancels the pending result
+ok 16 - wheel: removeEntry cancels the pending result
+  ---
+  duration_ms: 0.429875
+  ...
+# Subtest: wheel: undoLastAdd cancels the pending result
+ok 17 - wheel: undoLastAdd cancels the pending result
+  ---
+  duration_ms: 0.12625
+  ...
+# Subtest: wheel: two synchronous spin triggers commit one result
+ok 18 - wheel: two synchronous spin triggers commit one result
+  ---
+  duration_ms: 0.066792
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 466.04025

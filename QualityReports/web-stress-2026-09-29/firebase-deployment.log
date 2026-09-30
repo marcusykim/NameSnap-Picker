@@ -1,0 +1,18 @@
+
+=== Deploying to 'namesnap-picker-6759588637'...
+
+i  deploying hosting
+i  hosting[getnamesnap]: beginning deploy...
+i  hosting[getnamesnap]: found 161 files in firebase-public
+i  hosting: uploading new files [0/2] (0%)
+i  hosting: upload complete
+✔  hosting[getnamesnap]: file upload complete
+i  hosting[getnamesnap]: finalizing version...
+✔  hosting[getnamesnap]: version finalized
+i  hosting[getnamesnap]: releasing new version...
+✔  hosting[getnamesnap]: release complete
+
+✔  Deploy complete!
+
+Project Console: https://console.firebase.google.com/project/namesnap-picker-6759588637/overview
+Hosting URL: https://getnamesnap.web.app

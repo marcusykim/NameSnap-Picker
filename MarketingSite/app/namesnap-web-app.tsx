@@ -155,7 +155,7 @@ function celebrationParticles(variation: number) {
 function parseNames(input: string) {
   return input
     .split(/[\n,]+/)
-    .map((name) => name.replace(/^\s*\d+[.)-]?\s*/, "").trim())
+    .map((name) => name.trim().replace(/^\d+[.)-]\s+/, ""))
     .filter(Boolean);
 }
 
@@ -180,7 +180,7 @@ function namesExcludingDuplicates(names: string[], poolNames: string[]) {
 function stagedInputRows(input: string) {
   return input
     .split("\n")
-    .map((name) => name.replace(/^\s*\d+[.)-]?\s*/, "").replace(/\r/g, ""))
+    .map((name) => name.replace(/^\s*\d+[.)-]\s+/, "").replace(/\r/g, ""))
     .filter((name) => name.trim().length > 0);
 }
 
@@ -417,6 +417,17 @@ export function NameSnapWebApp() {
   const winnerAudioRef = useRef<HTMLAudioElement | null>(null);
   const winnerAutoDismissTimerRef = useRef<number | null>(null);
   const timersRef = useRef<number[]>([]);
+  const spinGenerationRef = useRef(0);
+  const spinningRef = useRef(false);
+
+  const cancelPendingSpin = useCallback(() => {
+    spinGenerationRef.current += 1;
+    spinningRef.current = false;
+    timersRef.current.forEach((timer) => window.clearTimeout(timer));
+    timersRef.current = [];
+    setIsSpinning(false);
+    setLiveName("Ready when you are");
+  }, []);
 
   useEffect(() => {
     let restoredSummary = EMPTY_SESSION_SUMMARY;
@@ -707,6 +718,7 @@ export function NameSnapWebApp() {
         if (unlocked && checkoutSucceeded) {
           const queued = parseNames(sessionStorage.getItem(PENDING_NAMES_KEY) ?? "");
           if (queued.length) {
+            cancelPendingSpin();
             const additions = queued.map((name) => ({ id: makeId(), drawNumber: 0, name, included: true }));
             setEntries((current) => renumberEntries([...current, ...additions]));
             setLastAddedIds(additions.map((entry) => entry.id));
@@ -727,7 +739,7 @@ export function NameSnapWebApp() {
     };
     void refresh();
     return () => { cancelled = true; };
-  }, [accountEmail, applyEntitlement, authReady]);
+  }, [accountEmail, applyEntitlement, authReady, cancelPendingSpin]);
 
   const drawWheel = useCallback(() => {
     const canvas = canvasRef.current;
@@ -848,6 +860,7 @@ export function NameSnapWebApp() {
   };
 
   const startFreshSession = () => {
+    cancelPendingSpin();
     // Picker state has its own key. Purchase identity, verified email, Firebase
     // authentication, and server-side entitlement records remain untouched.
     localStorage.removeItem(STORAGE_KEY);
@@ -903,16 +916,25 @@ export function NameSnapWebApp() {
   }, [noRepeats, presentWinner]);
 
   const spin = useCallback(() => {
-    if (isSpinning || !activeEntries.length) return;
+    if (isSpinning || spinningRef.current || !activeEntries.length) return;
+    spinningRef.current = true;
+    const generation = ++spinGenerationRef.current;
     dismissWinner();
     setIsSpinning(true);
     const selected = activeEntries[randomIndex(activeEntries.length)];
+    const complete = () => {
+      if (generation !== spinGenerationRef.current) return;
+      spinningRef.current = false;
+      timersRef.current = [];
+      finishPick(selected);
+    };
 
     if (mode === "classic") {
       const started = performance.now();
       const tick = () => {
+        if (generation !== spinGenerationRef.current) return;
         const elapsed = performance.now() - started;
-        if (elapsed >= 2200) { finishPick(selected); return; }
+        if (elapsed >= 2200) { complete(); return; }
         const preview = activeEntries[randomIndex(activeEntries.length)];
         setLiveName(`${preview.drawNumber}. ${preview.name}`);
         const timer = window.setTimeout(tick, Math.min(220, 45 + elapsed / 14));
@@ -930,7 +952,7 @@ export function NameSnapWebApp() {
       const delta = (target - normalized + 360) % 360;
       return current + 5 * 360 + delta;
     });
-    const timer = window.setTimeout(() => finishPick(selected), 3900);
+    const timer = window.setTimeout(complete, 3900);
     timersRef.current.push(timer);
   }, [activeEntries, dismissWinner, finishPick, isSpinning, mode]);
 
@@ -967,6 +989,7 @@ export function NameSnapWebApp() {
       return;
     }
     const additions = names.map((name) => ({ id: makeId(), drawNumber: 0, name, included: true }));
+    cancelPendingSpin();
     setEntries((current) => renumberEntries([...current, ...additions]));
     setLastAddedIds(additions.map((entry) => entry.id));
   };
@@ -1086,13 +1109,15 @@ export function NameSnapWebApp() {
   };
 
   const resetPool = useCallback(() => {
+    cancelPendingSpin();
     setExcludedIds([]);
     setHistory([]);
     setLiveName("Ready when you are");
     dismissWinner();
-  }, [dismissWinner]);
+  }, [cancelPendingSpin, dismissWinner]);
 
   const removeEntry = (entryId: string) => {
+    cancelPendingSpin();
     setEntries((current) => renumberEntries(current.filter((entry) => entry.id !== entryId)));
     setExcludedIds((current) => current.filter((id) => id !== entryId));
     setLastAddedIds((current) => current.filter((id) => id !== entryId));
@@ -1100,6 +1125,7 @@ export function NameSnapWebApp() {
 
   const undoLastAdd = () => {
     if (!lastAddedIds.length) return;
+    cancelPendingSpin();
     const ids = new Set(lastAddedIds);
     setEntries((current) => renumberEntries(current.filter((entry) => !ids.has(entry.id))));
     setExcludedIds((current) => current.filter((id) => !ids.has(id)));
@@ -1107,6 +1133,7 @@ export function NameSnapWebApp() {
   };
 
   const clearPool = () => {
+    cancelPendingSpin();
     setEntries([]);
     setLastAddedIds([]);
     resetPool();
@@ -1261,8 +1288,8 @@ export function NameSnapWebApp() {
           <div className="control-block">
             <span className="block-label">Reveal style</span>
             <div className="segmented" role="group" aria-label="Reveal style">
-              <button className={mode === "classic" ? "active" : ""} onClick={() => setMode("classic")}>Quick pick</button>
-              <button className={mode === "wheel" ? "active" : ""} onClick={() => setMode("wheel")}>Spin wheel</button>
+              <button className={mode === "classic" ? "active" : ""} onClick={() => { if (mode !== "classic") { cancelPendingSpin(); setMode("classic"); } }}>Quick pick</button>
+              <button className={mode === "wheel" ? "active" : ""} onClick={() => { if (mode !== "wheel") { cancelPendingSpin(); setMode("wheel"); } }}>Spin wheel</button>
             </div>
           </div>
 

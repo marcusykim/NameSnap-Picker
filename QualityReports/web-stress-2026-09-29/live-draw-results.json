@@ -1,0 +1,68 @@
+{
+  "roster": [
+    "2pac",
+    "007",
+    "50 Cent",
+    "7-11",
+    "Zoë",
+    "李雷",
+    "Alex",
+    "Alex"
+  ],
+  "first_wheel": {
+    "number": 7,
+    "name": "Alex"
+  },
+  "second_quick_pick": {
+    "number": 8,
+    "name": "Alex"
+  },
+  "subsequent_draws": [
+    {
+      "number": 2,
+      "name": "007",
+      "remaining": 5,
+      "immediateX": true
+    },
+    {
+      "number": 3,
+      "name": "50 Cent",
+      "remaining": 4,
+      "immediateX": true
+    },
+    {
+      "number": 4,
+      "name": "7-11",
+      "remaining": 3,
+      "immediateX": true
+    },
+    {
+      "number": 5,
+      "name": "Zoë",
+      "remaining": 2,
+      "immediateX": true
+    },
+    {
+      "number": 1,
+      "name": "2pac",
+      "remaining": 1,
+      "immediateX": true
+    },
+    {
+      "number": 6,
+      "name": "李雷",
+      "remaining": 0,
+      "immediateX": true
+    }
+  ],
+  "all_original_numbers_picked_once": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ]
+}

@@ -1,0 +1,14 @@
+
+> site-creator-vinext-starter@0.1.0 build:static
+> vite build --config vite.static.config.ts
+
+vite v8.2.2 building client environment for production...
+transforming...
+✓ 33 modules transformed.
+rendering chunks...
+computing gzip size...
+firebase-public/index.html                   1.41 kB │ gzip:   0.63 kB
+firebase-public/assets/index-zzUqVPZJ.css  103.65 kB │ gzip:  20.82 kB
+firebase-public/assets/index-B9tFAJEU.js   365.85 kB │ gzip: 111.04 kB
+
+✓ built in 716ms

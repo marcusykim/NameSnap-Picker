@@ -2,18 +2,21 @@
 
 ## Current priorities — updated September 29, 2026
 
-Web status: implementation is done, with the two accuracy checks below remaining.
+Web status: numeric-name parsing and delayed-draw cancellation fixes are deployed. Bounded stress QA passed 57 automated checks plus interactive desktop/mobile checks; see [the web QA report](QualityReports/web-stress-2026-09-29/QA-REPORT.md).
 
-- [ ] **Verify individual picks are accurate.** Confirm the selected eligible contestant's name and number match the wheel/quick-pick result, winner modal, and pick history, including contestants with identical names.
-- [ ] **Verify individual name manipulation is accurate.** Check adding, editing, deleting, including/excluding, undoing additions, and resetting picks affect the intended contestant only and keep names, numbers, and active-pool state consistent.
+- [x] **Verify individual picks are accurate.** Both draw modes, modal/history identity, duplicate-name occurrences, no-repeat exhaustion, delayed-result cancellation, and wheel alignment passed the bounded web QA.
+- [x] **Verify individual name manipulation is accurate.** Draft edits/deletion, pool addition/deletion, duplicate choices, exact-batch undo, winner exclusion, reset, persistence, and fresh sessions passed. Per-person pool rename/include controls are not exposed by the current web UI; see the report's scope.
 - [ ] **Finalize the iPhone app.** Complete app QA, purchase/restore checks, and release preparation.
-- [x] **Upload the iPhone test candidate.** Version 2.0 (31) passed archive validation, uploaded to App Store Connect, processed successfully, and is available to the two existing internal TestFlight groups. Public App Store release remains pending.
-- [ ] **Find 100 Twitch streamers for NameSnap DM outreach.** Build a prospect list with channel links, relevant use cases, and available contact routes.
+- [x] **Upload the iPhone test candidate.** Version 2.0 (32) passed archive validation, uploaded to App Store Connect, processed successfully, and is available to the two existing internal TestFlight groups. Public App Store release remains pending.
+- [x] **Submit mobile for App Store review.** Version 2.0 (32), updated icon, 12 refreshed screenshots, and two current previews submitted September 29 at 10:38 PM PDT. Apple shows Waiting for Review; release is manual.
+- [ ] **Find 1,000 of the largest Twitch streamers and send personalized NameSnap pitches through accepted business-contact routes.** Updated scope authorized September 29. Preserve ranking/contact provenance and verified send outcomes. The shared email provider currently has no approved cold-email route; accepted pitch forms may be used where appropriate. No campaign sends have occurred.
+
+Campaign checkpoint: three first-party business contacts (shroud, Myth, Summit1G) are verified locally in `artifacts/outreach/2026-09-29`. The 1,000-person ranking export is unfinished: the site's offered CSV action did not return an accessible file through the supported built-in browser. The source prohibits scraping. A client-project agency form was not treated as permission for creator product recommendations. Research notes and one unsent draft are preserved; no messages, replies, or demand are claimed.
 
 ### iOS accuracy QA — September 29
 
 - Added 41 passing model/UIKit regression tests and completed simulator and real-iPhone name-operation checks. Fixed numeric-name parsing, winner identity validation, spin cancellation, wheel eligibility, selected-text paste handling, and first-row keyboard focus.
-- Build 31 repairs the winner close button's status-area overlap. Final device verification is recorded in [the QA report](QualityReports/ios-name-accuracy-2026-09-29/QA-REPORT.md).
+- Build 31 repairs the winner close button's status-area overlap; build 32 removes the confetti GIF's black background and passed the final real-iPhone winner/X check. Final device verification is recorded in [the QA report](QualityReports/ios-name-accuracy-2026-09-29/QA-REPORT.md).
 - The two web accuracy tasks above remain separate; iOS checks do not certify the web implementation.
 - Remaining release checks include purchase/restore, physical clipboard paste, and the existing main-screen status-area overlap. Other device/layout/accessibility coverage is bounded in the QA report.
 

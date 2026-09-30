@@ -1,0 +1,16 @@
+{
+  "site": "https://getnamesnap.web.app",
+  "verified_at_utc": "2026-09-30T05:49:31.524090+00:00",
+  "assets": [
+    {
+      "path": "/assets/index-B9tFAJEU.js",
+      "matches_local": true,
+      "sha256": "3ba2d482efa4b2e721ce35830286eae5f9b4ed53c9e13a36e232a270e886f9d7"
+    },
+    {
+      "path": "/assets/index-zzUqVPZJ.css",
+      "matches_local": true,
+      "sha256": "dadc180f461012d714fa1aab3f4b298c06ab6a8a908c6d6c698503f605eb7d26"
+    }
+  ]
+}
