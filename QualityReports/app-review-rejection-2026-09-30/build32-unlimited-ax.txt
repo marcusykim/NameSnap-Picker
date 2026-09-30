@@ -1,0 +1,68 @@
+Window: "iPhone 16e", App: Simulator.
+0 standard window iPhone 16e – iOS 26.3, Secondary Actions: Raise
+	1 button Action
+	2 button Volume Up
+	3 button Volume Down
+	4 button Sleep/Wake
+	5 container
+		6 image Description: Upgrade, Secondary Actions: Cancel
+		7 text Description: Upgrade to Unlimited?, Secondary Actions: Cancel
+		8 text Description: Free supports up to 16 contestants., Secondary Actions: Cancel
+		9 text Description: • Unlimited contestants, Secondary Actions: Cancel
+		10 text Description: • No account needed, Secondary Actions: Cancel
+		11 text Description: • Restore purchases anytime, Secondary Actions: Cancel
+		12 text Description: Unlimited Monthly renews every month until canceled. Unlimited Lifetime is a one-time purchase., Secondary Actions: Cancel
+		13 button Description: Not Now, Secondary Actions: Cancel
+		14 button Description: Unlock Lifetime $6.99, Secondary Actions: Cancel
+		15 button Description: Or Monthly $0.99, Secondary Actions: Cancel
+		16 button Description: Restore Purchases, Secondary Actions: Cancel
+		17 button Description: Privacy Policy, Secondary Actions: Cancel
+		18 button Description: Terms of Use, Secondary Actions: Cancel
+		19 text Description: NAMESNAP, Secondary Actions: Cancel
+		20 button Description: Open help and support menu, Value: Collapsed, ID: line.3.horizontal, Secondary Actions: Cancel
+		21 text Description: RANDOM PICKER, Secondary Actions: Cancel
+		22 text Description: CONTESTANT LIST, Secondary Actions: Cancel
+		23 text Description: 17 READY, Secondary Actions: Cancel
+		24 text Description: One name per line. Numbers stay with the pool., Secondary Actions: Cancel
+		25 container Secondary Actions: Cancel, Scroll Down, Scroll Up
+			26 text Description: 1., Secondary Actions: Cancel
+			27 text field (settable) Value: Alex, Secondary Actions: Cancel
+			28 button Description: trash, Secondary Actions: Cancel
+			29 text Description: 2., Secondary Actions: Cancel
+			30 text field (settable) Value: Blair, Secondary Actions: Cancel
+			31 button Description: trash, Secondary Actions: Cancel
+			32 text Description: 3., Secondary Actions: Cancel
+			33 text field (settable) Value: Casey, Secondary Actions: Cancel
+			34 button Description: trash, Secondary Actions: Cancel
+			35 text Description: 4., Secondary Actions: Cancel
+			36 text field (settable) Value: Drew, Secondary Actions: Cancel
+			37 button Description: trash, Secondary Actions: Cancel
+		38 button Description: ADD THESE NAMES TO POOL, Secondary Actions: Cancel
+		39 button Description: UNDO LAST ADD, Secondary Actions: Cancel
+		40 button Description: CLEAR THIS LIST, Secondary Actions: Cancel
+		41 text Description: DRAW SETUP, Secondary Actions: Cancel
+		42 text Description: NO REPEATS, Secondary Actions: Cancel
+		43 text Description: Winners sit out until reset, Secondary Actions: Cancel
+		44 switch Value: 1, Secondary Actions: Cancel
+		45 button (selected) Description: QUICK PICK, Secondary Actions: Cancel
+		46 button Description: SPIN WHEEL, Secondary Actions: Cancel
+		47 button (disabled) Description: SPIN, Secondary Actions: Cancel
+	48 toolbar
+		49 button Description: Home, Secondary Actions: Move previous, Move next, Remove from toolbar
+		50 button Description: Save Screen, Secondary Actions: Move previous, Move next, Remove from toolbar
+		51 button Description: Rotate, Secondary Actions: Move previous, Move next, Remove from toolbar
+	52 close button
+	53 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	54 minimize button
+	55 text iPhone 16e iOS 26.3
+56 menu bar
+	57 Simulator
+	58 File
+	59 Edit
+	60 Device
+	61 I/O
+	62 Features
+	63 Window
+	64 Help
+
+The focused UI element is 0 standard window iPhone 16e – iOS 26.3, Secondary Actions: Raise

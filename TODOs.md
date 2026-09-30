@@ -1,6 +1,6 @@
 # NameSnap TODOs
 
-## Current priorities — updated September 29, 2026
+## Current priorities — updated September 30, 2026
 
 Web status: numeric-name parsing and delayed-draw cancellation fixes are deployed. Bounded stress QA passed 57 automated checks plus interactive desktop/mobile checks; see [the web QA report](QualityReports/web-stress-2026-09-29/QA-REPORT.md).
 
@@ -8,7 +8,8 @@ Web status: numeric-name parsing and delayed-draw cancellation fixes are deploye
 - [x] **Verify individual name manipulation is accurate.** Draft edits/deletion, pool addition/deletion, duplicate choices, exact-batch undo, winner exclusion, reset, persistence, and fresh sessions passed. Per-person pool rename/include controls are not exposed by the current web UI; see the report's scope.
 - [ ] **Finalize the iPhone app.** Complete app QA, purchase/restore checks, and release preparation.
 - [x] **Upload the iPhone test candidate.** Version 2.0 (32) passed archive validation, uploaded to App Store Connect, processed successfully, and is available to the two existing internal TestFlight groups. Public App Store release remains pending.
-- [x] **Submit mobile for App Store review.** Version 2.0 (32), updated icon, 12 refreshed screenshots, and two current previews submitted September 29 at 10:38 PM PDT. Apple shows Waiting for Review; release is manual.
+- [x] **Submit mobile for App Store review.** Version 2.0 (32) resubmitted September 30 at 2:29 PM PDT together with Unlimited Lifetime, Unlimited Monthly, and the subscription group. Apple shows all four items Waiting for Review; release is manual. [Rejection correction and evidence](QualityReports/app-review-rejection-2026-09-30/QA-REPORT.md).
+- [ ] **Record Apple's result for the corrected submission.** Submission `c57865bb-3166-4266-80b1-cf9c5740bcc5` is awaiting review. The September 30 information-needed rejection was addressed with current purchase-location steps and screenshots. Approval is pending.
 - [ ] **Find 1,000 of the largest Twitch streamers and send personalized NameSnap pitches through accepted business-contact routes.** Updated scope authorized September 29. Preserve ranking/contact provenance and verified send outcomes. The shared email provider currently has no approved cold-email route; accepted pitch forms may be used where appropriate. No campaign sends have occurred.
 
 Campaign checkpoint: three first-party business contacts (shroud, Myth, Summit1G) are verified locally in `artifacts/outreach/2026-09-29`. The 1,000-person ranking export is unfinished: the site's offered CSV action did not return an accessible file through the supported built-in browser. The source prohibits scraping. A client-project agency form was not treated as permission for creator product recommendations. Research notes and one unsent draft are preserved; no messages, replies, or demand are claimed.
@@ -19,6 +20,14 @@ Campaign checkpoint: three first-party business contacts (shroud, Myth, Summit1G
 - Build 31 repairs the winner close button's status-area overlap; build 32 removes the confetti GIF's black background and passed the final real-iPhone winner/X check. Final device verification is recorded in [the QA report](QualityReports/ios-name-accuracy-2026-09-29/QA-REPORT.md).
 - The two web accuracy tasks above remain separate; iOS checks do not certify the web implementation.
 - Remaining release checks include purchase/restore, physical clipboard paste, and the existing main-screen status-area overlap. Other device/layout/accessibility coverage is bounded in the QA report.
+
+### App Review correction — September 30
+
+- Apple could not locate Lifetime under Guideline 2.1(b). Both products still had obsolete review instructions referencing a gear icon and an upgrade menu removed by the UI redesign. The prior submission contained only the app version; the products and subscription group were Developer Rejected.
+- Built the unchanged build-32 native source in Release for iPhone 16e. Pasting 17 names and tapping ADD THESE NAMES TO POOL opened the current Unlimited screen, showing Lifetime, Monthly, and Restore Purchases. This checks discovery, not completion of a sandbox transaction.
+- Corrected both product review notes and the app-version notes, uploaded a current purchase-screen screenshot to each product and app review, and replied to Apple with the steps and attachment.
+- Replaced the incomplete rejected submission with a four-item submission. The Paid Apps Agreement was verified Active; purchase availability is all countries/regions. Existing product IDs, pricing, build 32, updated icon, store screenshots/previews, and manual release remain in place.
+- The checked-in `fastlane/review-notes.txt` now preserves the current walkthrough. Listing uploads also preserve manual release.
 
 The release notes below are historical context. Recheck their status before
 acting; the list above is the current work queue.

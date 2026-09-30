@@ -1,0 +1,18 @@
+Hello App Review,
+
+Thank you. We found obsolete In-App Purchase review notes that referred to a gear icon and an upgrade menu from the previous UI. Those instructions have been corrected.
+
+To locate the purchases in NameSnap 2.0 (32):
+1. Launch NameSnap. No app account or sign-in is required.
+2. In CONTESTANT LIST, paste these 17 names:
+Alex, Blair, Casey, Drew, Ellis, Finley, Gray, Harper, Indy, Jordan, Kai, Logan, Morgan, Nico, Oakley, Parker, Quinn
+3. Tap ADD THESE NAMES TO POOL. Because the free limit is 16 contestants, this opens the Upgrade to Unlimited? screen.
+4. Tap Unlock Lifetime (localized price) for NameSnap Unlimited Lifetime, product ID namesnap.unlimited_lifetime_699. Or Monthly opens namesnap.unlimited_monthly_099. Restore Purchases is on the same screen.
+
+We verified this exact path in the Release configuration of build 32 on the iPhone 16e simulator. The attached current screenshot shows both purchase buttons and Restore Purchases. This verification covers reaching the purchase screen; it is not a claim that a sandbox transaction was completed in that simulator session.
+
+Please use an Apple sandbox reviewer account without an existing Unlimited entitlement. An existing Lifetime entitlement prevents the free-limit screen from appearing. There are no app-side storefront or device restrictions. The Paid Apps Agreement is Active. Purchases use StoreKit and do not require web checkout or email sign-in.
+
+We are also correcting the submission grouping so version 2.0 (32), Unlimited Lifetime, Unlimited Monthly, and the Unlimited subscription group are submitted together. The app's build and current listing assets are unchanged.
+
+Thank you.

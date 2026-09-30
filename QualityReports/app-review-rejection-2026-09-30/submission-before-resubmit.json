@@ -1,0 +1,54 @@
+{
+  "review_submissions": [
+    {
+      "id": "c57865bb-3166-4266-80b1-cf9c5740bcc5",
+      "state": "READY_FOR_REVIEW",
+      "submitted_date": null,
+      "platform": null
+    },
+    {
+      "id": "0681ac05-10a6-451c-9990-403c899cfa5d",
+      "state": "COMPLETE",
+      "submitted_date": "2026-09-30T05:38:23.92Z",
+      "platform": "IOS"
+    },
+    {
+      "id": "2ebf5aa2-055f-41bd-98b2-81ace80470ca",
+      "state": "COMPLETE",
+      "submitted_date": "2026-08-23T01:55:16.325Z",
+      "platform": "IOS"
+    },
+    {
+      "id": "00d2195f-b002-4261-94ec-cb4b257f288e",
+      "state": "COMPLETE",
+      "submitted_date": "2026-08-23T01:50:39.548Z",
+      "platform": "IOS"
+    },
+    {
+      "id": "181a844a-2dc3-4462-9015-beee2bc3470e",
+      "state": "COMPLETE",
+      "submitted_date": "2026-08-13T17:00:33.208Z",
+      "platform": "IOS"
+    },
+    {
+      "id": "7ae62cf7-dacc-4d90-8ad6-730e2efa6cb0",
+      "state": "COMPLETE",
+      "submitted_date": "2026-08-12T14:15:11.667Z",
+      "platform": "IOS"
+    }
+  ],
+  "versions": [
+    {
+      "id": "af56c748-6d98-4c91-af61-f39abd076cc1",
+      "version": "2.0",
+      "state": "REJECTED",
+      "submission": null
+    },
+    {
+      "id": "6dd4ad71-3e98-4fd6-ad50-226340db1b69",
+      "version": "1.0",
+      "state": "READY_FOR_SALE",
+      "submission": null
+    }
+  ]
+}

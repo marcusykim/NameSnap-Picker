@@ -1,0 +1,950 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project NameSnap.xcodeproj -scheme NameSnap -configuration Release -destination "platform=iOS Simulator,id=B7D5E2A1-012A-44E9-84AE-A7CF9B8955BD" -derivedDataPath /tmp/namesnap-review-build32 CODE_SIGNING_ALLOWED=NO build
+
+Build settings from command line:
+    CODE_SIGNING_ALLOWED = NO
+
+2026-09-30 14:17:00.795 xcodebuild[27827:122131]  DVTProvisioningProfileManager: Failed to load profile "/Users/marcuskim/Library/Developer/Xcode/UserData/Provisioning Profiles/NoXcodeManaged-NameSnap.mobileprovision.bad" (Error Domain=DVTProvisioningProfileSourceErrorDomain Code=0 "No provisioning profile provider found for profile "/Users/marcuskim/Library/Developer/Xcode/UserData/Provisioning Profiles/NoXcodeManaged-NameSnap.mobileprovision.bad"." UserInfo={NSLocalizedDescription=No provisioning profile provider found for profile "/Users/marcuskim/Library/Developer/Xcode/UserData/Provisioning Profiles/NoXcodeManaged-NameSnap.mobileprovision.bad".})
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, arch:arm64, id:B7D5E2A1-012A-44E9-84AE-A7CF9B8955BD, OS:26.3.1, name:iPhone 16e }
+{ platform:iOS Simulator, arch:x86_64, id:B7D5E2A1-012A-44E9-84AE-A7CF9B8955BD, OS:26.3.1, name:iPhone 16e }
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (1 target)
+    Target 'NameSnap' in project 'NameSnap' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/NameSnap/Assets.xcassets
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/ibtool --version --output-format xml1
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: 6c2da7c1adaa7c728d0e97b5f58f8e0b
+Build description path: /tmp/namesnap-review-build32/Build/Intermediates.noindex/XCBuildData/6c2da7c1adaa7c728d0e97b5f58f8e0b.xcbuilddata
+CreateBuildDirectory /tmp/namesnap-review-build32/Build/Products
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap.xcodeproj
+    builtin-create-build-directory /tmp/namesnap-review-build32/Build/Products
+
+CreateBuildDirectory /tmp/namesnap-review-build32/Build/Intermediates.noindex
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap.xcodeproj
+    builtin-create-build-directory /tmp/namesnap-review-build32/Build/Intermediates.noindex
+
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk /tmp/namesnap-review-build32/SDKStatCaches.noindex/iphonesimulator26.2-23C53-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -o /tmp/namesnap-review-build32/SDKStatCaches.noindex/iphonesimulator26.2-23C53-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache
+
+CreateBuildDirectory /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap.xcodeproj
+    builtin-create-build-directory /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator
+
+CreateBuildDirectory /tmp/namesnap-review-build32/Build/Intermediates.noindex/ExplicitPrecompiledModules
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap.xcodeproj
+    builtin-create-build-directory /tmp/namesnap-review-build32/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+CreateBuildDirectory /tmp/namesnap-review-build32/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap.xcodeproj
+    builtin-create-build-directory /tmp/namesnap-review-build32/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+CreateBuildDirectory /tmp/namesnap-review-build32/Build/Intermediates.noindex/EagerLinkingTBDs/Release-iphonesimulator
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap.xcodeproj
+    builtin-create-build-directory /tmp/namesnap-review-build32/Build/Intermediates.noindex/EagerLinkingTBDs/Release-iphonesimulator
+
+WriteAuxiliaryFile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap-e8d8844fc9de007dec84cd9cb9354cc7-VFS-iphonesimulator/all-product-headers.yaml
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap.xcodeproj
+    write-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap-e8d8844fc9de007dec84cd9cb9354cc7-VFS-iphonesimulator/all-product-headers.yaml
+
+WriteAuxiliaryFile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap.hmap (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    write-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap.hmap
+
+WriteAuxiliaryFile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.LinkFileList (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    write-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.LinkFileList
+
+WriteAuxiliaryFile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.SwiftFileList (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    write-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.SwiftFileList
+
+WriteAuxiliaryFile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap-OutputFileMap.json (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    write-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap-OutputFileMap.json
+
+WriteAuxiliaryFile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.SwiftConstValuesFileList (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    write-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap_const_extract_protocols.json (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    write-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap_const_extract_protocols.json
+
+WriteAuxiliaryFile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap.DependencyStaticMetadataFileList (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    write-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap.DependencyMetadataFileList (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    write-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap.DependencyMetadataFileList
+
+WriteAuxiliaryFile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-project-headers.hmap (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    write-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-project-headers.hmap
+
+WriteAuxiliaryFile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-own-target-headers.hmap (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    write-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-own-target-headers.hmap
+
+WriteAuxiliaryFile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-generated-files.hmap (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    write-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-generated-files.hmap
+
+WriteAuxiliaryFile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-all-target-headers.hmap (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    write-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-all-target-headers.hmap
+
+WriteAuxiliaryFile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-all-non-framework-target-headers.hmap (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    write-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-all-non-framework-target-headers.hmap
+
+MkDir /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /bin/mkdir -p /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_100.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_100.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_100.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+MkDir /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_output/thinned (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /bin/mkdir -p /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_output/thinned
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_099.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_099.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_099.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+MkDir /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_output/unthinned (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /bin/mkdir -p /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_output/unthinned
+
+GenerateAssetSymbols /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Assets.xcassets (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Assets.xcassets --compile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app --output-format human-readable-text --notices --warnings --export-dependency-info /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_dependencies --output-partial-info-plist /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_generated_info.plist --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 18.0 --platform iphonesimulator --bundle-identifier com.marcuskim.namesnap --generate-swift-asset-symbols /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources/GeneratedAssetSymbols.swift --generate-objc-asset-symbols /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources/GeneratedAssetSymbols.h --generate-asset-symbol-index /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/* com.apple.actool.compilation-results */
+/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources/GeneratedAssetSymbols.h
+/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources/GeneratedAssetSymbols.swift
+
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_098.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_098.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_098.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_097.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_097.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_097.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_096.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_096.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_096.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_095.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_095.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_095.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_094.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_094.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_094.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_093.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_093.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_093.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_092.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_092.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_092.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_091.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_091.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_091.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_090.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_090.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_090.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_089.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_089.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_089.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_088.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_088.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_088.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_087.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_087.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_087.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_086.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_086.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_086.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_085.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_085.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_085.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_084.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_084.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_084.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_083.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_083.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_083.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_082.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_082.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_082.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_081.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_081.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_081.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_080.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_080.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_080.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_079.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_079.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_079.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_078.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_078.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_078.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_077.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_077.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_077.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_076.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_076.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_076.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_075.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_075.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_075.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_074.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_074.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_074.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_073.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_073.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_073.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_072.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_072.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_072.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_071.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_071.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_071.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_070.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_070.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_070.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_069.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_069.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_069.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_068.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_068.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_068.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_067.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_067.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_067.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_066.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_066.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_066.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_065.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_065.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_065.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_064.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_064.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_064.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_063.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_063.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_063.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_062.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_062.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_062.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_061.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_061.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_061.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_060.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_060.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_060.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_059.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_059.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_059.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_058.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_058.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_058.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_057.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_057.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_057.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_056.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_056.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_056.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_055.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_055.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_055.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_054.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_054.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_054.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_053.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_053.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_053.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_052.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_052.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_052.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_051.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_051.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_051.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_049.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_049.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_049.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_050.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_050.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_050.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_048.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_048.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_048.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_047.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_047.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_047.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_046.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_046.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_046.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_045.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_045.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_045.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_044.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_044.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_044.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_043.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_043.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_043.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_042.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_042.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_042.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_040.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_040.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_040.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_041.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_041.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_041.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_039.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_039.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_039.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_038.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_038.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_038.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_037.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_037.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_037.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_036.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_036.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_036.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_035.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_035.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_035.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_034.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_034.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_034.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_033.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_033.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_033.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_032.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_032.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_032.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_031.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_031.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_031.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_030.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_030.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_030.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_029.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_029.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_029.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_028.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_028.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_028.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_027.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_027.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_027.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_026.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_026.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_026.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_024.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_024.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_024.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_025.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_025.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_025.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_023.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_023.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_023.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_022.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_022.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_022.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_021.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_021.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_021.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_020.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_020.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_020.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_019.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_019.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_019.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_018.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_018.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_018.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_017.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_017.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_017.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_016.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_016.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_016.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_015.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_015.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_015.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_014.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_014.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_014.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_013.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_013.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_013.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_012.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_012.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_012.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_011.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_011.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_011.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_010.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_010.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_010.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_009.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_009.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_009.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_008.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_008.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_008.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_007.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_007.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_007.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_006.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_006.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_006.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_005.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_005.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_005.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_004.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_004.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_004.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_003.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_003.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_003.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_002.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_002.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_002.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/winner_music_001.mp3 /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_001.mp3 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Sounds/winner_music_001.mp3 /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/pixel-bomb.gif /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/pixel-bomb.gif (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/pixel-bomb.gif /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/confetti-burst.gif /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/confetti-burst.gif (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/confetti-burst.gif /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/RubikMonoOne-Regular.ttf /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Fonts/RubikMonoOne-Regular.ttf (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Fonts/RubikMonoOne-Regular.ttf /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CpResource /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/ArchivoBlack-OFL.txt /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Fonts/ArchivoBlack-OFL.txt (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Fonts/ArchivoBlack-OFL.txt /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/trumpet.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/trumpet.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/trumpet.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/trumpet.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/superhero.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/superhero.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/superhero.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/superhero.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/soccer-striker.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/soccer-striker.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/soccer-striker.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/soccer-striker.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/skater.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/skater.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/skater.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/skater.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/skateboarder.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/skateboarder.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/skateboarder.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/skateboarder.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/saxophonist.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/saxophonist.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/saxophonist.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/saxophonist.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/rodeo-star.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/rodeo-star.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/rodeo-star.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/rodeo-star.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/rocket-scientist.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/rocket-scientist.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/rocket-scientist.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/rocket-scientist.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/robot.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/robot.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/robot.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/robot.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/punk-vocalist.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/punk-vocalist.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/punk-vocalist.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/punk-vocalist.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/pirate-captain.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/pirate-captain.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/pirate-captain.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/pirate-captain.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/opera-singer.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/opera-singer.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/opera-singer.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/opera-singer.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/magician.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/magician.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/magician.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/magician.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/knight.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/knight.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/knight.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/knight.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/keytarist.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/keytarist.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/keytarist.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/keytarist.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/juggler.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/juggler.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/juggler.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/juggler.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/hype-mascot.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/hype-mascot.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/hype-mascot.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/hype-mascot.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/guitarist.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/guitarist.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/guitarist.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/guitarist.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/gamer.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/gamer.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/gamer.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/gamer.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/dynamite.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/dynamite.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/dynamite.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/dynamite.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/drummer.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/drummer.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/drummer.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/drummer.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/dj.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/dj.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/dj.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/dj.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/disco-dancer.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/disco-dancer.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/disco-dancer.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/disco-dancer.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/dancer.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/dancer.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/dancer.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/dancer.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/conductor.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/conductor.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/conductor.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/conductor.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/cheer-captain.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/cheer-captain.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/cheer-captain.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/cheer-captain.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/breakdancer.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/breakdancer.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/breakdancer.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/breakdancer.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/basketball-dunker.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/basketball-dunker.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/basketball-dunker.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/basketball-dunker.png
+
+CopyPNGFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/astronaut.png /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/astronaut.png (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Celebrations/astronaut.png /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/astronaut.png
+
+CompileStoryboard /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/SupportingFiles/LaunchScreen.storyboard (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/ibtool --errors --warnings --notices --module NameSnap --output-partial-info-plist /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/LaunchScreen-SBPartialInfo.plist --auto-activate-custom-fonts --target-device iphone --target-device ipad --minimum-deployment-target 18.0 --output-format human-readable-text /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/SupportingFiles/LaunchScreen.storyboard --compilation-directory /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build
+
+CompileAssetCatalogVariant thinned /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Assets.xcassets (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Assets.xcassets --compile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_dependencies_thinned --output-partial-info-plist /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_generated_info.plist_thinned --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --filter-for-thinning-device-configuration iPhone17,5 --filter-for-device-os-version 26.3.1 --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 18.0 --platform iphonesimulator
+/* com.apple.actool.compilation-results */
+/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_generated_info.plist_thinned
+/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_output/thinned/AppIcon60x60@2x.png
+/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_output/thinned/AppIcon76x76@2x~ipad.png
+/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_output/thinned/Assets.car
+
+
+SwiftDriver NameSnap normal arm64 com.apple.xcode.tools.swift.compiler (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name NameSnap -O -whole-module-optimization -enforce-exclusivity\=checked @/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.SwiftFileList -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -target arm64-apple-ios18.0-simulator -g -module-cache-path /tmp/namesnap-review-build32/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -swift-version 5 -I /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator -F /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator -emit-localized-strings -emit-localized-strings-path /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64 -c -num-threads 8 -Xcc -ivfsstatcache -Xcc /tmp/namesnap-review-build32/SDKStatCaches.noindex/iphonesimulator26.2-23C53-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache -output-file-map /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /tmp/namesnap-review-build32/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /tmp/namesnap-review-build32/ModuleCache.noindex -sdk-module-cache-path /tmp/namesnap-review-build32/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.swiftmodule -validate-clang-modules-once -clang-build-session-file /tmp/namesnap-review-build32/ModuleCache.noindex/Session.modulevalidation -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap_const_extract_protocols.json -Xcc -iquote -Xcc /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-generated-files.hmap -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-own-target-headers.hmap -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-all-target-headers.hmap -Xcc -iquote -Xcc /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-project-headers.hmap -Xcc -I/tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/include -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources-normal/arm64 -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources/arm64 -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources -emit-objc-header -emit-objc-header-path /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap-Swift.h -working-directory /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker -no-emit-module-separately-wmo
+
+LinkStoryboards (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/usr/bin/ibtool --errors --warnings --notices --module NameSnap --target-device iphone --target-device ipad --minimum-deployment-target 18.0 --output-format human-readable-text --link /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/LaunchScreen.storyboardc
+
+SwiftDriver\ Compilation NameSnap normal arm64 com.apple.xcode.tools.swift.compiler (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name NameSnap -O -whole-module-optimization -enforce-exclusivity\=checked @/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.SwiftFileList -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -target arm64-apple-ios18.0-simulator -g -module-cache-path /tmp/namesnap-review-build32/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -swift-version 5 -I /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator -F /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator -emit-localized-strings -emit-localized-strings-path /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64 -c -num-threads 8 -Xcc -ivfsstatcache -Xcc /tmp/namesnap-review-build32/SDKStatCaches.noindex/iphonesimulator26.2-23C53-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache -output-file-map /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /tmp/namesnap-review-build32/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /tmp/namesnap-review-build32/ModuleCache.noindex -sdk-module-cache-path /tmp/namesnap-review-build32/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.swiftmodule -validate-clang-modules-once -clang-build-session-file /tmp/namesnap-review-build32/ModuleCache.noindex/Session.modulevalidation -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap_const_extract_protocols.json -Xcc -iquote -Xcc /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-generated-files.hmap -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-own-target-headers.hmap -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-all-target-headers.hmap -Xcc -iquote -Xcc /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-project-headers.hmap -Xcc -I/tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/include -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources-normal/arm64 -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources/arm64 -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources -emit-objc-header -emit-objc-header-path /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap-Swift.h -working-directory /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker -no-emit-module-separately-wmo
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/DeveloperToolsSupport-11SRCTKMIQKSO0GUY23DW37QJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_SwiftConcurrencyShims-55K5MMUN1TOEXLDUCLCME2QT1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/ptrauth-DL7G7RF2TPQND8XD1MBUAY27W.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_stdbool-54NDX04DBGXB4BVUG2UNZG0HV.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/SwiftShims-9PE0Z51CZK7509DJ4VJM3G8SD.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_stddef-BVJTXM3JFA99472B37N5K7L5C.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_stdarg-6UR9KZMVSLK9HPQ6U4ZTZG9LB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_StoreKit_SwiftUI-D2YWG2N98T568932PSGJ8SKLR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_AvailabilityInternal-92T7HAVWUSWGUIEIY4QSKKBT2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/ptrcheck-AEN0JMCUZJFRUSNXN3MHDRANA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_float-5NDNZ0IPZ2F955RUM03L7JR6Y.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_DarwinFoundation1-9ZJYAK36I4WV64UECDM9RCXLE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/ExtensionFoundation-1M17VGBGGUB9E1FHFARFQZCTZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_limits-NW84X7VDEO9DHJOT8ZBB2BON.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_DarwinFoundation2-901JZ0BQX5BIPE0NHUR6KHNN2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/sys_types-5XDAIH9137RN14NN8KDZ9CYGW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_tgmath-9V2FU73J9C2SKIBCPGNF6U9FT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_stdint-AJ0KL3SSA1WS8QQZOKEW0OWJ2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_stdatomic-E8172520Y168LIXWTQ7X7P1I4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_intrinsics-IKRQHRFD3ZKE5JY7JLG6GSWG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_DarwinFoundation3-BJ15R2NZO8MAUO1I9LNGL5DI4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_inttypes-2LWEJQ62NG42F7C6Y0VNVFN5H.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/Darwin-C0Z1RYUJAI9LMYTH8GFP7OJL5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/simd-7FTR8GOJOF90CDI2SJE00ZR7C.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/MachO-30LT26OX3Q7ZX5LHNC848585G.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/ObjectiveC-90N4YH78WI8HJXJXW9JFOVM1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/os_object-4QULHG0K4OONFIQQFIEANUQ2W.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/os_workgroup-3I0MAIOBH3QB5EWH151RZKM2V.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/Spatial-CBHI97TZMLDTGLEC90ZX95QQG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/Dispatch-CME81TYU4Z3C1FR69NR87PQZX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/dnssd-VLZHZQ311BSTQLDMKH0OF5CH.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/CoreFoundation-DU32LH3SPZ4FYU7T01NCSZOZO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/XPC-EPPG05L4AZR5IMZ6V6LTMINC8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/os-ALOOT8XPDSKOVBFSKXOCZFIA2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/CFNetwork-2BO2AJIFTPQORYYAV4YDTIUSQ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/Security-COXX4AV43G4KAZQDHNLK714FZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/CoreAudioTypes-3JTK846VBSOB453Z51FYT4ZYN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/CoreGraphics-310FQ7850ZYOYRQYFLR44YYAQ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/CoreAudio-BBDTTZ5O6QPBRJ6XPZ8HMXPSL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/Foundation-3W5ASA5MN4AEZ1IZ19LCB4SHV.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/ImageIO-BX1HBQZJ7RPFU0TSPIWD45N2Z.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/CoreText-E4POE2WVCFVK29OD6X1K1YIAU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/Accessibility-6DVAMOM0FFGP4MMSASIEKW4AM.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/IOSurface-8O9TNFENKOU13UMV91R8V034S.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/UniformTypeIdentifiers-53AFWTEX07JZ90C45FIWWDBPK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/FileProvider-B1BVGBQ2MCY4EE88SVRQCU4PB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/OSLog-8FG5WMIIVCUAJ04B06C16F5HI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/DataDetection-BSJCLS42982FJY3QY051WK9S6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/Network-CWLWRVD44XR8NV6CJE5J9HNX3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/CoreMIDI-76VX5NKY041ATRF4G6PD85WQP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/BackgroundAssets-YNGN16ZXGJJPV3Q4GFZBLZGK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/UIUtilities-E3P5UUZ8GOY1B2WCLFRNI8GH9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/CoreData-4COR3WDNGIE0TQN683953ENJN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/OpenGLES-F1H7G94XWDNVYVDMG7ZD1E8TJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/Metal-4YMDJA5M67STLGE0KK2NUO4CD.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/CoreTransferable-930YXS765WOWXWPFL096E0SCF.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/AVRouting-4SGNP3TNQS5LT7XHC4U0PLVFR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/Symbols-9LE8UDDUOJPVQXW6UG6JOC4SX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/LocalAuthentication-S7U6A0JQQTE5J5GBMHZPK4Y3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/UserNotifications-8C7L162JJS58UDULKQBLG06R2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/AudioToolbox-DV98DJLCFYNZZWZA0AJFI4UPT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/CoreVideo-1VGY0EDKL8CR6UBG3BVVXPTOT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/QuartzCore-MVUILH6LH7RJDHT1C6AOLUG9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/CoreMedia-743A3L3CIQXGLVJHATL1XLSK8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/CoreImage-7ZTOG60Y6M9SSTJ9X8J8UUAMI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/SwiftUICore-EU8LEYW6MROSFX4GR2K7H1JDJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/UIKit-65VM4UV0PXCKX0Q2J9MO625N1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/MediaToolbox-874SGP529DJNIUSE4E0LQ506U.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/AVFAudio-2D3KYI3A1XLPVSL46078AEV0O.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/AVFoundation-1WJ6LQZCGTOCMVJPL8RKA8L49.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/SwiftUI-1KX54QI1RYY3IQS9KGT8PKR87.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/namesnap-review-build32/ModuleCache.noindex/StoreKit-8P6LEJ37OFSFZD115Z5VGIMI8.pcm
+
+SwiftCompile normal arm64 Compiling\ ContentView.swift,\ NameSnapApp.swift,\ GeneratedAssetSymbols.swift /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/ContentView.swift /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/NameSnapApp.swift /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources/GeneratedAssetSymbols.swift /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/Observation.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/CoreVideo.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/_StringProcessing.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/Combine.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/simd.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/CoreMIDI.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/XPC.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/Spatial.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/AudioToolbox.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/OSLog.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/CoreTransferable.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/Network.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/AVFoundation.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/UniformTypeIdentifiers.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/AVFAudio.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/Distributed.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/CoreText.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/SwiftUICore.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/CoreAudio.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/System.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/Symbols.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/CoreGraphics.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/Accessibility.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/DeveloperToolsSupport.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/StoreKit.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/_StoreKit_SwiftUI.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/Foundation.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/_DarwinFoundation2.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/CoreImage.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/CryptoKit.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/ExtensionFoundation.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/FileProvider.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/Synchronization.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/os.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/Dispatch.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/Metal.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/QuartzCore.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/LocalAuthentication.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/_DarwinFoundation1.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/SwiftUI.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/CoreData.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/ObjectiveC.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/CoreMedia.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/UIKit.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/_Builtin_float.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/BackgroundAssets.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/DataDetection.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/Swift.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/_Concurrency.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/Darwin.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/_DarwinFoundation3.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/prebuilt-modules/26.2/CoreFoundation.swiftmodule/arm64-apple-ios-simulator.swiftmodule /tmp/namesnap-review-build32/ModuleCache.noindex/Metal-4YMDJA5M67STLGE0KK2NUO4CD.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/UserNotifications-8C7L162JJS58UDULKQBLG06R2.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_tgmath-9V2FU73J9C2SKIBCPGNF6U9FT.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/ExtensionFoundation-1M17VGBGGUB9E1FHFARFQZCTZ.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/Darwin-C0Z1RYUJAI9LMYTH8GFP7OJL5.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/CoreText-E4POE2WVCFVK29OD6X1K1YIAU.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/BackgroundAssets-YNGN16ZXGJJPV3Q4GFZBLZGK.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/AVFoundation-1WJ6LQZCGTOCMVJPL8RKA8L49.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/SwiftShims-9PE0Z51CZK7509DJ4VJM3G8SD.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/AudioToolbox-DV98DJLCFYNZZWZA0AJFI4UPT.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/FileProvider-B1BVGBQ2MCY4EE88SVRQCU4PB.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/simd-7FTR8GOJOF90CDI2SJE00ZR7C.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/AVFAudio-2D3KYI3A1XLPVSL46078AEV0O.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/CoreData-4COR3WDNGIE0TQN683953ENJN.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/CoreMIDI-76VX5NKY041ATRF4G6PD85WQP.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/CoreGraphics-310FQ7850ZYOYRQYFLR44YYAQ.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/OSLog-8FG5WMIIVCUAJ04B06C16F5HI.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_stdint-AJ0KL3SSA1WS8QQZOKEW0OWJ2.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/SwiftUI-1KX54QI1RYY3IQS9KGT8PKR87.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/DataDetection-BSJCLS42982FJY3QY051WK9S6.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/QuartzCore-MVUILH6LH7RJDHT1C6AOLUG9.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/DeveloperToolsSupport-11SRCTKMIQKSO0GUY23DW37QJ.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/Foundation-3W5ASA5MN4AEZ1IZ19LCB4SHV.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/AVRouting-4SGNP3TNQS5LT7XHC4U0PLVFR.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_stddef-BVJTXM3JFA99472B37N5K7L5C.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/sys_types-5XDAIH9137RN14NN8KDZ9CYGW.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_stdatomic-E8172520Y168LIXWTQ7X7P1I4.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/CoreFoundation-DU32LH3SPZ4FYU7T01NCSZOZO.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/UniformTypeIdentifiers-53AFWTEX07JZ90C45FIWWDBPK.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/SwiftUICore-EU8LEYW6MROSFX4GR2K7H1JDJ.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/IOSurface-8O9TNFENKOU13UMV91R8V034S.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/CoreAudio-BBDTTZ5O6QPBRJ6XPZ8HMXPSL.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/UIKit-65VM4UV0PXCKX0Q2J9MO625N1.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_StoreKit_SwiftUI-D2YWG2N98T568932PSGJ8SKLR.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/Network-CWLWRVD44XR8NV6CJE5J9HNX3.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/MediaToolbox-874SGP529DJNIUSE4E0LQ506U.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_inttypes-2LWEJQ62NG42F7C6Y0VNVFN5H.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/OpenGLES-F1H7G94XWDNVYVDMG7ZD1E8TJ.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/UIUtilities-E3P5UUZ8GOY1B2WCLFRNI8GH9.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_SwiftConcurrencyShims-55K5MMUN1TOEXLDUCLCME2QT1.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/ObjectiveC-90N4YH78WI8HJXJXW9JFOVM1.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_DarwinFoundation3-BJ15R2NZO8MAUO1I9LNGL5DI4.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/Dispatch-CME81TYU4Z3C1FR69NR87PQZX.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_stdarg-6UR9KZMVSLK9HPQ6U4ZTZG9LB.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/StoreKit-8P6LEJ37OFSFZD115Z5VGIMI8.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/CoreMedia-743A3L3CIQXGLVJHATL1XLSK8.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_DarwinFoundation1-9ZJYAK36I4WV64UECDM9RCXLE.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_float-5NDNZ0IPZ2F955RUM03L7JR6Y.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/CFNetwork-2BO2AJIFTPQORYYAV4YDTIUSQ.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/os_workgroup-3I0MAIOBH3QB5EWH151RZKM2V.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/dnssd-VLZHZQ311BSTQLDMKH0OF5CH.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/ptrauth-DL7G7RF2TPQND8XD1MBUAY27W.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_AvailabilityInternal-92T7HAVWUSWGUIEIY4QSKKBT2.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/MachO-30LT26OX3Q7ZX5LHNC848585G.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/os_object-4QULHG0K4OONFIQQFIEANUQ2W.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/Accessibility-6DVAMOM0FFGP4MMSASIEKW4AM.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/CoreVideo-1VGY0EDKL8CR6UBG3BVVXPTOT.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_DarwinFoundation2-901JZ0BQX5BIPE0NHUR6KHNN2.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/XPC-EPPG05L4AZR5IMZ6V6LTMINC8.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/Security-COXX4AV43G4KAZQDHNLK714FZ.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/CoreImage-7ZTOG60Y6M9SSTJ9X8J8UUAMI.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_stdbool-54NDX04DBGXB4BVUG2UNZG0HV.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/CoreTransferable-930YXS765WOWXWPFL096E0SCF.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/os-ALOOT8XPDSKOVBFSKXOCZFIA2.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/ImageIO-BX1HBQZJ7RPFU0TSPIWD45N2Z.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_limits-NW84X7VDEO9DHJOT8ZBB2BON.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/LocalAuthentication-S7U6A0JQQTE5J5GBMHZPK4Y3.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/ptrcheck-AEN0JMCUZJFRUSNXN3MHDRANA.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/CoreAudioTypes-3JTK846VBSOB453Z51FYT4ZYN.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/Symbols-9LE8UDDUOJPVQXW6UG6JOC4SX.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/_Builtin_intrinsics-IKRQHRFD3ZKE5JY7JLG6GSWG.pcm /tmp/namesnap-review-build32/ModuleCache.noindex/Spatial-CBHI97TZMLDTGLEC90ZX95QQG.pcm /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap-dependencies-1.json (in target 'NameSnap' from project 'NameSnap')
+
+CompileSwift normal arm64 (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    
+/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/NameSnap/ContentView.swift:1915:42: warning: 'onChange(of:perform:)' was deprecated in iOS 17.0: Use `onChange` with a two or zero parameter action closure instead.
+                                        .onChange(of: noRepeatToggleUIValue) { newValue in
+                                         ^
+/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/NameSnap/ContentView.swift:2734:14: warning: 'onChange(of:perform:)' was deprecated in iOS 17.0: Use `onChange` with a two or zero parameter action closure instead.
+            .onChange(of: vm.wheelIndex) { _ in
+             ^
+/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/NameSnap/ContentView.swift:2793:14: warning: 'onChange(of:perform:)' was deprecated in iOS 17.0: Use `onChange` with a two or zero parameter action closure instead.
+            .onChange(of: vm.activeEntries.map(\.id)) { _ in
+             ^
+/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/NameSnap/ContentView.swift:2803:14: warning: 'onChange(of:perform:)' was deprecated in iOS 17.0: Use `onChange` with a two or zero parameter action closure instead.
+            .onChange(of: vm.wheelVirtualRowCount) { _ in
+             ^
+/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/NameSnap/ContentView.swift:2807:14: warning: 'onChange(of:perform:)' was deprecated in iOS 17.0: Use `onChange` with a two or zero parameter action closure instead.
+            .onChange(of: vm.noRepeatMode) { newValue in
+             ^
+/Users/marcuskim/Documents/Sidequest Software/NameSnap-Picker/NameSnap/ContentView.swift:2813:14: warning: 'onChange(of:perform:)' was deprecated in iOS 17.0: Use `onChange` with a two or zero parameter action closure instead.
+            .onChange(of: vm.isSpinning) { spinning in
+             ^
+
+SwiftDriverJobDiscovery normal arm64 Compiling ContentView.swift, NameSnapApp.swift, GeneratedAssetSymbols.swift (in target 'NameSnap' from project 'NameSnap')
+
+SwiftDriver\ Compilation\ Requirements NameSnap normal arm64 com.apple.xcode.tools.swift.compiler (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name NameSnap -O -whole-module-optimization -enforce-exclusivity\=checked @/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.SwiftFileList -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -target arm64-apple-ios18.0-simulator -g -module-cache-path /tmp/namesnap-review-build32/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -swift-version 5 -I /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator -F /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator -emit-localized-strings -emit-localized-strings-path /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64 -c -num-threads 8 -Xcc -ivfsstatcache -Xcc /tmp/namesnap-review-build32/SDKStatCaches.noindex/iphonesimulator26.2-23C53-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache -output-file-map /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /tmp/namesnap-review-build32/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /tmp/namesnap-review-build32/ModuleCache.noindex -sdk-module-cache-path /tmp/namesnap-review-build32/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.swiftmodule -validate-clang-modules-once -clang-build-session-file /tmp/namesnap-review-build32/ModuleCache.noindex/Session.modulevalidation -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap_const_extract_protocols.json -Xcc -iquote -Xcc /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-generated-files.hmap -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-own-target-headers.hmap -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-all-target-headers.hmap -Xcc -iquote -Xcc /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap-project-headers.hmap -Xcc -I/tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/include -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources-normal/arm64 -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources/arm64 -Xcc -I/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources -emit-objc-header -emit-objc-header-path /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap-Swift.h -working-directory /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker -no-emit-module-separately-wmo
+
+SwiftMergeGeneratedHeaders /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources/NameSnap-Swift.h /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap-Swift.h (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-swiftHeaderTool -arch arm64 /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap-Swift.h -o /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/DerivedSources/NameSnap-Swift.h
+
+Copy /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.swiftmodule/arm64-apple-ios-simulator.abi.json /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.abi.json (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.abi.json /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.swiftmodule/arm64-apple-ios-simulator.abi.json
+
+Copy /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.swiftmodule/arm64-apple-ios-simulator.swiftmodule /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.swiftmodule (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.swiftmodule /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.swiftmodule/arm64-apple-ios-simulator.swiftmodule
+
+Copy /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.swiftmodule/arm64-apple-ios-simulator.swiftdoc /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.swiftdoc (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.swiftdoc /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.swiftmodule/arm64-apple-ios-simulator.swiftdoc
+
+Copy /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.swiftsourceinfo (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.swiftsourceinfo /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo
+
+Ld /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/NameSnap normal (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios18.0-simulator -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -Os -L/tmp/namesnap-review-build32/Build/Intermediates.noindex/EagerLinkingTBDs/Release-iphonesimulator -L/tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator -F/tmp/namesnap-review-build32/Build/Intermediates.noindex/EagerLinkingTBDs/Release-iphonesimulator -F/tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator -filelist /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.LinkFileList -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @executable_path/Frameworks -dead_strip -Xlinker -object_path_lto -Xlinker /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap_lto.o -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -debug_variant -Xlinker -dependency_info -Xlinker /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap_dependency_info.dat -fobjc-link-runtime -fprofile-instr-generate -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.swiftmodule @/tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap-linker-args.resp -o /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/NameSnap
+
+LinkAssetCatalog /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/Assets.xcassets (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-linkAssetCatalog --thinned /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_output/thinned --thinned-dependencies /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_dependencies_thinned --thinned-info-plist-content /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_generated_info.plist_thinned --unthinned /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_output/unthinned --unthinned-dependencies /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_dependencies_unthinned --unthinned-info-plist-content /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_generated_info.plist_unthinned --output /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app --plist-output /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_generated_info.plist
+note: Emplaced /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/AppIcon60x60@2x.png (in target 'NameSnap' from project 'NameSnap')
+note: Emplaced /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/Assets.car (in target 'NameSnap' from project 'NameSnap')
+note: Emplaced /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/AppIcon76x76@2x~ipad.png (in target 'NameSnap' from project 'NameSnap')
+
+ProcessInfoPlistFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/Info.plist /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/SupportingFiles/Info.plist (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-infoPlistUtility /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker/NameSnap/SupportingFiles/Info.plist -producttype com.apple.product-type.application -genpkginfo /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/PkgInfo -expandbuildsettings -format binary -platform iphonesimulator -additionalcontentfile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/LaunchScreen-SBPartialInfo.plist -additionalcontentfile /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/assetcatalog_generated_info.plist -o /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/Info.plist
+
+CopySwiftLibs /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-swiftStdLibTool --copy --verbose --scan-executable /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/NameSnap --scan-folder /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/Frameworks --scan-folder /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/PlugIns --scan-folder /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/SystemExtensions --scan-folder /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/Extensions --platform iphonesimulator --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+Ignoring --strip-bitcode because --sign was not passed
+
+ExtractAppIntentsMetadata (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name NameSnap --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk --xcode-version 17C52 --platform-family iOS --deployment-target 18.0 --bundle-identifier com.marcuskim.namesnap --output /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app --target-triple arm64-apple-ios18.0-simulator --binary-file /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/NameSnap --dependency-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap_dependency_info.dat --stringsdata-file /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.SwiftFileList --metadata-file-list /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap.DependencyMetadataFileList --static-metadata-file-list /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap.DependencyStaticMetadataFileList --swift-const-vals-list /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/Objects-normal/arm64/NameSnap.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-09-30 14:17:50.492 appintentsmetadataprocessor[28240:125999] Starting appintentsmetadataprocessor export
+2026-09-30 14:17:50.503 appintentsmetadataprocessor[28240:125999] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
+
+GenerateDSYMFile /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app.dSYM /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/NameSnap (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/dsymutil /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/NameSnap -o /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app.dSYM
+
+AppIntentsSSUTraining (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsnltrainingprocessor --infoplist-path /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/Info.plist --temp-dir-path /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/ssu --bundle-id com.marcuskim.namesnap --product-path /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app --extracted-metadata-path /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app/Metadata.appintents --metadata-file-list /tmp/namesnap-review-build32/Build/Intermediates.noindex/NameSnap.build/Release-iphonesimulator/NameSnap.build/NameSnap.DependencyMetadataFileList --archive-ssu-assets
+2026-09-30 14:17:50.537 appintentsnltrainingprocessor[28242:126028] Parsing options for appintentsnltrainingprocessor
+2026-09-30 14:17:50.538 appintentsnltrainingprocessor[28242:126028] No AppShortcuts found - Skipping.
+
+RegisterExecutionPolicyException /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-RegisterExecutionPolicyException /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+Validate /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    builtin-validationUtility /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app -shallow-bundle -infoplist-subpath Info.plist
+
+Touch /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app (in target 'NameSnap' from project 'NameSnap')
+    cd /Users/marcuskim/Documents/Sidequest\ Software/NameSnap-Picker
+    /usr/bin/touch -c /tmp/namesnap-review-build32/Build/Products/Release-iphonesimulator/NameSnap.app
+
+** BUILD SUCCEEDED **
+

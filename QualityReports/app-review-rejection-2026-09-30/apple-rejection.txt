@@ -1,0 +1,17 @@
+Reconstructed observation note from the September 30, 2026 UI session.
+The original screenshot apple-rejection.png is the primary visual evidence.
+This file replaces an incomplete accessibility diff; it is not a new capture.
+
+Submission: 0681ac05-10a6-451c-9990-403c899cfa5d
+App: NameSnap Picker, 6759588637
+Reviewed version: 2.0 (32)
+Message timestamp displayed: September 30, 2026, 4:48 AM PDT
+Guideline: 2.1(b), Information Needed
+
+Apple reported that the reviewer could not locate the In-App Purchases,
+including NameSnap Unlimited Lifetime. Apple requested exact location steps,
+sandbox configuration, and any storefront/device restrictions, and reminded
+us that the Account Holder must have accepted the Paid Apps Agreement.
+
+The corrected response was sent before this submission was canceled and
+replaced. The old submission now displays Removed and hides Messages.

@@ -1,0 +1,15 @@
+Observation note recorded from the September 30, 2026 UI session.
+The screenshot apple-response-confirmed.png is the primary visual evidence.
+This file replaces an incomplete accessibility diff; it is not a new capture.
+
+Submission: 0681ac05-10a6-451c-9990-403c899cfa5d
+Visible sender: Marcus Kim
+Visible timestamp: Today 2:24 PM (September 30, 2026, PDT)
+Messages count after send: 2
+The sent response and attached current purchase-screen image were visible.
+Exact response body: apple-response.txt
+Attached screenshot: build32-unlimited-screen.png
+
+After cancellation/replacement, the removed submission's details page stopped
+displaying Messages. The saved screenshot records confirmation before that
+cancellation. The replacement submission is c57865bb-3166-4266-80b1-cf9c5740bcc5.

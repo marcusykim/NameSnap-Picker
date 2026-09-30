@@ -47,7 +47,7 @@ platform :ios do
       skip_binary_upload: true,
       submit_for_review: false,
       run_precheck_before_submit: false,
-      automatic_release: true,
+      automatic_release: false,
       force: true,
       copyright: "2026 Marcus Kim",
       primary_category: "UTILITIES",
@@ -58,7 +58,7 @@ platform :ios do
         email_address: "sidequest@ik.me",
         demo_user: "",
         demo_password: "",
-        notes: "NameSnap is a random name picker for classrooms, giveaways, games, and live streams. No account is required. The free tier allows up to 16 contestants per session. Unlimited Monthly provides ongoing access to unlimited recurring classroom, livestream, giveaway, and event sessions. Unlimited Lifetime provides that access as a one-time purchase. Restore Purchases is on the same Unlimited screen. The paywall clearly shows the monthly duration, localized StoreKit price, renewal disclosure, Privacy Policy link, and Apple Standard EULA link. The App Store description also includes the Standard EULA URL. Participant names and winner history stay on device."
+        notes: File.read(File.expand_path("review-notes.txt", __dir__))
       }
     )
   end

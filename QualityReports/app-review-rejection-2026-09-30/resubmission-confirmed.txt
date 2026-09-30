@@ -1,0 +1,96 @@
+Browser tab: 1, Title: "App Store Connect", URL: "https://appstoreconnect.apple.com/apps/6759588637/distribution/reviewsubmissions/details/c57865bb-3166-4266-80b1-cf9c5740bcc5".
+1 AXWebArea App Store Connect, URL: appstoreconnect.apple.com/apps/6759588637/distribution/reviewsubmissions/details/c57865bb-3166-4266-80b1-cf9c5740bcc5
+	2 container
+		3 container App Store Connect
+			4 container
+				5 heading App Store Connect, Value: 1
+					6 link Description: App Store Connect, Value: appstoreconnect.apple.com/, ID: logo
+				7 container Global
+					8 content list
+						9 link Description: Apps, Value: appstoreconnect.apple.com/apps
+						10 link Description: Xcode Cloud, Value: appstoreconnect.apple.com/teams/67c52852-b22f-4e49-ad81-df53bf4476fb/xcode-cloud
+						11 link Description: Trends, Value: appstoreconnect.apple.com/trends
+						12 link Description: Reports, Value: appstoreconnect.apple.com/itc/payments_and_financial_reports
+						13 link Description: Business, Value: appstoreconnect.apple.com/business
+				14 button Marcus Kim Marcus Kim|681947275|1 Account name menu
+					15 text Marcus Kim
+					16 text Marcus Kim|681947275|1
+					17 image
+		18 container
+			19 pop up button (collapsed) Description: Apps menu, NameSnap Picker, selected, Secondary Actions: Expand
+				20 container
+					21 image NameSnap Picker
+					22 text NameSnap Picker
+				23 image
+			24 container Apps
+				25 content list
+					26 link Description: Distribution, Value: appstoreconnect.apple.com/apps/6759588637/distribution
+					27 link Description: Analytics, Value: appstoreconnect.apple.com/apps/6759588637/analytics
+					28 link Description: TestFlight, Value: appstoreconnect.apple.com/teams/67c52852-b22f-4e49-ad81-df53bf4476fb/apps/6759588637/testflight
+		29 container
+			30 container
+				31 link Description: App Review, Value: appstoreconnect.apple.com/apps/6759588637/distribution/reviewsubmissions
+				32 heading iOS Submission, Value: 2
+					33 text iOS Submission
+				34 image
+				35 text Waiting for Review
+				36 heading Items Submitted (4), Value: 3
+					37 text Items Submitted (4)
+				38 table
+					39 row
+						40 cell
+							41 text ITEM
+						42 cell
+							43 text TYPE
+						44 cell
+							45 text REVIEW STATUS
+						46 cell
+					47 row YzU3ODY1YmItMzE2Ni00MjY2LTgwYjEtY2Y5YzU3NDBiY2M1fDE4fGQ3MDk3MTJjLTBkY2MtNDU2Mi1hODQyLWFmODBjMDE2OWU5Nw
+						48 cell
+							94 image App Icon
+							50 text Unlimited Monthly
+						51 cell
+							52 text Subscription
+						53 cell
+							54 text Waiting for Review
+					55 row YzU3ODY1YmItMzE2Ni00MjY2LTgwYjEtY2Y5YzU3NDBiY2M1fDE5fGM3ZTVlYzY5LTg4MWYtNDI4Mi05N2Q3LTU4NTRmNTEzMmJhMw
+						56 cell
+							95 image App Icon
+							58 text Unlimited
+						59 cell
+							60 text Subscription Group
+						61 cell
+							62 text Waiting for Review
+					63 row YzU3ODY1YmItMzE2Ni00MjY2LTgwYjEtY2Y5YzU3NDBiY2M1fDE3fDVmY2FiMmFiLWIzYTktNDYxOS04MDE5LTA1ZDhiOTEzYThmOA
+						64 cell
+							96 image App Icon
+							66 text Unlimited Lifetime
+						67 cell
+							68 text In-App Purchase
+						69 cell
+							70 text Waiting for Review
+					71 row YzU3ODY1YmItMzE2Ni00MjY2LTgwYjEtY2Y5YzU3NDBiY2M1fDZ8ODgyODg0MjA4
+						72 cell
+							73 image App Icon
+							74 text iOS App 2.0
+							75 link Description: 2.0 (32), Value: appstoreconnect.apple.com/apps/6759588637/testflight/ios/bb0cff33-4d50-42c2-8373-236f4ce18ce2/metadata
+						76 cell
+							77 text App Version
+						78 cell
+							79 text Waiting for Review
+				80 text Date Submitted Sep 30, 2026 at 2:29 PM Submission ID c57865bb-3166-4266-80b1-cf9c5740bcc5 Submitted By Marcus Kim
+				81 button Cancel Submission
+		82 content list
+			83 link Description: App Store Connect, Value: appstoreconnect.apple.com/apps
+		84 content list
+			85 container
+				86 text Copyright © 2026 Apple Inc. All rights reserved. |
+			87 container
+				88 link Description: Terms of Service, Value: appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/wa/termsOfService
+				89 text |
+			90 container
+				91 link Description: Privacy Policy, Value: apple.com/legal/privacy
+				92 text |
+			93 link Description: Contact Us, Value: appstoreconnect.apple.com/contact-us
+
+The focused UI element is 1 AXWebArea App Store Connect, URL: appstoreconnect.apple.com/apps/6759588637/distribution/reviewsubmissions/details/c57865bb-3166-4266-80b1-cf9c5740bcc5

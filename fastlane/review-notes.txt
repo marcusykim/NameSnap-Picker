@@ -1,0 +1,14 @@
+NameSnap is a random name picker for classrooms, giveaways, games, and live streams. No app account or sign-in is required. Participant names and winner history stay on device.
+
+HOW TO LOCATE IN-APP PURCHASES — VERSION 2.0 (32)
+1. Launch NameSnap.
+2. In CONTESTANT LIST, paste this 17-name example:
+Alex, Blair, Casey, Drew, Ellis, Finley, Gray, Harper, Indy, Jordan, Kai, Logan, Morgan, Nico, Oakley, Parker, Quinn
+3. Tap ADD THESE NAMES TO POOL. Free use supports up to 16 contestants. Adding this 17-name list opens the Upgrade to Unlimited? screen.
+4. Tap Unlock Lifetime (localized price) to review NameSnap Unlimited Lifetime, product ID namesnap.unlimited_lifetime_699. Or Monthly opens namesnap.unlimited_monthly_099. Restore Purchases is on the same screen.
+
+The previous product review notes referring to a gear icon and an upgrade menu were obsolete after the UI redesign. Use the steps above. This path was verified in the Release configuration of build 32 on the iPhone 16e simulator.
+
+Use an Apple sandbox reviewer account without an existing Unlimited entitlement. An already-unlocked Lifetime account will not trigger the free-limit screen. There are no app-side storefront or device restrictions. The Paid Apps Agreement was verified Active on September 30, 2026.
+
+Unlimited Monthly provides ongoing unlimited contestant access and renews monthly until canceled. Unlimited Lifetime provides unlimited contestant access as a one-time purchase. The purchase screen includes renewal information, Restore Purchases, Privacy Policy, and Terms of Use. The app uses StoreKit; no web payment or email account is required for the iOS purchases.
