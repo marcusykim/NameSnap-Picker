@@ -251,6 +251,25 @@ when "submission-status"
       }
     end
   )
+when "select-draft-build"
+  build_number = ARGV.fetch(1)
+  version_string = ARGV.fetch(2, "2.0")
+  build = build_for(token, build_number)
+  abort("Build is unavailable or invalid") unless build && build.dig("attributes", "processingState") == "VALID"
+  abort("Build is expired") if build.dig("attributes", "expired")
+  version = app_store_versions(token).find { |candidate| candidate.dig("attributes", "versionString") == version_string }
+  editable_states = %w[PREPARE_FOR_SUBMISSION DEVELOPER_REJECTED REJECTED METADATA_REJECTED]
+  abort("Version is not an editable draft") unless version && editable_states.include?(version.dig("attributes", "appStoreState"))
+  prerelease = request(token, :get, "/v1/builds/#{build.fetch("id")}/preReleaseVersion").fetch("data")
+  abort("Build version does not match the draft") unless prerelease.dig("attributes", "version") == version_string
+  request(token, :patch, "/v1/appStoreVersions/#{version.fetch("id")}", body: {
+    data: { type: "appStoreVersions", id: version.fetch("id"), relationships: {
+      build: { data: { type: "builds", id: build.fetch("id") } }
+    } }
+  })
+  selected = request(token, :get, "/v1/appStoreVersions/#{version.fetch("id")}/build").fetch("data")
+  abort("Selected build verification failed") unless selected.fetch("id") == build.fetch("id")
+  puts JSON.pretty_generate(version: version_string, version_state: version.dig("attributes", "appStoreState"), selected_build: selected.dig("attributes", "version"), submitted_for_review: false)
 when "visual-assets-status"
   version_string = ARGV.fetch(1, "2.0")
   locale = ARGV.fetch(2, "en-US")
@@ -283,14 +302,18 @@ when "visual-assets-status"
     {
       id: asset["id"],
       file_name: asset.dig("attributes", "fileName"),
-      delivery_state: asset.dig("attributes", "assetDeliveryState", "state")
+      delivery_state: asset.dig("attributes", "assetDeliveryState", "state"),
+      source_file_checksum: asset.dig("attributes", "sourceFileChecksum")
     }
   end
   preview_names = preview_response.fetch("included", []).filter_map do |asset|
     next unless asset["type"] == "appPreviews"
     {
       file_name: asset.dig("attributes", "fileName"),
-      delivery_state: asset.dig("attributes", "videoDeliveryState", "state")
+      delivery_state: asset.dig("attributes", "videoDeliveryState", "state"),
+      source_file_checksum: asset.dig("attributes", "sourceFileChecksum"),
+      preview_frame_time_code: asset.dig("attributes", "previewFrameTimeCode"),
+      errors: asset.dig("attributes", "videoDeliveryState", "errors")
     }
   end
 

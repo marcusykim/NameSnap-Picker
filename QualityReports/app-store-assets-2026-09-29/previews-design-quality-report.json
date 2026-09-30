@@ -1,0 +1,159 @@
+{
+  "status": "PASS",
+  "overallScore": 93.7,
+  "criticalIssues": [],
+  "scope": "Independent rendered design and sampled-motion review of the final two 21-second App Store previews and their 15-second posters. All review is local; no upload or account operation performed. This does not certify app-wide behavior, randomness, accessibility, or App Store acceptance.",
+  "reviewDate": "2026-09-29",
+  "evidenceMethod": "Decoded both videos independently at 2 frames/second; inspected overview and consecutive draw-phase galleries, plus original-resolution spinning, winner, history/reset, repaired final phone reset at 19 and 20.5 seconds, and both 15-second posters. Entire final files were decoded for errors and blackdetect; ffprobe and volume analysis were run. This is frame/timeline inspection, not a claim of human real-time playback.",
+  "categoryScores": {
+    "audienceResonance": 9.4,
+    "categoryRecognition": 9.3,
+    "productSpecificity": 9.5,
+    "primaryTaskClarity": 9.3,
+    "visualHierarchy": 9.2,
+    "compositionDiversity": 9.2,
+    "contentRealism": 9.7,
+    "domainArtifactFidelity": 9.6,
+    "crossScreenContinuity": 9.7,
+    "platformFidelity": 9.2,
+    "spatialEconomy": 8.8,
+    "typography": 9.2,
+    "accessibility": 8.9,
+    "interactionCredibility": 9.6,
+    "stateCompleteness": 9.1,
+    "distinctiveness": 9.6,
+    "appStorePlausibility": 9.3,
+    "implementationReadiness": 9.7,
+    "componentSemantics": 9.6,
+    "materialFit": 9.5
+  },
+  "categoryEvidence": {
+    "audienceResonance": "The sequence demonstrates list setup, changing wheel, an identifiable celebratory winner, and a names-preserving reset for a host. The long winner hold suits a reveal but leaves less time for operating details.",
+    "categoryRecognition": "Numbered pool, spinning vertical selector, result medal, and reset confirmation establish random group selection. The opening tablet input view alone is less distinctive until motion begins.",
+    "productSpecificity": "Ethan #8 and Owen #16, active counts, no-repeat state, numbered history, and NameSnap's own celebration artwork prevent this from reading as a generic animation. The input roster is intentionally synthetic.",
+    "primaryTaskClarity": "Each file moves from populated input to a visible SPINNING state and winner. No finger indicator is shown, and the input/add step is introduced through an edit rather than an uninterrupted tutorial.",
+    "visualHierarchy": "Winners dominate their screens and the final reset actions remain complete. iPad's full layout leaves its wheel and dialog relatively small in gallery thumbnails.",
+    "compositionDiversity": "Input, operational wheel, full-screen celebration, and centered confirmation create distinct stages. The opening and reset are static holds, and both devices follow the same appropriate demonstration structure.",
+    "contentRealism": "Both clips show a real changing draw state and coherent winners. Phone resolves to Ethan Nguyen #8 and tablet to Owen Lewis #16; each post-winner scene retains that history and 15 TOTAL from an initial 16.",
+    "domainArtifactFidelity": "The actual vertical picker and real app panels are shown without a fabricated radial wheel or marketing device shell. Input action itself is not shown as a live edit.",
+    "crossScreenContinuity": "Phone #8 Ethan persists from reveal into result/history with 15 active; iPad #16 Owen does likewise. Reset is still a confirmation, so 15 before confirmation is correct. Input and reset are separately captured segments, not one wholly uncut recording.",
+    "platformFidelity": "Phone live/reset detail segments omit the problematic status strip through an aspect-preserving top crop with pale padding; modal X, dialog actions, toolbar, and home indicator remain whole. Tablet retains its native full canvas. The real fixed toolbar remains bright behind dimmed reset content.",
+    "spatialEconomy": "Phone uses most of the frame. Tablet opening and celebration retain generous native whitespace, and the winner has a long held presentation. This is readable but less economical than the tighter phone composition.",
+    "typography": "Names, result IDs, actions, and 15 TOTAL badges are readable at original resolution. Tablet operational metadata and celebration variation labels are small in thumbnails; wheel neighbors intentionally fade.",
+    "accessibility": "Numbered results, text labels, checkmarks, and complete Cancel/Reset actions provide non-color cues. Confetti and motion are visible; reduced-motion behavior and assistive access are not tested. The intentionally silent export communicates its story visually.",
+    "interactionCredibility": "Consecutive frames show names changing while SPINNING is disabled, followed by a numbered winner and matching history. This resolves the earlier static-state demonstration weakness. The montage does not prove the paste gesture, random distribution, or execution of the final reset.",
+    "stateCompleteness": "The listing preview covers prepared input, spinning, success, post-winner history/count, and destructive confirmation. It does not show empty/error/exhausted state or completed reset, which remain outside this short preview's claims.",
+    "distinctiveness": "Different authentic celebrations\u2014drummer for Ethan and DJ artwork for Owen\u2014show NameSnap's numbered, playful reveal. The full-screen celebration occupies a large fraction of the runtime.",
+    "appStorePlausibility": "Clean current-app footage, readable posters, coherent results, and bounded edits form a credible listing preview. There are no fake controls or external promotional scenes. The silent track and long holds are a modest presentation tradeoff.",
+    "implementationReadiness": "The render script defines sources, trims, crop, padding, encodes, and poster time; final decoded specifications and SHA-256 hashes identify reviewed files. Source capture timing remains dependent on the recorded session.",
+    "componentSemantics": "Final result, medal number, history item, no-repeat state, and 16-to-15 count change agree on both devices. Intermediate name banners differ from the moving wheel during animation; these are transient spinning states, not a second finalized result.",
+    "materialFit": "Warm actions, violet outlines, light panels, and animated confetti fit playful group picking while leaving current names legible. Heavy shadows and fades remain inherited app styling."
+  },
+  "diagnosticTests": {
+    "blurTest": {
+      "passed": true,
+      "evidence": "The sequence visibly changes from list to operational selector to celebratory result and confirmation; the dominant objects remain recognizable even when text details are small."
+    },
+    "silhouetteTest": {
+      "passed": true,
+      "evidence": "Full roster, vertical wheel, large winner, and modal confirmation have different structures. Both device files follow the same product journey; no unrelated-product composition is copied."
+    },
+    "fiveSecondTest": {
+      "passed": true,
+      "evidence": "By the early draw phase, the viewer sees the numbered picker visibly SPINNING, followed soon by an unmistakable winner. The opening list and app name establish context."
+    },
+    "realityTest": {
+      "passed": true,
+      "evidence": "The capture contains genuine changing wheel states and coherent synthetic contestant data. Final Ethan #8 / Owen #16 histories each correspond to 15 remaining. No fabricated UI is composited."
+    },
+    "componentSemanticTest": {
+      "passed": true,
+      "evidence": "Original-scale checks cover spinning label, wheel rows, winner medal/name, recent winner, count, and reset dialog. Complete labels and values agree after settlement; reset confirms the effects rather than pretending they already happened."
+    },
+    "journeyTest": {
+      "passed": true,
+      "evidence": "Final phone winner #8 Ethan and tablet winner #16 Owen persist into their corresponding history/count/reset segments. The earlier montage's return to 16 after a no-repeat winner is eliminated. The add action and reset confirmation execution are not claimed as observed."
+    },
+    "platformTest": {
+      "passed": true,
+      "evidence": "Final phone ending at 19s and 20.5s no longer contains prior-card fragments overlapping status icons. All modal and toolbar controls stay intact; iPad has no comparable clipping. Pale padding preserves detail-frame aspect."
+    },
+    "buyerValueTest": {
+      "passed": true,
+      "evidence": "The viewer receives an actual moving selection and numbered reveal rather than only fixture stills. Current app controls and the final confirmation make the product's use concrete."
+    },
+    "implementationTest": {
+      "passed": true,
+      "evidence": "The checked render script and independently recorded final specs/hashes reproduce the three-segment pipeline, dimensions, crop/padding, 21-second encoding and 15-second poster extraction."
+    },
+    "categoryReferenceTest": {
+      "passed": true,
+      "evidence": "Compared with the already-inspected current Apple references for Tiny Decisions, Spin The Wheel, and Decide Now: immediate draw/result grammar is retained, with NameSnap's own vertical picker, IDs, and celebration. No radial-wheel clich\u00e9, copied reference imagery, or store-frame chrome leaks into the app footage."
+    }
+  },
+  "screenFindings": [
+    {
+      "screen": "Both videos, initial and draw phase",
+      "severity": "resolved",
+      "finding": "The former six-second ready-wheel hold has been replaced by actual changing SPINNING states and a continuous recorded reveal. Opening setup remains an editorial introduction, not a paste demonstration."
+    },
+    {
+      "screen": "iPhone reveal/post-winner",
+      "severity": "observation",
+      "finding": "Ethan Nguyen #8 agrees across the medal, winner description, result banner, and history. The active count becomes15."
+    },
+    {
+      "screen": "iPad reveal/post-winner",
+      "severity": "observation",
+      "finding": "Owen Lewis #16 agrees across medal, winner description, result banner, and history. The active count becomes15. Confetti has no opaque black rectangle."
+    },
+    {
+      "screen": "iPhone reset ending",
+      "severity": "resolved",
+      "finding": "Initial review found a previous card overlapping status icons at the top. Final crop at 19s and 20.5s removes that strip while preserving Draw Setup, reset explanation/actions, Ethan history, 15 TOTAL, toolbar, and home indicator."
+    },
+    {
+      "screen": "Both 15-second posters",
+      "severity": "observation",
+      "finding": "Final actual winners are shown at full original size with complete close and continuation controls. No incorrect old Ava fixture remains in these reviewed posters."
+    },
+    {
+      "screen": "Whole preview pacing",
+      "severity": "minor",
+      "finding": "Winner holds are long and iPad native layouts leave generous whitespace. Silent audio omits the app's music experience. These are tradeoffs, not misleading UI or missing visible controls."
+    }
+  ],
+  "repairs": [],
+  "technicalEvidence": {
+    "durationSeconds": 21,
+    "video": "630 frames each; H.264 High, yuv420p, 30 fps",
+    "dimensions": {
+      "iphone": [
+        886,
+        1920
+      ],
+      "ipad": [
+        1200,
+        1600
+      ]
+    },
+    "audio": "AAC stereo 48 kHz; mean and peak decoded volume -91.0dB, consistent with intentional silence",
+    "decode": "Both final files decode with exit 0; blackdetect produced no events at minimum 0.1 second and pixel threshold 0.10",
+    "reviewedSpecifications": "final-preview-independent-frames/reviewed-video-specifications.json"
+  },
+  "artifactHashes": {
+    "AppStoreAssets/ReleasePreviews/en-US/NameSnap-AppPreview-IPHONE_67-886x1920.mp4": "776d5caf4500bc8d5e14dbeb48cdd333248fd412fdd1e473cf9aad8336303289",
+    "AppStoreAssets/ReleasePreviews/en-US/NameSnap-AppPreview-IPAD_PRO_3GEN_129-1200x1600.mp4": "536b1d962bdb5dd85692cade801051423c3d7b2c9262f8cf5143adcb8cc13666",
+    "AppStoreAssets/ReleasePreviews/en-US/NameSnap-AppPreview-ipad-Poster-15s.png": "8fc5d40a1c8dde98033d615499d2466a7e7904f32b6adc71c5d4e083e4bcc18c",
+    "AppStoreAssets/ReleasePreviews/en-US/NameSnap-AppPreview-iphone-Poster-15s.png": "06ce2ad2ebda07f55d8025db0930989383b39c04586a303cd6ca2585c814f569"
+  },
+  "unverified": [
+    "App Store processing/acceptance and uploaded poster selection",
+    "Human real-time playback and subjective audio experience (the files are intentionally silent)",
+    "Randomness/fairness distribution",
+    "Runtime VoiceOver, dynamic type, focus, reduced motion, or modal hit testing",
+    "Final reset execution and preservation after its confirmation",
+    "Legacy Poster-5s PNG files; only current Poster-15s files are in this verdict"
+  ],
+  "verdict": "PASS, 93.7/100, for the final two 21-second previews and their 15-second posters within this local rendered/frame-timeline review. The real-draw and state-continuity repairs are verified, and no critical visible defect remains after the phone ending crop. Upload/release and broader app behavior require their separate checks."
+}

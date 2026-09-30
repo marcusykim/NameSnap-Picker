@@ -1,0 +1,7 @@
+# Reproducible local preview frame extractions; retain final review galleries.
+preview-frames/
+release-review-pre-repair-samples/
+final-preview-independent-frames/*
+!final-preview-independent-frames/*gallery.jpg
+release-review-samples/*
+!release-review-samples/*gallery.jpg

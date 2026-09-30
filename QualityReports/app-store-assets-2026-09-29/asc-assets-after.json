@@ -1,0 +1,115 @@
+{
+  "version": "2.0",
+  "version_state": "PREPARE_FOR_SUBMISSION",
+  "locale": "en-US",
+  "screenshot_sets": [
+    {
+      "display_type": "APP_IPAD_PRO_3GEN_129",
+      "screenshot_count": 6
+    },
+    {
+      "display_type": "APP_IPHONE_67",
+      "screenshot_count": 6
+    }
+  ],
+  "screenshots": [
+    {
+      "id": "fd0e9c2d-824c-4a6a-a528-f82b1f725ff4",
+      "file_name": "01_NameSnap_iPad_13_Celebration.png",
+      "delivery_state": "COMPLETE",
+      "source_file_checksum": "18f58f5293419ac90db6ba76f5bd084e"
+    },
+    {
+      "id": "ba9dc404-f8da-4e3a-8916-f5a2f07854da",
+      "file_name": "01_NameSnap_iPhone_6_9_Celebration.png",
+      "delivery_state": "COMPLETE",
+      "source_file_checksum": "ed08f6d81090406dc56472c1da69870c"
+    },
+    {
+      "id": "ccf491a7-99d0-45c8-9a25-fdefa64cafb3",
+      "file_name": "02_NameSnap_iPad_13_Paste.png",
+      "delivery_state": "COMPLETE",
+      "source_file_checksum": "4236f21193c57432877240da63ae7aec"
+    },
+    {
+      "id": "de69de3f-2ad7-4853-ae4d-2457c17fc3d6",
+      "file_name": "02_NameSnap_iPhone_6_9_Paste.png",
+      "delivery_state": "COMPLETE",
+      "source_file_checksum": "f9ec75b39a6f6e587078f3d7afbd64d0"
+    },
+    {
+      "id": "8d7e8042-8a47-4615-89e5-119a4a72609a",
+      "file_name": "03_NameSnap_iPad_13_Quick_Pick.png",
+      "delivery_state": "COMPLETE",
+      "source_file_checksum": "7e80934367f6235550546a6f7aed43b9"
+    },
+    {
+      "id": "16056dca-0d56-482d-a8df-6771518f226e",
+      "file_name": "03_NameSnap_iPhone_6_9_Quick_Pick.png",
+      "delivery_state": "COMPLETE",
+      "source_file_checksum": "33e6090b2d1edefab810e3ab25f4db0e"
+    },
+    {
+      "id": "3d4a5074-630d-4ee7-8230-23f9f9014ba3",
+      "file_name": "04_NameSnap_iPad_13_Spin_Wheel.png",
+      "delivery_state": "COMPLETE",
+      "source_file_checksum": "261f5422c2525f54c57c8b639d313e02"
+    },
+    {
+      "id": "0d632fb4-c308-4571-80ad-8b1f7c0d1785",
+      "file_name": "04_NameSnap_iPhone_6_9_Spin_Wheel.png",
+      "delivery_state": "COMPLETE",
+      "source_file_checksum": "7ce908c0c793cd9af15e4236ae133368"
+    },
+    {
+      "id": "86953c64-080a-4350-bb05-876ddf252064",
+      "file_name": "05_NameSnap_iPad_13_No_Repeats.png",
+      "delivery_state": "COMPLETE",
+      "source_file_checksum": "e45f5c91ed4548077641162fbb6a0e22"
+    },
+    {
+      "id": "546915aa-2bfe-4656-8253-def0bead0526",
+      "file_name": "05_NameSnap_iPhone_6_9_No_Repeats.png",
+      "delivery_state": "COMPLETE",
+      "source_file_checksum": "0b2a7ab8650b08cfa158134d30cb4984"
+    },
+    {
+      "id": "e9945513-787c-400e-b0c4-f06c8e59bf20",
+      "file_name": "06_NameSnap_iPad_13_Reset.png",
+      "delivery_state": "COMPLETE",
+      "source_file_checksum": "cdac62e94b0e859e57c16d042e8775d8"
+    },
+    {
+      "id": "0e59e19c-91a0-4bfa-9b65-e0ebac50cd24",
+      "file_name": "06_NameSnap_iPhone_6_9_Reset.png",
+      "delivery_state": "COMPLETE",
+      "source_file_checksum": "73385a4668846dc4efa2306349317b8c"
+    }
+  ],
+  "preview_sets": [
+    {
+      "preview_type": "IPHONE_67",
+      "preview_count": 1
+    },
+    {
+      "preview_type": "IPAD_PRO_3GEN_129",
+      "preview_count": 1
+    }
+  ],
+  "previews": [
+    {
+      "file_name": "NameSnap-AppPreview-IPAD_PRO_3GEN_129-1200x1600.mp4",
+      "delivery_state": "COMPLETE",
+      "source_file_checksum": "e931000d3987349a641e1e87d4e18f29",
+      "preview_frame_time_code": "00:00:15:00",
+      "errors": null
+    },
+    {
+      "file_name": "NameSnap-AppPreview-IPHONE_67-886x1920.mp4",
+      "delivery_state": "COMPLETE",
+      "source_file_checksum": "5c7a98fae8f7411aebf86bca25965a0f",
+      "preview_frame_time_code": "00:00:15:00",
+      "errors": null
+    }
+  ]
+}

@@ -111,19 +111,19 @@ func asset(
 let phoneAssets: [MarketingAsset] = [
     asset(1, .iPhone69, "05_iphone_69_celebration.png", "Celebration", "WINNER REVEAL", "MAKE EVERY WINNER\nA BIG DEAL", "300 celebration variations turn one fair pick into the main event.", "MUSIC • CONFETTI • PURE HYPE", lavender, warmWhite, yellow),
     asset(2, .iPhone69, "01_iphone_69_add_16_names.png", "Paste", "FAST SETUP", "PASTE A WHOLE\nGROUP AT ONCE", "One name per line. NameSnap numbers the pool automatically.", "CLASS • GAMES • GIVEAWAYS", green, lavender, sky),
-    asset(3, .iPhone69, "02_iphone_69_names_added.png", "Quick_Pick", "QUICK PICK", "ONE TAP.\nONE FAIR PICK.", "Keep the room moving with a fast, numbered random draw.", "READY IN SECONDS", sky, green, yellow),
-    asset(4, .iPhone69, "04_iphone_69_wheel_ready.png", "Spin_Wheel", "SPIN WHEEL", "SPIN IT LIKE\nA GAME SHOW", "Swipe anywhere on the wheel or use the big spin control.", "EVERY NAME STAYS NUMBERED", lavender, sky, tan),
-    asset(5, .iPhone69, "06_iphone_69_history.png", "No_Repeats", "FAIR BY DESIGN", "NO REPEATS.\nNO GUESSING.", "Winners sit out while recent picks stay easy to verify.", "CLEAR HISTORY AT A GLANCE", green, warmWhite, hotPink),
+    asset(3, .iPhone69, "02_iphone_69_names_added.png", "Quick_Pick", "QUICK PICK", "ONE TAP.\nONE FAIR PICK.", "Keep the room moving with a fast, numbered random draw.", "READY IN SECONDS", sky, green, yellow, .fullScreen, 120),
+    asset(4, .iPhone69, "04_iphone_69_wheel_ready.png", "Spin_Wheel", "SPIN WHEEL", "SPIN IT LIKE\nA GAME SHOW", "Swipe anywhere on the wheel or use the big spin control.", "EVERY NAME STAYS NUMBERED", lavender, sky, tan, .fullScreen, 120),
+    asset(5, .iPhone69, "06_iphone_69_history.png", "No_Repeats", "FAIR BY DESIGN", "NO REPEATS.\nNO GUESSING.", "Winners sit out while recent picks stay easy to verify.", "RECENT PICKS AT A GLANCE", green, warmWhite, hotPink, .fullScreen, 120),
     asset(6, .iPhone69, "07_iphone_69_reset_confirm.png", "Reset", "FULL CONTROL", "RESET PICKS.\nKEEP THE LIST.", "Start a fresh round without typing the same names again.", "NO ACCOUNT • LIST STAYS LOCAL", warmWhite, lavender, yellow)
 ]
 
 let tabletAssets: [MarketingAsset] = [
     asset(1, .iPad13, "12_ipad_13_celebration.png", "Celebration", "WINNER REVEAL", "MAKE EVERY WINNER\nA BIG DEAL", "A full-screen celebration built for classrooms, streams, and big groups.", "MUSIC • CONFETTI • PURE HYPE", lavender, warmWhite, yellow),
-    asset(2, .iPad13, "08_ipad_13_add_16_names.png", "Paste", "FAST SETUP", "PASTE A WHOLE\nGROUP AT ONCE", "One name per line. NameSnap numbers the pool automatically.", "CLASS • GAMES • GIVEAWAYS", green, lavender, sky, .topFocused),
-    asset(3, .iPad13, "09_ipad_13_names_added.png", "Quick_Pick", "QUICK PICK", "ONE TAP.\nONE FAIR PICK.", "Use the large iPad canvas to run a draw everyone can follow.", "READY IN SECONDS", sky, green, yellow, .topFocused),
-    asset(4, .iPad13, "11_ipad_13_wheel_ready.png", "Spin_Wheel", "SPIN WHEEL", "SPIN IT LIKE\nA GAME SHOW", "The centered numbered wheel stays easy to read across the room.", "EVERY NAME STAYS NUMBERED", lavender, sky, tan, .topFocused),
-    asset(5, .iPad13, "13_ipad_13_history.png", "No_Repeats", "FAIR BY DESIGN", "NO REPEATS.\nNO GUESSING.", "Winners sit out while recent picks stay easy to verify.", "CLEAR HISTORY AT A GLANCE", green, warmWhite, hotPink, .topFocused),
-    asset(6, .iPad13, "14_ipad_13_reset_confirm.png", "Reset", "FULL CONTROL", "RESET PICKS.\nKEEP THE LIST.", "Start a fresh round without typing the same names again.", "NO ACCOUNT • LIST STAYS LOCAL", warmWhite, lavender, yellow, .topFocused)
+    asset(2, .iPad13, "08_ipad_13_add_16_names.png", "Paste", "FAST SETUP", "PASTE A WHOLE\nGROUP AT ONCE", "One name per line. NameSnap numbers the pool automatically.", "CLASS • GAMES • GIVEAWAYS", green, lavender, sky, .fullScreen),
+    asset(3, .iPad13, "09_ipad_13_names_added.png", "Quick_Pick", "QUICK PICK", "ONE TAP.\nONE FAIR PICK.", "Use the large iPad canvas to run a draw everyone can follow.", "READY IN SECONDS", sky, green, yellow, .fullScreen, 950),
+    asset(4, .iPad13, "11_ipad_13_wheel_ready.png", "Spin_Wheel", "SPIN WHEEL", "SPIN IT LIKE\nA GAME SHOW", "Keep every contestant tied to a clear number.", "EVERY NAME STAYS NUMBERED", lavender, sky, tan, .fullScreen, 950),
+    asset(5, .iPad13, "13_ipad_13_history.png", "No_Repeats", "FAIR BY DESIGN", "NO REPEATS.\nNO GUESSING.", "Winners sit out while recent picks stay easy to verify.", "RECENT PICKS AT A GLANCE", green, warmWhite, hotPink, .fullScreen, 950),
+    asset(6, .iPad13, "14_ipad_13_reset_confirm.png", "Reset", "FULL CONTROL", "RESET PICKS.\nKEEP THE LIST.", "Start a fresh round without typing the same names again.", "NO ACCOUNT • LIST STAYS LOCAL", warmWhite, lavender, yellow, .fullScreen, 950)
 ]
 
 let assets = phoneAssets + tabletAssets
@@ -269,9 +269,7 @@ func drawScreen(_ screenshot: NSImage, inside frameRect: NSRect, radius: CGFloat
     }
     NSGraphicsContext.restoreGraphicsState()
 
-    let tabWidth = min(frameRect.width * 0.28, 330)
-    let tabRect = NSRect(x: frameRect.minX + 34, y: frameRect.maxY - 40, width: tabWidth, height: 54)
-    drawRoundedPanel(tabRect, radius: 27, fill: accent, strokeWidth: 4)
+
 }
 
 func render(_ asset: MarketingAsset) throws {
@@ -279,7 +277,19 @@ func render(_ asset: MarketingAsset) throws {
     guard let originalScreenshot = NSImage(contentsOf: sourceURL) else {
         throw AssetError.missingImage(sourceURL)
     }
-    let screenshot = croppingTopPixels(originalScreenshot, pixels: asset.cropTopPixels)
+    let screenshot: NSImage
+    if asset.device == .iPad13 && asset.ordinal > 1,
+       let source = originalScreenshot.cgImage(forProposedRect: nil, context: nil, hints: nil) {
+        let top = asset.ordinal == 2 ? 72 : Int(asset.cropTopPixels)
+        let bottom = asset.ordinal == 2 ? 650 : 0
+        let side = asset.ordinal == 2 ? 132 : 0
+        guard let crop = source.cropping(to: CGRect(x: side, y: top, width: source.width - side * 2, height: source.height - top - bottom)) else {
+            throw AssetError.missingImage(sourceURL)
+        }
+        screenshot = NSImage(cgImage: crop, size: NSSize(width: crop.width, height: crop.height))
+    } else {
+        screenshot = croppingTopPixels(originalScreenshot, pixels: asset.cropTopPixels)
+    }
 
     let canvas = asset.device.canvas
     let isTablet = asset.device == .iPad13
@@ -362,7 +372,7 @@ func render(_ asset: MarketingAsset) throws {
             canvasHeight: canvas.height
         )
     } else {
-        let maxFrameWidth = canvas.width - 2 * (isTablet ? 230 : 112)
+        let maxFrameWidth = canvas.width - 2 * (isTablet ? 112 : 112)
         let sourceAspect = screenshot.size.width / screenshot.size.height
         let frameWidth = min(maxFrameWidth, maxFrameHeight * sourceAspect)
         let frameHeight = frameWidth / sourceAspect

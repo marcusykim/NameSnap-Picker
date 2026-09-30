@@ -355,6 +355,7 @@ private struct WinnerCelebrationOverlay: View {
                         .rotationEffect(.degrees(-14))
                         .offset(x: -proxy.size.width * 0.34, y: -proxy.size.height * 0.28)
                         .opacity(0.9)
+                        .blendMode(.screen)
                         .allowsHitTesting(false)
 
                     confettiRain(in: proxy.size)

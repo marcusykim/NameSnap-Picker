@@ -1,0 +1,98 @@
+[
+  {
+    "file": "AppStoreAssets/ReleaseScreenshots/en-US/01_NameSnap_iPad_13_Celebration.png",
+    "width": 2064,
+    "height": 2752,
+    "mode": "RGB",
+    "sha256": "5809d7660f80edb307308632bc455a06059356d68153dfd78005ac741b44e8d4",
+    "md5": "18f58f5293419ac90db6ba76f5bd084e"
+  },
+  {
+    "file": "AppStoreAssets/ReleaseScreenshots/en-US/01_NameSnap_iPhone_6_9_Celebration.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "sha256": "4c212e092696fc97c0393bec8734146ce35eae3695b3d85a8a42a957e2b30aa1",
+    "md5": "ed08f6d81090406dc56472c1da69870c"
+  },
+  {
+    "file": "AppStoreAssets/ReleaseScreenshots/en-US/02_NameSnap_iPad_13_Paste.png",
+    "width": 2064,
+    "height": 2752,
+    "mode": "RGB",
+    "sha256": "1105a8a2afb10b8620d4ed93e6136f85b3b314fffadae0c93b3ad4efb71faa24",
+    "md5": "4236f21193c57432877240da63ae7aec"
+  },
+  {
+    "file": "AppStoreAssets/ReleaseScreenshots/en-US/02_NameSnap_iPhone_6_9_Paste.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "sha256": "19e5a3dea9eb1aa6141b5407862a864c5816949a2b3d40eb19ed1eef65871ef9",
+    "md5": "f9ec75b39a6f6e587078f3d7afbd64d0"
+  },
+  {
+    "file": "AppStoreAssets/ReleaseScreenshots/en-US/03_NameSnap_iPad_13_Quick_Pick.png",
+    "width": 2064,
+    "height": 2752,
+    "mode": "RGB",
+    "sha256": "21558950065bf88a16ddbd32cf29dc265796a09e5a535591fecec4fa9b47d604",
+    "md5": "7e80934367f6235550546a6f7aed43b9"
+  },
+  {
+    "file": "AppStoreAssets/ReleaseScreenshots/en-US/03_NameSnap_iPhone_6_9_Quick_Pick.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "sha256": "f8c00a49e8f922e36a0c7fcd438f1eddcd5e03808d12aa4ad3b2abcc5120fa5f",
+    "md5": "33e6090b2d1edefab810e3ab25f4db0e"
+  },
+  {
+    "file": "AppStoreAssets/ReleaseScreenshots/en-US/04_NameSnap_iPad_13_Spin_Wheel.png",
+    "width": 2064,
+    "height": 2752,
+    "mode": "RGB",
+    "sha256": "4d094c13a50048458310ef8c6991c8f47ec83d3863477091ce46e4b34a27a040",
+    "md5": "261f5422c2525f54c57c8b639d313e02"
+  },
+  {
+    "file": "AppStoreAssets/ReleaseScreenshots/en-US/04_NameSnap_iPhone_6_9_Spin_Wheel.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "sha256": "d3417986f9760307f6b8b0a3fc68a5a795922d66c82abfcc55df062bace56f68",
+    "md5": "7ce908c0c793cd9af15e4236ae133368"
+  },
+  {
+    "file": "AppStoreAssets/ReleaseScreenshots/en-US/05_NameSnap_iPad_13_No_Repeats.png",
+    "width": 2064,
+    "height": 2752,
+    "mode": "RGB",
+    "sha256": "483366396b0bf30ad9b6761337e110463c7b923add2aa88702af48fb3f271f21",
+    "md5": "e45f5c91ed4548077641162fbb6a0e22"
+  },
+  {
+    "file": "AppStoreAssets/ReleaseScreenshots/en-US/05_NameSnap_iPhone_6_9_No_Repeats.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "sha256": "7c85155cc8f341caa84f07bf5e8906a0fc1f842436027a0598d9c628d0474c66",
+    "md5": "0b2a7ab8650b08cfa158134d30cb4984"
+  },
+  {
+    "file": "AppStoreAssets/ReleaseScreenshots/en-US/06_NameSnap_iPad_13_Reset.png",
+    "width": 2064,
+    "height": 2752,
+    "mode": "RGB",
+    "sha256": "84b0d2277626e635c8ae278860b180785853b31a20bfc3280ff64cee6c49e4cf",
+    "md5": "cdac62e94b0e859e57c16d042e8775d8"
+  },
+  {
+    "file": "AppStoreAssets/ReleaseScreenshots/en-US/06_NameSnap_iPhone_6_9_Reset.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "sha256": "76390a34bdd1337ecd60c87ecd5f1360df2ca4ca14ab7b1c1d00fa505ee1c410",
+    "md5": "73385a4668846dc4efa2306349317b8c"
+  }
+]

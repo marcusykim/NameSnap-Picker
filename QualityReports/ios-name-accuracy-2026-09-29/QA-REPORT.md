@@ -1,6 +1,6 @@
 # NameSnap iOS name accuracy QA — September 29, 2026
 
-Candidate: NameSnap 2.0 (31), `com.marcuskim.namesnap`.
+Candidate: NameSnap 2.0 (32), `com.marcuskim.namesnap`.
 Scope: individual contestant input, pool mutation, eligibility, winner identity, history, simulator behavior, and TestFlight verification on Marcus's iPhone. This is not approval for public App Store release.
 
 ## Findings and fixes
@@ -53,7 +53,7 @@ Manual clipboard-paste automation timed out without changing the text in the lat
 - Build 31 uploaded successfully (delivery `c37cb46f-6acf-4b14-b9ba-2dcfcd35c6fc`), completed Apple processing with state `VALID`, and was distributed to the same two existing internal groups.
 - Final IPA: `artifacts/runs/20260929-200221-testflight/NameSnap.ipa`.
 - Real iPhone TestFlight installation of final version 2.0 (31) was verified with its Build 31 label and Open button.
-- No public App Store submission or release was performed.
+- No App Store review submission or public release was performed during these TestFlight checks. The later authorized review submission is recorded below.
 
 ## Actual iPhone interaction evidence
 
@@ -74,6 +74,18 @@ Final build 31 follow-up on the same real iPhone:
 - Added both names, drew #2 `007`, inspected the winner and tapped the X at its new position below the Dynamic Island. The modal dismissed immediately, before the ten-second timeout.
 - Evidence: `iphone-testflight-build31-installed.jpg`, `iphone-build31-live-winner.jpg`, `iphone-build31-immediate-close.jpg`.
 
+Final build 32 follow-up on the same real iPhone:
+
+- TestFlight displayed version 2.0, Build 32, Open; installation is confirmed.
+- Entered `2pac` and `007`, added both, and drew contestant #1. The winner displayed `2PAC` in the app's uppercase display style, matching #1.
+- Confetti rendered on the light backdrop without the opaque black rectangle found during iPad asset capture.
+- Tapped the stationary X below the Dynamic Island immediately after the reveal. The modal closed before the ten-second timeout; dismissal is operator-observed and supported by before/after captures.
+- Evidence: `build32-installed.jpg`, `build32-phone-winner.jpg`, `build32-phone-dismissed.jpg`.
+- Build 32 changes only confetti screen blending after build 31's 41-test pass. A focused numeric-name regression passed again on build 32; the 41-case result remains explicitly attributed to build 31.
+- Build 32 archive/export and Apple validation succeeded. Delivery `bb0cff33-4d50-42c2-8373-236f4ce18ce2` processed `VALID` and was distributed to the two existing internal groups.
+- Latest IPA: `artifacts/runs/20260929-203712-testflight/NameSnap.ipa`.
+- Current iPad winner rendering was inspected during the asset refresh. This is bounded visual coverage, not a complete iPad interaction/accessibility pass.
+
 ## Screenshot interpretation
 
 - `baseline-numeric-name-corruption.png`: before-fix evidence.
@@ -91,3 +103,7 @@ Final build 31 follow-up on the same real iPhone:
 ## Remaining boundaries
 
 Purchase/restore transactions, older iOS versions, iPad layout, VoiceOver, and statistical randomness distribution have not been exhaustively validated by this pass. Public release remains a separate decision after device QA and any remaining release checks.
+
+## App Store review submission — September 29, 10:38 PM PDT
+
+Marcus explicitly authorized submitting mobile for review. Version 2.0 (32) was submitted through the visible App Store Connect review flow after all 12 current screenshots and both current previews completed processing and matched local checksums. The updated icon was verified in the selected build. Apple shows Waiting for Review for submission `0681ac05-10a6-451c-9990-403c899cfa5d`. Manual release remains selected; no public release occurred. Asset and submission evidence is in `../app-store-assets-2026-09-29`.

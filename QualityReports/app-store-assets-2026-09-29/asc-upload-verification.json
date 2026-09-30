@@ -1,0 +1,132 @@
+{
+  "verified_at_utc": "2026-09-30T05:37:13.083764+00:00",
+  "all_14_complete_and_matching": true,
+  "checks": [
+    {
+      "kind": "screenshot",
+      "file_name": "01_NameSnap_iPad_13_Celebration.png",
+      "local_md5": "18f58f5293419ac90db6ba76f5bd084e",
+      "apple_md5": "18f58f5293419ac90db6ba76f5bd084e",
+      "checksum_matches": true,
+      "delivery_state": "COMPLETE",
+      "preview_frame_time_code": null
+    },
+    {
+      "kind": "screenshot",
+      "file_name": "01_NameSnap_iPhone_6_9_Celebration.png",
+      "local_md5": "ed08f6d81090406dc56472c1da69870c",
+      "apple_md5": "ed08f6d81090406dc56472c1da69870c",
+      "checksum_matches": true,
+      "delivery_state": "COMPLETE",
+      "preview_frame_time_code": null
+    },
+    {
+      "kind": "screenshot",
+      "file_name": "02_NameSnap_iPad_13_Paste.png",
+      "local_md5": "4236f21193c57432877240da63ae7aec",
+      "apple_md5": "4236f21193c57432877240da63ae7aec",
+      "checksum_matches": true,
+      "delivery_state": "COMPLETE",
+      "preview_frame_time_code": null
+    },
+    {
+      "kind": "screenshot",
+      "file_name": "02_NameSnap_iPhone_6_9_Paste.png",
+      "local_md5": "f9ec75b39a6f6e587078f3d7afbd64d0",
+      "apple_md5": "f9ec75b39a6f6e587078f3d7afbd64d0",
+      "checksum_matches": true,
+      "delivery_state": "COMPLETE",
+      "preview_frame_time_code": null
+    },
+    {
+      "kind": "screenshot",
+      "file_name": "03_NameSnap_iPad_13_Quick_Pick.png",
+      "local_md5": "7e80934367f6235550546a6f7aed43b9",
+      "apple_md5": "7e80934367f6235550546a6f7aed43b9",
+      "checksum_matches": true,
+      "delivery_state": "COMPLETE",
+      "preview_frame_time_code": null
+    },
+    {
+      "kind": "screenshot",
+      "file_name": "03_NameSnap_iPhone_6_9_Quick_Pick.png",
+      "local_md5": "33e6090b2d1edefab810e3ab25f4db0e",
+      "apple_md5": "33e6090b2d1edefab810e3ab25f4db0e",
+      "checksum_matches": true,
+      "delivery_state": "COMPLETE",
+      "preview_frame_time_code": null
+    },
+    {
+      "kind": "screenshot",
+      "file_name": "04_NameSnap_iPad_13_Spin_Wheel.png",
+      "local_md5": "261f5422c2525f54c57c8b639d313e02",
+      "apple_md5": "261f5422c2525f54c57c8b639d313e02",
+      "checksum_matches": true,
+      "delivery_state": "COMPLETE",
+      "preview_frame_time_code": null
+    },
+    {
+      "kind": "screenshot",
+      "file_name": "04_NameSnap_iPhone_6_9_Spin_Wheel.png",
+      "local_md5": "7ce908c0c793cd9af15e4236ae133368",
+      "apple_md5": "7ce908c0c793cd9af15e4236ae133368",
+      "checksum_matches": true,
+      "delivery_state": "COMPLETE",
+      "preview_frame_time_code": null
+    },
+    {
+      "kind": "screenshot",
+      "file_name": "05_NameSnap_iPad_13_No_Repeats.png",
+      "local_md5": "e45f5c91ed4548077641162fbb6a0e22",
+      "apple_md5": "e45f5c91ed4548077641162fbb6a0e22",
+      "checksum_matches": true,
+      "delivery_state": "COMPLETE",
+      "preview_frame_time_code": null
+    },
+    {
+      "kind": "screenshot",
+      "file_name": "05_NameSnap_iPhone_6_9_No_Repeats.png",
+      "local_md5": "0b2a7ab8650b08cfa158134d30cb4984",
+      "apple_md5": "0b2a7ab8650b08cfa158134d30cb4984",
+      "checksum_matches": true,
+      "delivery_state": "COMPLETE",
+      "preview_frame_time_code": null
+    },
+    {
+      "kind": "screenshot",
+      "file_name": "06_NameSnap_iPad_13_Reset.png",
+      "local_md5": "cdac62e94b0e859e57c16d042e8775d8",
+      "apple_md5": "cdac62e94b0e859e57c16d042e8775d8",
+      "checksum_matches": true,
+      "delivery_state": "COMPLETE",
+      "preview_frame_time_code": null
+    },
+    {
+      "kind": "screenshot",
+      "file_name": "06_NameSnap_iPhone_6_9_Reset.png",
+      "local_md5": "73385a4668846dc4efa2306349317b8c",
+      "apple_md5": "73385a4668846dc4efa2306349317b8c",
+      "checksum_matches": true,
+      "delivery_state": "COMPLETE",
+      "preview_frame_time_code": null
+    },
+    {
+      "kind": "preview",
+      "file_name": "NameSnap-AppPreview-IPAD_PRO_3GEN_129-1200x1600.mp4",
+      "local_md5": "e931000d3987349a641e1e87d4e18f29",
+      "apple_md5": "e931000d3987349a641e1e87d4e18f29",
+      "checksum_matches": true,
+      "delivery_state": "COMPLETE",
+      "preview_frame_time_code": "00:00:15:00"
+    },
+    {
+      "kind": "preview",
+      "file_name": "NameSnap-AppPreview-IPHONE_67-886x1920.mp4",
+      "local_md5": "5c7a98fae8f7411aebf86bca25965a0f",
+      "apple_md5": "5c7a98fae8f7411aebf86bca25965a0f",
+      "checksum_matches": true,
+      "delivery_state": "COMPLETE",
+      "preview_frame_time_code": "00:00:15:00"
+    }
+  ]
+}
