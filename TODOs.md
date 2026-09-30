@@ -1,14 +1,21 @@
 # NameSnap TODOs
 
-## Current priorities — September 21, 2026
+## Current priorities — updated September 29, 2026
 
 Web status: implementation is done, with the two accuracy checks below remaining.
 
 - [ ] **Verify individual picks are accurate.** Confirm the selected eligible contestant's name and number match the wheel/quick-pick result, winner modal, and pick history, including contestants with identical names.
 - [ ] **Verify individual name manipulation is accurate.** Check adding, editing, deleting, including/excluding, undoing additions, and resetting picks affect the intended contestant only and keep names, numbers, and active-pool state consistent.
 - [ ] **Finalize the iPhone app.** Complete app QA, purchase/restore checks, and release preparation.
-- [ ] **Upload the iPhone app.** Validate the release archive and upload the finalized build to App Store Connect.
+- [x] **Upload the iPhone test candidate.** Version 2.0 (31) passed archive validation, uploaded to App Store Connect, processed successfully, and is available to the two existing internal TestFlight groups. Public App Store release remains pending.
 - [ ] **Find 100 Twitch streamers for NameSnap DM outreach.** Build a prospect list with channel links, relevant use cases, and available contact routes.
+
+### iOS accuracy QA — September 29
+
+- Added 41 passing model/UIKit regression tests and completed simulator and real-iPhone name-operation checks. Fixed numeric-name parsing, winner identity validation, spin cancellation, wheel eligibility, selected-text paste handling, and first-row keyboard focus.
+- Build 31 repairs the winner close button's status-area overlap. Final device verification is recorded in [the QA report](QualityReports/ios-name-accuracy-2026-09-29/QA-REPORT.md).
+- The two web accuracy tasks above remain separate; iOS checks do not certify the web implementation.
+- Remaining release checks include purchase/restore, physical clipboard paste, and the existing main-screen status-area overlap. Other device/layout/accessibility coverage is bounded in the QA report.
 
 The release notes below are historical context. Recheck their status before
 acting; the list above is the current work queue.

@@ -6,7 +6,25 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		0A723D25ED93562BB8879AE3 /* NameSnapModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3CEA121247C96D1D26CC5B /* NameSnapModelTests.swift */; };
+		494038725830AB9F01A00B01 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 650520394BC065003369A68D /* Foundation.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		CDD8A67C532C1153E32C1A2D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E261D77A2F270D17007077C3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E261D7812F270D17007077C3;
+			remoteInfo = NameSnap;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		3D3CEA121247C96D1D26CC5B /* NameSnapModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NameSnapModelTests.swift; sourceTree = "<group>"; };
+		4F80A85DCA6DF485571C6E8E /* NameSnapTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NameSnapTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		650520394BC065003369A68D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		E261D7822F270D17007077C3 /* NameSnap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NameSnap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -35,6 +53,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		A77D4611EA66998D8C05D87C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				494038725830AB9F01A00B01 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E261D77F2F270D17007077C3 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -45,11 +71,38 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		30C292595895184C27E6E11D /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				650520394BC065003369A68D /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		A9F91FDDCCF1308E69408121 /* NameSnapTests */ = {
+			isa = PBXGroup;
+			children = (
+				3D3CEA121247C96D1D26CC5B /* NameSnapModelTests.swift */,
+			);
+			name = NameSnapTests;
+			path = NameSnapTests;
+			sourceTree = "<group>";
+		};
+		BAE30D4A0D13BB2E5606DA6C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				30C292595895184C27E6E11D /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		E261D7792F270D17007077C3 = {
 			isa = PBXGroup;
 			children = (
 				E261D7842F270D17007077C3 /* NameSnap */,
 				E261D7832F270D17007077C3 /* Products */,
+				BAE30D4A0D13BB2E5606DA6C /* Frameworks */,
+				A9F91FDDCCF1308E69408121 /* NameSnapTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -57,6 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				E261D7822F270D17007077C3 /* NameSnap.app */,
+				4F80A85DCA6DF485571C6E8E /* NameSnapTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -80,11 +134,27 @@
 				E261D7842F270D17007077C3 /* NameSnap */,
 			);
 			name = NameSnap;
-			packageProductDependencies = (
-			);
 			productName = NameSnap;
 			productReference = E261D7822F270D17007077C3 /* NameSnap.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E80B9841943A103A0A29978B /* NameSnapTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0C27D39AD5197D4D3E4EBE26 /* Build configuration list for PBXNativeTarget "NameSnapTests" */;
+			buildPhases = (
+				B1E4CF5DC1AED8EF73EEF6A4 /* Sources */,
+				A77D4611EA66998D8C05D87C /* Frameworks */,
+				6C92B75BDCE4C3384F0E4C24 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				497D305424E2961CF63E7774 /* PBXTargetDependency */,
+			);
+			name = NameSnapTests;
+			productName = NameSnapTests;
+			productReference = 4F80A85DCA6DF485571C6E8E /* NameSnapTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -116,11 +186,19 @@
 			projectRoot = "";
 			targets = (
 				E261D7812F270D17007077C3 /* NameSnap */,
+				E80B9841943A103A0A29978B /* NameSnapTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		6C92B75BDCE4C3384F0E4C24 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E261D7802F270D17007077C3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -131,6 +209,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		B1E4CF5DC1AED8EF73EEF6A4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0A723D25ED93562BB8879AE3 /* NameSnapModelTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E261D77E2F270D17007077C3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -140,7 +226,51 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		497D305424E2961CF63E7774 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = NameSnap;
+			target = E261D7812F270D17007077C3 /* NameSnap */;
+			targetProxy = CDD8A67C532C1153E32C1A2D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		27D10A5653F9BC8441FCC884 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				DEVELOPMENT_TEAM = 79X64CRQXT;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.marcuskim.namesnap.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NameSnap.app/NameSnap";
+			};
+			name = Debug;
+		};
+		89DBCD5BC7B377739CF30357 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				DEVELOPMENT_TEAM = 79X64CRQXT;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.marcuskim.namesnap.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NameSnap.app/NameSnap";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		E261D78B2F270D1A007077C3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -264,7 +394,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 31;
 				DEVELOPMENT_TEAM = 79X64CRQXT;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -312,7 +442,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 31;
 				DEVELOPMENT_TEAM = 79X64CRQXT;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -357,6 +487,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		0C27D39AD5197D4D3E4EBE26 /* Build configuration list for PBXNativeTarget "NameSnapTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				89DBCD5BC7B377739CF30357 /* Release */,
+				27D10A5653F9BC8441FCC884 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E261D77D2F270D17007077C3 /* Build configuration list for PBXProject "NameSnap" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

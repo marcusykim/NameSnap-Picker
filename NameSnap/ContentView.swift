@@ -338,7 +338,7 @@ private struct WinnerCelebrationOverlay: View {
             let heroWidth = compact ? min(proxy.size.width * 0.5, 220) : min(proxy.size.width * 0.36, 520)
 
             ZStack {
-                Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255)
+                Color(red: 247 / 255, green: 248 / 255, blue: 252 / 255)
                     .overlay(
                         RadialGradient(
                             colors: [palette[0].opacity(0.46), .clear],
@@ -355,8 +355,10 @@ private struct WinnerCelebrationOverlay: View {
                         .rotationEffect(.degrees(-14))
                         .offset(x: -proxy.size.width * 0.34, y: -proxy.size.height * 0.28)
                         .opacity(0.9)
+                        .allowsHitTesting(false)
 
                     confettiRain(in: proxy.size)
+                        .allowsHitTesting(false)
                 }
 
                 celebrationHero(compact: compact, width: heroWidth)
@@ -368,6 +370,7 @@ private struct WinnerCelebrationOverlay: View {
                     // On iPad it becomes a background flourish so it can never cover a long
                     // winner name or either action button.
                     .zIndex(compact ? 4 : 2)
+                    .allowsHitTesting(false)
 
                 celebrationCard(compact: compact)
                     .frame(width: max(cardWidth, 0), height: max(cardHeight, 0))
@@ -377,8 +380,12 @@ private struct WinnerCelebrationOverlay: View {
                     .zIndex(3)
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
+            .overlay(alignment: .topTrailing) {
+                closeButton
+                    .padding(.top, max((proxy.size.height - cardHeight) / 2, 0) + 14)
+                    .padding(.trailing, max((proxy.size.width - cardWidth) / 2, 0) + 14)
+            }
         }
-        .ignoresSafeArea()
         .onAppear {
             if reduceMotion {
                 animateHero = true
@@ -422,6 +429,20 @@ private struct WinnerCelebrationOverlay: View {
         let nestedURL = Bundle.main.url(forResource: name, withExtension: "png", subdirectory: "Celebrations")
         guard let url = rootURL ?? nestedURL else { return nil }
         return UIImage(contentsOfFile: url.path)
+    }
+
+    private var closeButton: some View {
+        Button(action: onDismiss) {
+            Image(systemName: "xmark")
+                .font(.system(size: 17, weight: .black))
+                .foregroundStyle(Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255))
+                .frame(width: 46, height: 46)
+                .background(.white.opacity(0.94))
+                .clipShape(Circle())
+                .overlay(Circle().stroke(Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255), lineWidth: 2))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Close winner celebration")
     }
 
     private func celebrationCard(compact: Bool) -> some View {
@@ -501,18 +522,7 @@ private struct WinnerCelebrationOverlay: View {
                 .padding(.horizontal, compact ? 18 : 40)
             }
 
-            Button(action: onDismiss) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 17, weight: .black))
-                    .foregroundStyle(Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255))
-                    .frame(width: 46, height: 46)
-                    .background(.white.opacity(0.94))
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Color(red: 16 / 255, green: 16 / 255, blue: 24 / 255), lineWidth: 2))
-            }
-            .buttonStyle(.plain)
-            .padding(14)
-            .accessibilityLabel("Close winner celebration")
+
         }
         .background(
             RadialGradient(
@@ -568,6 +578,15 @@ enum SpinVisualMode: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
+enum NameInputParser {
+    static func parse(_ text: String) -> [String] {
+        text.components(separatedBy: CharacterSet(charactersIn: ",\n"))
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .map { $0.replacingOccurrences(of: "^[0-9]+[.)-]\\s+", with: "", options: .regularExpression) }
+            .filter { !$0.isEmpty }
+    }
+}
+
 @MainActor
 final class NameSnapViewModel: ObservableObject {
     @Published var rawInput: String = ""
@@ -577,13 +596,24 @@ final class NameSnapViewModel: ObservableObject {
     @Published var noRepeatMode = true
     @Published var pickedIds: Set<UUID> = []
     @Published var history: [WinnerRecord] = []
-    @Published var visualMode: SpinVisualMode = .classic
+    @Published var visualMode: SpinVisualMode = .classic {
+        didSet { if oldValue != visualMode { cancelPendingSpin() } }
+    }
     @Published var wheelIndex: Int = 0
 
     private var lastAddedBatch: [UUID] = []
+    private var spinGeneration = UUID()
+    private var selectedWinner: NameEntry?
+
+    private func cancelPendingSpin() {
+        spinGeneration = UUID()
+        selectedWinner = nil
+        selectedName = ""
+        isSpinning = false
+    }
 
     var activeEntries: [NameEntry] { entries.filter { $0.isIncluded } }
-    var wheelBaseEntries: [NameEntry] { activeEntries }
+    var wheelBaseEntries: [NameEntry] { availableEntries }
 
     var availableEntries: [NameEntry] {
         if !noRepeatMode { return activeEntries }
@@ -591,12 +621,26 @@ final class NameSnapViewModel: ObservableObject {
     }
 
     private func parseNames(from text: String) -> [String] {
-        let separators = CharacterSet(charactersIn: ",\n")
-        return text
-            .components(separatedBy: separators)
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .map { $0.replacingOccurrences(of: "^[0-9]+[\\.)-]?\\s*", with: "", options: .regularExpression) }
-            .filter { !$0.isEmpty }
+        NameInputParser.parse(text)
+    }
+
+    private func normalizedName(_ name: String) -> String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+    }
+
+    func poolDuplicateCount(in names: [String]) -> Int {
+        guard !availableEntries.isEmpty else { return 0 }
+        var seen = Set(availableEntries.map { normalizedName($0.name) })
+        return names.reduce(into: 0) { count, name in
+            if !seen.insert(normalizedName(name)).inserted { count += 1 }
+        }
+    }
+
+    func namesExcludingPoolDuplicates(_ names: [String]) -> [String] {
+        guard !availableEntries.isEmpty else { return names }
+        var seen = Set(availableEntries.map { normalizedName($0.name) })
+        return names.filter { seen.insert(normalizedName($0)).inserted }
     }
 
     private func writeInputNames(_ names: [String]) {
@@ -693,7 +737,9 @@ final class NameSnapViewModel: ObservableObject {
 
     @discardableResult
     func addNames(_ names: [String]) -> Int {
+        let names = names.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
         guard !names.isEmpty else { return 0 }
+        cancelPendingSpin()
         // Keep labels contiguous even if this pool was edited before adding more names.
         renumberPoolEntries()
         var nextNumber = entries.count + 1
@@ -713,6 +759,7 @@ final class NameSnapViewModel: ObservableObject {
     @discardableResult
     func undoLastAdd() -> Int {
         guard !lastAddedBatch.isEmpty else { return 0 }
+        cancelPendingSpin()
         let previous = Set(lastAddedBatch)
         let before = entries.count
         entries.removeAll { previous.contains($0.id) }
@@ -747,7 +794,7 @@ final class NameSnapViewModel: ObservableObject {
         }
 
         let normalized = wrappedModulo(wheelIndex, modulus: total)
-        let offset = wrappedModulo(normalized, modulus: baseCount)
+        let offset = wrappedModulo(wheelIndex, modulus: baseCount)
         let edgeBuffer = max(baseCount * 3, 24)
 
         let needsRecentering = forceCenter || normalized < edgeBuffer || normalized >= (total - edgeBuffer)
@@ -774,7 +821,8 @@ final class NameSnapViewModel: ObservableObject {
     }
 
     @discardableResult
-    func commitWinnerSnapshot(_ winner: NameEntry, consumeWinner: Bool = true) -> String {
+    func commitWinnerSnapshot(_ snapshot: NameEntry, consumeWinner: Bool = true) -> String? {
+        guard let winner = availableEntries.first(where: { $0.id == snapshot.id }) else { return nil }
         let display = "\(winner.drawNumber). \(winner.name)"
         history.insert(WinnerRecord(drawNumber: winner.drawNumber, name: winner.name), at: 0)
         if history.count > 20 { history.removeLast() }
@@ -796,29 +844,26 @@ final class NameSnapViewModel: ObservableObject {
         clampWheelIndexToWheelEntries()
     }
 
-    func commitSelectedNameAsWinnerIfNeeded() {
-        let parts = selectedName.split(separator: ".", maxSplits: 1).map { String($0).trimmingCharacters(in: .whitespaces) }
-        guard parts.count == 2, let draw = Int(parts[0]) else { return }
-        guard let winner = entries.first(where: { $0.drawNumber == draw && $0.name == parts[1] }) else { return }
-        _ = commitWinnerSnapshot(winner)
-    }
-
-    func alignWheelHighlightToSelectedWinner() {
-        let parts = selectedName.split(separator: ".", maxSplits: 1).map { String($0).trimmingCharacters(in: .whitespaces) }
-        guard parts.count == 2, let draw = Int(parts[0]) else { return }
-        guard let baseIndex = wheelBaseEntries.firstIndex(where: { $0.drawNumber == draw && $0.name == parts[1] }) else { return }
-        wheelIndex = centeredWheelIndex(forBaseOffset: baseIndex)
-        normalizeWheelIndexIfNeeded(forceCenter: true)
+    @discardableResult
+    func commitSelectedNameAsWinnerIfNeeded() -> String? {
+        guard let winner = selectedWinner else { return nil }
+        selectedWinner = nil
+        guard let display = commitWinnerSnapshot(winner) else { return nil }
+        selectedName = display
+        return display
     }
 
     func clearInputList() { rawInput = "" }
 
     func toggle(_ entry: NameEntry) {
         guard let index = entries.firstIndex(where: { $0.id == entry.id }) else { return }
+        cancelPendingSpin()
         entries[index].isIncluded.toggle()
+        normalizeWheelIndexIfNeeded(forceCenter: true)
     }
 
     func resetThisPool() {
+        cancelPendingSpin()
         for index in entries.indices { entries[index].isIncluded = true }
         pickedIds.removeAll()
         selectedName = ""
@@ -827,6 +872,7 @@ final class NameSnapViewModel: ObservableObject {
     }
 
     func clearThisPool() {
+        cancelPendingSpin()
         entries.removeAll()
         pickedIds.removeAll()
         selectedName = ""
@@ -836,6 +882,8 @@ final class NameSnapViewModel: ObservableObject {
     }
 
     func removeEntry(_ entry: NameEntry) {
+        guard entries.contains(where: { $0.id == entry.id }) else { return }
+        cancelPendingSpin()
         entries.removeAll { $0.id == entry.id }
         pickedIds.remove(entry.id)
         renumberPoolEntries()
@@ -860,10 +908,12 @@ final class NameSnapViewModel: ObservableObject {
                 return
             }
         case .wheel:
-            // Wheel mode intentionally ignores no-repeat consumption so spins remain infinite.
             pool = wheelBaseEntries
         }
 
+        selectedWinner = nil
+        spinGeneration = UUID()
+        let generation = spinGeneration
         isSpinning = true
 
         switch visualMode {
@@ -872,7 +922,7 @@ final class NameSnapViewModel: ObservableObject {
             for i in 0..<ticks {
                 let delay = Double(i) * 0.055
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-                    guard let self else { return }
+                    guard let self, self.spinGeneration == generation, self.isSpinning else { return }
                     self.selectedName = pool.randomElement()?.name ?? ""
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     if i == ticks - 1 { self.finishSpin(pool: pool) }
@@ -893,13 +943,13 @@ final class NameSnapViewModel: ObservableObject {
                 let progress = Double(i + 1) / Double(ticks)
                 let eased = 1.0 - pow(1.0 - progress, 2.2)
                 let targetMoved = Int((Double(totalTravel) * eased).rounded())
-                let step = max(1, targetMoved - moved)
+                let step = max(0, targetMoved - moved)
                 moved = targetMoved
 
                 let delay = (Double(i) * 0.034) + (Double(i * i) * 0.00062)
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-                    guard let self else { return }
-                    self.spinWheelForward(step: step)
+                    guard let self, self.spinGeneration == generation, self.isSpinning else { return }
+                    if step > 0 { self.spinWheelForward(step: step) }
                     self.normalizeWheelIndexIfNeeded()
                     if i % 2 == 0 || i == ticks - 1 {
                         self.selectedName = self.currentWheelEntry()?.name ?? ""
@@ -918,7 +968,11 @@ final class NameSnapViewModel: ObservableObject {
         } else {
             winner = pool.randomElement()
         }
-        guard let winner else { isSpinning = false; return }
+        guard let winner, availableEntries.contains(where: { $0.id == winner.id }) else {
+            cancelPendingSpin()
+            return
+        }
+        selectedWinner = winner
         selectedName = "\(winner.drawNumber). \(winner.name)"
         normalizeWheelIndexIfNeeded(forceCenter: true)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -1508,28 +1562,16 @@ struct ContentView: View {
         return !purchases.isUnlimitedUnlocked
     }
 
-    private func normalizedName(_ name: String) -> String {
-        name
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
-    }
-
     private func hasPoolDuplicates(in names: [String]) -> Bool {
-        poolDuplicateCount(in: names) > 0
+        vm.poolDuplicateCount(in: names) > 0
     }
 
     private func poolDuplicateCount(in names: [String]) -> Int {
-        var seenNames = Set(vm.entries.map { normalizedName($0.name) })
-        return names.reduce(into: 0) { duplicateCount, name in
-            if !seenNames.insert(normalizedName(name)).inserted {
-                duplicateCount += 1
-            }
-        }
+        vm.poolDuplicateCount(in: names)
     }
 
     private func namesExcludingPoolDuplicates(_ names: [String]) -> [String] {
-        var seenNames = Set(vm.entries.map { normalizedName($0.name) })
-        return names.filter { seenNames.insert(normalizedName($0)).inserted }
+        vm.namesExcludingPoolDuplicates(names)
     }
 
     private func beginAddingNames(_ names: [String]) {
@@ -2748,6 +2790,8 @@ struct ContentView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.75, execute: settle)
             }
             .onChange(of: vm.activeEntries.map(\.id)) { _ in
+                wheelSettleWorkItem?.cancel()
+                isWheelSwipeSession = false
                 suppressWheelSettle = true
                 vm.normalizeWheelIndexIfNeeded(forceCenter: true)
                 vm.clampWheelIndexToWheelEntries()
@@ -2786,21 +2830,9 @@ struct ContentView: View {
                     }
 
                     if !didShowWinnerForCurrentSpin,
-                       !vm.selectedName.isEmpty,
-                       vm.selectedName != "All Contestants Picked!",
-                       vm.selectedName != "Add contestants to start spinning" {
-                        if vm.visualMode == .wheel, let wheelWinner = vm.currentWheelEntry() {
-                            // Wheel is source-of-truth: commit + effects use the highlighted wheel entry.
-                            let winnerText = vm.commitWinnerSnapshot(wheelWinner, consumeWinner: vm.noRepeatMode)
-                            vm.selectedName = winnerText
-                            didShowWinnerForCurrentSpin = true
-                            triggerWinnerEffects(name: winnerText)
-                        } else {
-                            // Classic keeps selectedName-driven commit path.
-                            vm.commitSelectedNameAsWinnerIfNeeded()
-                            didShowWinnerForCurrentSpin = true
-                            triggerWinnerEffects(name: vm.selectedName)
-                        }
+                       let winnerText = vm.commitSelectedNameAsWinnerIfNeeded() {
+                        didShowWinnerForCurrentSpin = true
+                        triggerWinnerEffects(name: winnerText)
                     }
                 }
             }
@@ -2990,7 +3022,7 @@ private struct InfiniteWheelPicker: UIViewRepresentable {
 }
 
 
-private struct InlineTrashTextView: UIViewRepresentable {
+struct InlineTrashTextView: UIViewRepresentable {
     @Binding var text: String
     var onDeleteLine: (Int) -> Void
 
@@ -3273,6 +3305,7 @@ private struct InlineTrashTextView: UIViewRepresentable {
                 lines.remove(at: index)
                 writeBack()
                 tableView?.reloadData()
+                focusRow(min(index, lines.count))
             } else {
                 lines[index] = trimmed
                 // Keep typing stable: do not reload rows for every keystroke.
@@ -3289,24 +3322,28 @@ private struct InlineTrashTextView: UIViewRepresentable {
         }
 
         private static func parse(_ text: String) -> [String] {
-            let separators = CharacterSet(charactersIn: ",\n")
-            return text
-                .components(separatedBy: separators)
-                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-                .map { $0.replacingOccurrences(of: "^[0-9]+[\\.)-]?\\s*", with: "", options: .regularExpression) }
-                .filter { !$0.isEmpty }
+            NameInputParser.parse(text)
         }
     }
 }
 
-private final class PasteAwareTextField: UITextField {
+final class PasteAwareTextField: UITextField {
     var onPasteText: ((String) -> Void)?
     var onEmptyBackspace: (() -> Void)?
 
     override func paste(_ sender: Any?) {
         if let pasted = UIPasteboard.general.string,
            (pasted.contains("\n") || pasted.contains(",")) {
-            onPasteText?(pasted)
+            let current = text ?? ""
+            let replacement: String
+            if let selection = selectedTextRange {
+                let start = offset(from: beginningOfDocument, to: selection.start)
+                let length = offset(from: selection.start, to: selection.end)
+                replacement = (current as NSString).replacingCharacters(in: NSRange(location: start, length: length), with: pasted)
+            } else {
+                replacement = current + pasted
+            }
+            onPasteText?(replacement)
             return
         }
         super.paste(sender)
@@ -3328,7 +3365,7 @@ private final class PasteAwareTextField: UITextField {
 
 }
 
-private final class InlineInputRowCell: UITableViewCell {
+final class InlineInputRowCell: UITableViewCell {
     static let reuseId = "InlineInputRowCell"
 
     let numberLabel = UILabel()
