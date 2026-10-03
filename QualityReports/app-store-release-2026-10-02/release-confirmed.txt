@@ -1,0 +1,253 @@
+- banner "App Store Connect":
+  - heading "App Store Connect" [level=1]:
+    - link "App Store Connect":
+      - /url: /
+  - navigation "Global":
+    - list:
+      - link "Apps":
+        - /url: /apps
+      - link "Xcode Cloud":
+        - /url: /teams/67c52852-b22f-4e49-ad81-df53bf4476fb/xcode-cloud
+      - link "Trends":
+        - /url: /trends
+      - link "Reports":
+        - /url: /itc/payments_and_financial_reports
+      - link "Business":
+        - /url: /business
+  - button "Marcus Kim Marcus Kim|681947275|1 Account name menu":
+    - generic: Marcus Kim
+    - generic: Marcus Kim|681947275|1
+- button "Apps menu, NameSnap Picker, selected":
+  - generic "NameSnap Picker":
+    - img "NameSnap Picker"
+  - generic: NameSnap Picker
+- navigation "Apps":
+  - list:
+    - link "Distribution":
+      - /url: /apps/6759588637/distribution
+    - link "Analytics":
+      - /url: /apps/6759588637/analytics
+    - link "TestFlight":
+      - /url: /teams/67c52852-b22f-4e49-ad81-df53bf4476fb/apps/6759588637/testflight
+- main:
+  - navigation "Distribution":
+    - list:
+      - heading "iOS App" [level=2]
+      - button "Add iOS App":
+      - list:
+        - link "2.0 Ready for Distribution":
+          - /url: /apps/6759588637/distribution/ios/version/deliverable
+          - text: 2.0 Ready for Distribution
+      - button "Add Platform"
+      - separator
+      - heading "General" [level=2]
+      - list:
+        - link "App Information":
+          - /url: /apps/6759588637/distribution/info
+          - generic: App Information
+        - link "App Review":
+          - /url: /apps/6759588637/distribution/reviewsubmissions
+          - generic: App Review
+        - link "History":
+          - /url: /apps/6759588637/distribution/activity/ios/versions
+          - generic: History
+      - separator
+      - heading "App Store" [level=2]
+      - heading "Trust & Safety" [level=3]
+      - list:
+        - link "App Privacy":
+          - /url: /apps/6759588637/distribution/privacy
+          - generic: App Privacy
+        - link "App Accessibility":
+          - /url: /apps/6759588637/distribution/accessibility
+          - generic: App Accessibility
+        - link "Ratings and Reviews":
+          - /url: /apps/6759588637/distribution/ratings/ios
+          - generic: Ratings and Reviews
+      - heading "Growth & Marketing" [level=3]
+      - list:
+        - link "In-App Events":
+          - /url: /apps/6759588637/distribution/events
+          - generic: In-App Events
+        - link "Custom Product Pages":
+          - /url: /apps/6759588637/distribution/productpages
+          - generic: Custom Product Pages
+        - link "Product Page Optimization":
+          - /url: /apps/6759588637/distribution/optimization
+          - generic: Product Page Optimization
+        - link "Promo Codes":
+          - /url: /apps/6759588637/distribution/promo_codes/generate
+          - generic: Promo Codes
+        - link "Game Center":
+          - /url: /apps/6759588637/distribution/gamecenter
+          - generic: Game Center
+      - heading "Monetization" [level=3]
+      - list:
+        - link "Pricing and Availability":
+          - /url: /apps/6759588637/distribution/pricing
+          - generic: Pricing and Availability
+        - link "In-App Purchases":
+          - /url: /apps/6759588637/distribution/iaps
+          - generic: In-App Purchases
+        - link "Subscriptions":
+          - /url: /apps/6759588637/distribution/subscriptions
+          - generic: Subscriptions
+      - heading "Featuring" [level=3]
+      - list:
+        - link "Nominations":
+          - /url: /apps/6759588637/distribution/nominations
+          - generic: Nominations
+  - heading "iOS App Version 2.0" [level=2]
+  - button "Save" [disabled]
+  - separator
+  - paragraph: The assets and metadata below appear on your app’s product page, when users install your app, and will be used for web engine search results once you release your app.
+  - button "English (U.S.)":
+    - text: English (U.S.)
+  - button "?"
+  - separator
+  - heading "Previews and Screenshots" [level=3]
+  - button "More information": "?"
+  - paragraph: Adding accurate screenshots of your app on the newest devices can help you represent the app's user experience. Keep in mind that we'll use these screenshots for all display sizes and localizations. Screenshots are only required for iOS apps, and only the first 3 will be used on the app installation sheets.
+  - tablist:
+    - tab "iPhone" [selected]:
+      - generic: iPhone
+    - tab "iPad":
+      - generic: iPad
+  - paragraph:
+    - link "View All Sizes in Media Manager":
+      - /url: /apps/6759588637/distribution/ios/version/inflight/media-manager/iphone
+  - alert
+  - tabpanel "iPhone":
+    - generic: iPhone
+    - generic: 6.5" Display
+    - region:
+      - tabpanel:
+        - paragraph: Using 6.9" Display
+        - list "App Previews from English (U.S.) 6.9\" Display":
+          - img "App Preview NameSnap-AppPreview-IPHONE_67-886x1920.mp4":
+        - list "Screenshots from English (U.S.) 6.9\" Display":
+          - img "Screenshot 01_NameSnap_iPhone_6_9_Celebration.png":
+          - img "Screenshot 02_NameSnap_iPhone_6_9_Paste.png":
+          - img "Screenshot 03_NameSnap_iPhone_6_9_Quick_Pick.png":
+          - img "Screenshot 04_NameSnap_iPhone_6_9_Spin_Wheel.png":
+          - img "Screenshot 05_NameSnap_iPhone_6_9_No_Repeats.png":
+          - img "Screenshot 06_NameSnap_iPhone_6_9_Reset.png":
+  - generic: Promotional Text
+  - button "More information": "?"
+  - button "Edit"
+  - textbox "Promotional Text" [disabled]: Stop overthinking and pick instantly. NameSnap makes random picks feel fun, fair, and fast for classrooms, giveaways, games, and live streams.
+  - status "Characters remaining": "28"
+  - separator
+  - generic: Description
+  - button "More information": "?"
+  - textbox "Description" [disabled]: "NameSnap is a playful random name picker built for speed. Paste names, tap Spin, and get a fair winner in seconds. Perfect for: • Classroom participation • Giveaways and raffles • Team picks and party games • Livestream audience contests What you can do: • Paste names from any list, separated by commas or lines • Spin with haptics for fun reveal moments • Turn on No Repeat mode to avoid duplicate winners • Include or exclude participants with one tap • Track recent winners Built to be simple: Free to start. No account required. No analytics tracking. No clutter. Just open, paste, and pick. NameSnap is designed for moments where you need a quick, fair decision and want it to feel exciting. SUBSCRIPTION TERMS NameSnap Unlimited Monthly unlocks unlimited contestants and renews monthly until canceled. The current localized price is shown before purchase. You can manage or cancel the subscription in your Apple Account settings. A one-time Unlimited Lifetime purchase is also available. Terms of Use (Apple Standard EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/ Privacy Policy: https://getnamesnap.web.app/privacy"
+  - status "Characters remaining": 2,844
+  - generic: What's New in This Version
+  - button "More information": "?"
+  - textbox "What's New in This Version" [disabled]: • A playful redesigned picker for iPhone and iPad • Wheel and classic winner-reveal modes • Numbered contestants with quick include, exclude, and delete controls • No Repeat mode with quick reset • Winner history for recent draws • Up to 16 contestants free, with unlimited available as an upgrade
+  - status "Characters remaining": 3,703
+  - generic: Keywords
+  - button "More information": "?"
+  - textbox "Keywords" [disabled]: random,name,picker,raffle,giveaway,classroom,wheel,contest,lottery,draw,selector,spinner,winner
+  - status "Characters remaining": "5"
+  - generic: Support URL
+  - button "More information": "?"
+  - textbox "Support URL" [disabled]: https://getnamesnap.web.app/support
+  - generic: Marketing URL
+  - button "More information": "?"
+  - textbox "Marketing URL" [disabled]: https://getnamesnap.web.app
+  - generic: Version
+  - button "More information": "?"
+  - textbox "Version" [disabled]: "2.0"
+  - generic: Copyright
+  - button "More information": "?"
+  - button "Edit"
+  - textbox "Copyright" [disabled]: 2026 Marcus Kim
+  - status "Characters remaining": "185"
+  - generic: Routing App Coverage File
+  - button "More information": "?"
+  - button "Choose File"
+  - generic: Choose File
+  - separator
+  - heading "Build" [level=3]
+  - table:
+    - rowgroup:
+      - row "Build Version Has App Clip":
+        - columnheader "Build":
+          - generic: Build
+        - columnheader "Version":
+          - generic: Version
+        - columnheader "Has App Clip":
+          - generic: Has App Clip
+    - rowgroup:
+      - row "App Icon 32 2.0 No":
+        - cell "App Icon 32":
+          - link "App Icon":
+            - /url: /apps/6759588637/testflight/ios/bb0cff33-4d50-42c2-8373-236f4ce18ce2/metadata
+            - generic "App Icon":
+              - img "App Icon"
+          - link "32":
+            - /url: /apps/6759588637/testflight/ios/bb0cff33-4d50-42c2-8373-236f4ce18ce2/metadata
+        - cell "2.0":
+          - generic: "2.0"
+        - cell "No":
+          - paragraph: "No"
+  - paragraph: Included Assets
+  - button "App Icon":
+    - generic "App Icon":
+      - img "App Icon"
+  - paragraph: App Icon
+  - checkbox "Game Center" [disabled]
+  - text: Game Center
+  - separator
+  - heading "App Review Information Edit" [level=3]:
+    - text: App Review Information
+    - button "Edit"
+  - generic: Sign-In Information
+  - button "More information": "?"
+  - paragraph: Provide a user name and password so we can sign in to your app. We’ll need this to complete your app review.
+  - checkbox "Sign-in required" [disabled]
+  - generic: Sign-in required
+  - generic: Contact Information
+  - button "More information": "?"
+  - textbox "First name" [disabled]: Marcus
+  - textbox "Last name" [disabled]: Kim
+  - textbox "Phone number" [disabled]: <redacted>
+  - textbox "Email" [disabled]: <redacted>
+  - generic: Notes
+  - button "More information": "?"
+  - paragraph:
+    - text: Chinese law requires apps with news, religious, book, and magazine content to have relevant permits in order to be available on the App Store in China mainland. If applicable, enter information about your permits below.
+    - link "Learn More":
+      - /url: https://developer.apple.com/help/app-store-connect/reference/app-information
+  - textbox "Notes" [disabled]: "NameSnap is a random name picker for classrooms, giveaways, games, and live streams. No app account or sign-in is required. Participant names and winner history stay on device. HOW TO LOCATE IN-APP PURCHASES — VERSION 2.0 (32) 1. Launch NameSnap. 2. In CONTESTANT LIST, paste this 17-name example: Alex, Blair, Casey, Drew, Ellis, Finley, Gray, Harper, Indy, Jordan, Kai, Logan, Morgan, Nico, Oakley, Parker, Quinn 3. Tap ADD THESE NAMES TO POOL. Free use supports up to 16 contestants. Adding this 17-name list opens the Upgrade to Unlimited? screen. 4. Tap Unlock Lifetime (localized price) to review NameSnap Unlimited Lifetime, product ID namesnap.unlimited_lifetime_699. Or Monthly opens namesnap.unlimited_monthly_099. Restore Purchases is on the same screen. The previous product review notes referring to a gear icon and an upgrade menu were obsolete after the UI redesign. Use the steps above. This path was verified in the Release configuration of build 32 on the iPhone 16e simulator. Use an Apple sandbox reviewer account without an existing Unlimited entitlement. An already-unlocked Lifetime account will not trigger the free-limit screen. There are no app-side storefront or device restrictions. The Paid Apps Agreement was verified Active on September 30, 2026. Unlimited Monthly provides ongoing unlimited contestant access and renews monthly until canceled. Unlimited Lifetime provides unlimited contestant access as a one-time purchase. The purchase screen includes renewal information, Restore Purchases, Privacy Policy, and Terms of Use. The app uses StoreKit; no web payment or email account is required for the iOS purchases."
+  - status "Characters remaining": 2,347
+  - generic: Attachment
+  - button "More information": "?"
+  - generic: build32-unlimited-screen.png
+  - separator
+  - heading "App Store Version Release" [level=3]
+  - paragraph: To make your app available on the App Store, you can automatically release it after it’s been approved by App Review. You can also manually release it on the App Store at a later date.
+  - radio "Manually release this version" [checked] [disabled]
+  - generic: Manually release this version
+  - radio "Automatically release this version" [disabled]
+  - generic: Automatically release this version
+  - radio "Automatically release this version after App Review, no earlier than" [disabled]
+  - generic: Automatically release this version after App Review, no earlier than
+  - paragraph: Your local date and time.
+  - textbox "Automatically release this version after App Review, no earlier than" [disabled]: Oct 2, 2026 11:00 PM
+  - text: PDT
+- contentinfo:
+  - list:
+    - link "App Store Connect":
+      - /url: /apps
+  - list:
+    - listitem: Copyright © 2026 Apple Inc. All rights reserved. |
+    - link "Terms of Service":
+      - /url: /WebObjects/iTunesConnect.woa/wa/termsOfService
+    - text: "|"
+    - link "Privacy Policy":
+      - /url: https://www.apple.com/legal/privacy
+    - text: "|"
+    - link "Contact Us":
+      - /url: /contact-us

@@ -31,3 +31,11 @@ The reviewer walkthrough is maintained in `fastlane/review-notes.txt`. In build 
 Version 2.0 (32), Unlimited Lifetime, Unlimited Monthly, and the Unlimited subscription group were submitted together at 2:29 PM PDT under submission `c57865bb-3166-4266-80b1-cf9c5740bcc5`. All four items are Waiting for Review. Manual release is selected. A reply with corrected steps and a current screenshot was sent on the original submission `0681ac05-10a6-451c-9990-403c899cfa5d` before it was replaced; its confirmation is saved in the report. The removed submission's details page no longer displays the Messages section.
 
 See `QualityReports/app-review-rejection-2026-09-30/QA-REPORT.md` for the bounded verification and evidence.
+
+## App Store release — October 2, 2026
+
+Marcus authorized release of the approved version 2.0 (32). The manual Release This Version action was completed through App Store Connect for 175 countries/regions. The UI now shows 2.0 Ready for Distribution; the API reports READY_FOR_SALE. The approved build, current icon and listing media were retained. Existing ratings were retained, with updates available to all users immediately.
+
+The public US lookup still returned 1.0 immediately afterward, so public storefront propagation remains pending. The disabled 11:00 PM scheduled date is inactive because manual release was selected.
+
+See `QualityReports/app-store-release-2026-10-02/RELEASE-REPORT.md` for the release confirmation. Future uploads continue to use manual release; this action releases only the already-approved version.

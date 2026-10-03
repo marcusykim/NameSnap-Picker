@@ -1,15 +1,17 @@
 # NameSnap TODOs
 
-## Current priorities — updated September 30, 2026
+## Current priorities — updated October 2, 2026
 
 Web status: numeric-name parsing and delayed-draw cancellation fixes are deployed. Bounded stress QA passed 57 automated checks plus interactive desktop/mobile checks; see [the web QA report](QualityReports/web-stress-2026-09-29/QA-REPORT.md).
 
 - [x] **Verify individual picks are accurate.** Both draw modes, modal/history identity, duplicate-name occurrences, no-repeat exhaustion, delayed-result cancellation, and wheel alignment passed the bounded web QA.
 - [x] **Verify individual name manipulation is accurate.** Draft edits/deletion, pool addition/deletion, duplicate choices, exact-batch undo, winner exclusion, reset, persistence, and fresh sessions passed. Per-person pool rename/include controls are not exposed by the current web UI; see the report's scope.
 - [ ] **Finalize the iPhone app.** Complete app QA, purchase/restore checks, and release preparation.
-- [x] **Upload the iPhone test candidate.** Version 2.0 (32) passed archive validation, uploaded to App Store Connect, processed successfully, and is available to the two existing internal TestFlight groups. Public App Store release remains pending.
-- [x] **Submit mobile for App Store review.** Version 2.0 (32) resubmitted September 30 at 2:29 PM PDT together with Unlimited Lifetime, Unlimited Monthly, and the subscription group. Apple shows all four items Waiting for Review; release is manual. [Rejection correction and evidence](QualityReports/app-review-rejection-2026-09-30/QA-REPORT.md).
-- [ ] **Record Apple's result for the corrected submission.** Submission `c57865bb-3166-4266-80b1-cf9c5740bcc5` is awaiting review. The September 30 information-needed rejection was addressed with current purchase-location steps and screenshots. Approval is pending.
+- [x] **Upload the iPhone test candidate.** Version 2.0 (32) passed archive validation, uploaded to App Store Connect, processed successfully, and is available to the two existing internal TestFlight groups. This build was released to the App Store October 2.
+- [x] **Submit mobile for App Store review.** Version 2.0 (32) resubmitted September 30 at 2:29 PM PDT together with Unlimited Lifetime, Unlimited Monthly, and the subscription group. Apple approved the app; the corrected submission is Complete. [Rejection correction and evidence](QualityReports/app-review-rejection-2026-09-30/QA-REPORT.md).
+- [x] **Record Apple's result for the corrected submission.** Submission `c57865bb-3166-4266-80b1-cf9c5740bcc5` is Complete. Version 2.0 was approved and released October 2. The September 30 information-needed rejection was addressed with current purchase-location steps and screenshots.
+- [x] **Release the approved iPhone app.** Marcus authorized release October 2. Released version 2.0 (32) through App Store Connect in 175 countries/regions, with existing ratings retained and immediate update availability. Apple shows Ready for Distribution. [Release evidence](QualityReports/app-store-release-2026-10-02/RELEASE-REPORT.md).
+- [ ] **Verify public version 2.0 after storefront propagation.** Apple's public US lookup still returned 1.0 immediately after the October 2 manual release. Confirm version 2.0, current icon/media, and an actual public download once Apple's storefront has updated. The inactive 11:00 PM scheduled-release field does not control the completed manual release.
 - [ ] **Find 1,000 of the largest Twitch streamers and send personalized NameSnap pitches through accepted business-contact routes.** Updated scope authorized September 29. Preserve ranking/contact provenance and verified send outcomes. The shared email provider currently has no approved cold-email route; accepted pitch forms may be used where appropriate. No campaign sends have occurred.
 
 Campaign checkpoint: three first-party business contacts (shroud, Myth, Summit1G) are verified locally in `artifacts/outreach/2026-09-29`. The 1,000-person ranking export is unfinished: the site's offered CSV action did not return an accessible file through the supported built-in browser. The source prohibits scraping. A client-project agency form was not treated as permission for creator product recommendations. Research notes and one unsent draft are preserved; no messages, replies, or demand are claimed.
